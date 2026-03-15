@@ -7,6 +7,7 @@ import ProductCard from "@/components/home/ProductCard";
 import { products } from "@/data/products";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
+import Image from "next/image";
 import {
   Heart,
   ShoppingCart,
@@ -96,8 +97,14 @@ export default function ProductPage() {
           <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12">
             {/* Image */}
             <div className="relative">
-              <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl aspect-square flex items-center justify-center">
-                <span className="text-8xl">🌿</span>
+              <div className="relative rounded-2xl aspect-square overflow-hidden bg-gray-100">
+                <Image
+                  src={product.image}
+                  alt={product.name}
+                  fill
+                  className="object-cover"
+                  priority
+                />
               </div>
               {product.badge && (
                 <span

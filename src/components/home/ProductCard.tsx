@@ -2,6 +2,7 @@
 
 import { Heart, ShoppingCart, Eye } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 import { Product } from "@/data/products";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
@@ -10,23 +11,23 @@ interface ProductCardProps {
   product: Product;
 }
 
-const plantEmojis: Record<string, string> = {
-  "money-plant": "🪴",
-  "snake-plant": "🌵",
-  "peace-lily": "🌸",
-  "spider-plant": "🌿",
-  pothos: "🍃",
-  "jade-plant": "🪴",
-  "aloe-vera": "🌵",
-  "rubber-plant": "🌳",
-  marigold: "🌼",
-  dahlia: "🌺",
-  rose: "🌹",
-  hibiscus: "🌺",
-  jasmine: "🤍",
-  bougainvillea: "🌸",
-  chrysanthemum: "💐",
-  sunflower: "🌻",
+const plantImages: Record<string, string> = {
+  "money-plant": "/uploads/1773556212668-w0sk9g.jpg",
+  "snake-plant": "/uploads/1773556212675-6uw8zf.jpg",
+  "peace-lily": "/uploads/1773556212671-rs2qts.jpg",
+  "spider-plant": "/uploads/1773556212665-wnugmm.jpg",
+  pothos: "/uploads/1773556212660-n4qo7a.jpg",
+  "jade-plant": "/uploads/1773556212677-ytxqae.jpg",
+  "aloe-vera": "/uploads/1773556212652-nfcwiz.jpg",
+  "rubber-plant": "/uploads/1773556212674-3qmm3f.jpg",
+  marigold: "/uploads/1773556212662-4ghup0.jpg",
+  dahlia: "/uploads/1773556212663-q5e325.jpg",
+  rose: "/uploads/1773556212663-q5e325.jpg",
+  hibiscus: "/uploads/1773556212669-u3m0ay.jpg",
+  jasmine: "/uploads/1773556212671-rs2qts.jpg",
+  bougainvillea: "/uploads/1773556212662-4ghup0.jpg",
+  chrysanthemum: "/uploads/1773556212669-u3m0ay.jpg",
+  sunflower: "/uploads/1773556212672-cfl640.jpg",
 };
 
 export default function ProductCard({ product }: ProductCardProps) {
@@ -49,15 +50,18 @@ export default function ProductCard({ product }: ProductCardProps) {
     ? Math.round(((product.price - product.salePrice) / product.price) * 100)
     : 0;
 
-  const emoji = plantEmojis[product.slug] || "🌿";
+  const imageUrl = plantImages[product.slug] || product.image;
 
   return (
     <div className="group bg-white rounded-xl border border-gray-100 overflow-hidden hover:shadow-lg transition-all duration-300">
       {/* Image */}
-      <div className="relative aspect-square bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center overflow-hidden">
-        <span className="text-6xl group-hover:scale-110 transition-transform duration-300">
-          {emoji}
-        </span>
+      <div className="relative aspect-square bg-gray-100 overflow-hidden">
+        <Image
+          src={imageUrl}
+          alt={product.name}
+          fill
+          className="object-cover group-hover:scale-105 transition-transform duration-500"
+        />
 
         {/* Badge */}
         {product.badge && (

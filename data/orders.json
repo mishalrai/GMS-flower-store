@@ -2,10 +2,27 @@
   {
     "id": "ORD-001",
     "items": [
-      {"productId": 1, "name": "Money Plant", "quantity": 2, "price": 350, "reviewed": true},
-      {"productId": 11, "name": "Rose", "quantity": 1, "price": 1200, "reviewed": true}
+      {
+        "productId": 1,
+        "name": "Money Plant",
+        "quantity": 2,
+        "price": 350,
+        "reviewed": true
+      },
+      {
+        "productId": 11,
+        "name": "Rose",
+        "quantity": 1,
+        "price": 1200,
+        "reviewed": true
+      }
     ],
-    "customer": {"name": "Sita Sharma", "phone": "+977-9812345678", "address": "Gauradaha, Jhapa", "note": "Please deliver before 3 PM"},
+    "customer": {
+      "name": "Sita Sharma",
+      "phone": "+977-9812345678",
+      "address": "Gauradaha, Jhapa",
+      "note": "Please deliver before 3 PM"
+    },
     "status": "delivered",
     "reviewEnabled": true,
     "total": 1900,
@@ -15,10 +32,27 @@
   {
     "id": "ORD-002",
     "items": [
-      {"productId": 2, "name": "Snake Plant", "quantity": 1, "price": 550, "reviewed": false},
-      {"productId": 5, "name": "Pothos", "quantity": 3, "price": 250, "reviewed": false}
+      {
+        "productId": 2,
+        "name": "Snake Plant",
+        "quantity": 1,
+        "price": 550,
+        "reviewed": false
+      },
+      {
+        "productId": 5,
+        "name": "Pothos",
+        "quantity": 3,
+        "price": 250,
+        "reviewed": false
+      }
     ],
-    "customer": {"name": "Rajesh Thapa", "phone": "+977-9845678901", "address": "Birtamod, Jhapa", "note": ""},
+    "customer": {
+      "name": "Rajesh Thapa",
+      "phone": "+977-9845678901",
+      "address": "Birtamod, Jhapa",
+      "note": ""
+    },
     "status": "confirmed",
     "reviewEnabled": false,
     "total": 1300,
@@ -28,14 +62,53 @@
   {
     "id": "ORD-003",
     "items": [
-      {"productId": 3, "name": "Peace Lily", "quantity": 1, "price": 800, "reviewed": false},
-      {"productId": 13, "name": "Jasmine", "quantity": 2, "price": 550, "reviewed": false}
+      {
+        "productId": 3,
+        "name": "Peace Lily",
+        "quantity": 1,
+        "price": 800,
+        "reviewed": false
+      },
+      {
+        "productId": 13,
+        "name": "Jasmine",
+        "quantity": 2,
+        "price": 550,
+        "reviewed": false
+      }
     ],
-    "customer": {"name": "Priya Rai", "phone": "+977-9867890123", "address": "Damak, Jhapa", "note": "Gift wrap please"},
+    "customer": {
+      "name": "Priya Rai",
+      "phone": "+977-9867890123",
+      "address": "Damak, Jhapa",
+      "note": "Gift wrap please"
+    },
     "status": "pending",
     "reviewEnabled": false,
     "total": 1900,
     "createdAt": "2026-03-14T07:00:00Z",
     "updatedAt": "2026-03-14T07:00:00Z"
+  },
+  {
+    "id": "ORD-004",
+    "items": [
+      {
+        "productId": 3,
+        "name": "Peace Lily",
+        "quantity": 1,
+        "price": 800,
+        "reviewed": false
+      }
+    ],
+    "customer": {
+      "name": "Min Rai",
+      "phone": "9840063808",
+      "address": "Gauradaha 09"
+    },
+    "status": "confirmed",
+    "reviewEnabled": true,
+    "total": 800,
+    "createdAt": "2026-03-15T05:36:24.126Z",
+    "updatedAt": "2026-03-15T05:59:32.973Z"
   }
 ]

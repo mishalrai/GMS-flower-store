@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, MessageCircle, CheckCircle, XCircle } from "lucide-react";
+import Image from "next/image";
+import { ArrowLeft, MessageCircle, CheckCircle, XCircle, QrCode, Banknote } from "lucide-react";
 import StatusBadge from "@/components/admin/StatusBadge";
 
 interface OrderItem {
@@ -14,10 +15,17 @@ interface OrderItem {
   reviewed: boolean;
 }
 
+interface Payment {
+  method: "cod" | "qr";
+  qrLabel?: string;
+  screenshotUrl?: string;
+}
+
 interface Order {
   id: string;
   items: OrderItem[];
   customer: { name: string; phone: string; address: string; note?: string };
+  payment?: Payment;
   status: string;
   reviewEnabled: boolean;
   total: number;
@@ -72,6 +80,7 @@ export default function OrderDetailPage() {
       <div className="flex items-center gap-4 mb-6">
         <Link
           href="/admin/orders"
+          title="Back to orders"
           className="p-2 hover:bg-gray-200 rounded-lg"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -224,6 +233,46 @@ export default function OrderDetailPage() {
               <MessageCircle className="w-4 h-4" />
               WhatsApp Customer
             </a>
+          </div>
+
+          {/* Payment Info */}
+          <div className="bg-white rounded-xl border border-gray-100 p-6">
+            <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              {order.payment?.method === "qr" ? (
+                <QrCode className="w-4 h-4 text-[#6FB644]" />
+              ) : (
+                <Banknote className="w-4 h-4 text-[#6FB644]" />
+              )}
+              Payment
+            </h3>
+            <div className="text-sm space-y-3">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Method</span>
+                <span className="font-medium capitalize">
+                  {order.payment?.method === "qr"
+                    ? `QR Pay (${order.payment.qrLabel})`
+                    : "Cash on Delivery"}
+                </span>
+              </div>
+              {order.payment?.method === "qr" && order.payment.screenshotUrl && (
+                <div>
+                  <p className="text-gray-500 mb-2">Payment Screenshot</p>
+                  <a
+                    href={order.payment.screenshotUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block relative w-full aspect-[9/16] max-h-72 rounded-lg overflow-hidden border border-gray-200 hover:opacity-90 transition-opacity"
+                  >
+                    <Image
+                      src={order.payment.screenshotUrl}
+                      alt="Payment screenshot"
+                      fill
+                      className="object-cover"
+                    />
+                  </a>
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="bg-white rounded-xl border border-gray-100 p-6">

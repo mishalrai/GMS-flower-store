@@ -227,6 +227,7 @@ export default function OrdersPage() {
                 <td className="px-4 py-3">
                   <Link
                     href={`/admin/orders/${order.id}`}
+                    title="View order details"
                     className="p-1.5 text-[#6FB644] hover:bg-green-50 rounded inline-flex"
                   >
                     <Eye className="w-4 h-4" />

@@ -2,10 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { readData, writeData } from '@/lib/db';
 
 interface OrderItem { productId: number; name: string; quantity: number; price: number; reviewed: boolean; }
+interface Payment { method: 'cod' | 'qr'; qrLabel?: string; screenshotUrl?: string; }
 interface Order {
   id: string;
   items: OrderItem[];
   customer: { name: string; phone: string; address: string; note?: string };
+  payment: Payment;
   status: string;
   reviewEnabled: boolean;
   total: number;
@@ -35,6 +37,7 @@ export async function POST(request: NextRequest) {
     id: `ORD-${String(count).padStart(3, '0')}`,
     items: (body.items || []).map((item: Partial<OrderItem>) => ({ ...item, reviewed: false })),
     customer: body.customer,
+    payment: body.payment || { method: 'cod' },
     status: 'pending',
     reviewEnabled: false,
     total: body.total || 0,

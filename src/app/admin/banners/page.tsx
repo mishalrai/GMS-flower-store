@@ -117,7 +117,7 @@ export default function BannersPage() {
             <h3 className="font-semibold">
               {editId ? "Edit Banner" : "New Banner"}
             </h3>
-            <button onClick={() => { setShowNew(false); setEditId(null); }} className="p-1 hover:bg-gray-100 rounded">
+            <button onClick={() => { setShowNew(false); setEditId(null); }} title="Close form" className="p-1 hover:bg-gray-100 rounded">
               <X className="w-5 h-5" />
             </button>
           </div>
@@ -150,10 +150,10 @@ export default function BannersPage() {
                 </div>
               </div>
               <div className="flex gap-2">
-                <button onClick={() => startEdit(banner)} className="p-1.5 text-blue-500 hover:bg-blue-50 rounded">
+                <button onClick={() => startEdit(banner)} title="Edit banner" className="p-1.5 text-blue-500 hover:bg-blue-50 rounded">
                   <Edit className="w-4 h-4" />
                 </button>
-                <button onClick={() => setDeleteId(banner.id)} className="p-1.5 text-red-500 hover:bg-red-50 rounded">
+                <button onClick={() => setDeleteId(banner.id)} title="Delete banner" className="p-1.5 text-red-500 hover:bg-red-50 rounded">
                   <Trash2 className="w-4 h-4" />
                 </button>
               </div>

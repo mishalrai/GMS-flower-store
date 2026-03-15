@@ -185,12 +185,14 @@ export default function ProductsPage() {
                   <div className="flex items-center gap-2">
                     <Link
                       href={`/admin/products/${product.id}`}
+                      title="Edit product"
                       className="p-1.5 text-blue-500 hover:bg-blue-50 rounded"
                     >
                       <Edit className="w-4 h-4" />
                     </Link>
                     <button
                       onClick={() => setDeleteId(product.id)}
+                      title="Delete product"
                       className="p-1.5 text-red-500 hover:bg-red-50 rounded"
                     >
                       <Trash2 className="w-4 h-4" />

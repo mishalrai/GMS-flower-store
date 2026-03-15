@@ -30,7 +30,7 @@ export default function Modal({
         <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
           <div className="flex items-center justify-between p-4 border-b">
             <h3 className="text-lg font-semibold">{title}</h3>
-            <button onClick={onClose} className="p-1 hover:bg-gray-100 rounded">
+            <button onClick={onClose} title="Close" className="p-1 hover:bg-gray-100 rounded">
               <X className="w-5 h-5" />
             </button>
           </div>

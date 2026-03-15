@@ -1,16 +1,15 @@
 import Link from "next/link";
+import Image from "next/image";
 import { categories } from "@/data/products";
 
-const categoryColors = [
-  "from-green-600 to-green-500",
-  "from-emerald-600 to-emerald-500",
-  "from-teal-600 to-teal-500",
-  "from-lime-600 to-lime-500",
-  "from-green-700 to-emerald-600",
-  "from-cyan-600 to-teal-500",
+const categoryImages = [
+  "/uploads/1773556212666-zs8ueh.jpg",
+  "/uploads/1773556212672-cfl640.jpg",
+  "/uploads/1773556212659-sr70uz.jpg",
+  "/uploads/1773556212663-q5e325.jpg",
+  "/uploads/1773556212660-n4qo7a.jpg",
+  "/uploads/1773556212669-u3m0ay.jpg",
 ];
-
-const categoryEmojis = ["🏠", "🌳", "🌵", "🌸", "🍃", "🎁"];
 
 export default function CategoryGrid() {
   return (
@@ -33,14 +32,15 @@ export default function CategoryGrid() {
               href="/shop"
               className="group relative overflow-hidden rounded-2xl h-48 md:h-56 flex items-center justify-center"
             >
-              <div
-                className={`absolute inset-0 bg-gradient-to-br ${categoryColors[index]} group-hover:scale-105 transition-transform duration-500`}
+              <Image
+                src={categoryImages[index] || categoryImages[0]}
+                alt={category.name}
+                fill
+                className="object-cover group-hover:scale-110 transition-transform duration-500"
               />
+              <div className="absolute inset-0 bg-black/40 group-hover:bg-black/50 transition-colors" />
               <div className="relative text-center text-white z-10">
-                <span className="text-4xl md:text-5xl block mb-3">
-                  {categoryEmojis[index]}
-                </span>
-                <h3 className="text-lg md:text-xl font-bold mb-1">
+                <h3 className="text-lg md:text-xl font-bold mb-1 drop-shadow-lg">
                   {category.name}
                 </h3>
                 <span className="text-sm opacity-80 group-hover:opacity-100 transition-opacity">

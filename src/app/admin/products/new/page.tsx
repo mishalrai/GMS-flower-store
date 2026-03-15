@@ -108,6 +108,7 @@ export default function NewProductPage() {
       <div className="flex items-center gap-4 mb-6">
         <Link
           href="/admin/products"
+          title="Back to products"
           className="p-2 hover:bg-gray-200 rounded-lg"
         >
           <ArrowLeft className="w-5 h-5" />
@@ -135,6 +136,7 @@ export default function NewProductPage() {
               <button
                 type="button"
                 onClick={removeImage}
+                title="Remove image"
                 className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
               >
                 <X className="w-4 h-4 text-gray-600" />

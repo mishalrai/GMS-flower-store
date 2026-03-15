@@ -1,6 +1,7 @@
 "use client";
 
 import { X, Minus, Plus, Trash2, ShoppingBag, MessageCircle } from "lucide-react";
+import Image from "next/image";
 import { useCartStore } from "@/store/cartStore";
 import Link from "next/link";
 
@@ -70,9 +71,14 @@ export default function CartSidebar() {
                     key={item.product.id}
                     className="flex gap-3 p-3 bg-gray-50 rounded-lg"
                   >
-                    {/* Image placeholder */}
-                    <div className="w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-lg flex items-center justify-center flex-shrink-0">
-                      <span className="text-2xl">🌿</span>
+                    {/* Image */}
+                    <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 relative bg-gray-100">
+                      <Image
+                        src={item.product.image}
+                        alt={item.product.name}
+                        fill
+                        className="object-cover"
+                      />
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -141,7 +147,7 @@ export default function CartSidebar() {
             </div>
 
             <Link
-              href="/shop"
+              href="/checkout"
               onClick={toggleCart}
               className="block w-full text-center bg-[#6FB644] text-white py-3 rounded-lg font-semibold hover:bg-[#5a9636] transition-colors"
             >

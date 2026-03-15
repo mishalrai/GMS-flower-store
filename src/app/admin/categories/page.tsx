@@ -110,6 +110,7 @@ export default function CategoriesPage() {
                 setShowNew(false);
                 setEditId(null);
               }}
+              title="Close form"
               className="p-1 hover:bg-gray-100 rounded"
             >
               <X className="w-5 h-5" />

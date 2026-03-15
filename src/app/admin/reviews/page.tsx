@@ -133,6 +133,7 @@ export default function ReviewsPage() {
                   <td className="px-4 py-3">
                     <button
                       onClick={() => setDeleteId(review.id)}
+                      title="Delete review"
                       className="p-1.5 text-red-500 hover:bg-red-50 rounded"
                     >
                       <Trash2 className="w-4 h-4" />

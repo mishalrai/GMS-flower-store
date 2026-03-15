@@ -29,7 +29,7 @@ export const products: Product[] = [
     slug: 'money-plant',
     category: 'indoor',
     price: 350,
-    image: '/images/plants/plant-1.jpg',
+    image: '/uploads/1773556212668-w0sk9g.jpg',
     description:
       'A beautiful and easy-to-care-for money plant that brings prosperity and good luck to your home. Thrives in indirect sunlight and requires minimal watering.',
     size: 'small',
@@ -44,7 +44,7 @@ export const products: Product[] = [
     category: 'indoor',
     price: 650,
     salePrice: 550,
-    image: '/images/plants/plant-2.jpg',
+    image: '/uploads/1773556212675-6uw8zf.jpg',
     description:
       'Also known as Sansevieria, the snake plant is one of the best air-purifying plants. Perfect for bedrooms as it releases oxygen at night.',
     size: 'medium',
@@ -58,7 +58,7 @@ export const products: Product[] = [
     slug: 'peace-lily',
     category: 'indoor',
     price: 800,
-    image: '/images/plants/plant-3.jpg',
+    image: '/uploads/1773556212671-rs2qts.jpg',
     description:
       'An elegant flowering indoor plant known for its white blooms and excellent air-purifying qualities. Ideal for low-light environments.',
     size: 'medium',
@@ -72,7 +72,7 @@ export const products: Product[] = [
     slug: 'spider-plant',
     category: 'indoor',
     price: 300,
-    image: '/images/plants/plant-4.jpg',
+    image: '/uploads/1773556212665-wnugmm.jpg',
     description:
       'A hardy and adaptable plant with arching green and white striped leaves. Great for hanging baskets and known for removing indoor pollutants.',
     size: 'small',
@@ -86,7 +86,7 @@ export const products: Product[] = [
     slug: 'pothos',
     category: 'indoor',
     price: 250,
-    image: '/images/plants/plant-5.jpg',
+    image: '/uploads/1773556212660-n4qo7a.jpg',
     description:
       'A trailing vine plant that is nearly impossible to kill. Perfect for beginners and looks stunning in hanging pots or climbing on a moss pole.',
     size: 'small',
@@ -101,7 +101,7 @@ export const products: Product[] = [
     category: 'indoor',
     price: 500,
     salePrice: 420,
-    image: '/images/plants/plant-6.jpg',
+    image: '/uploads/1773556212677-ytxqae.jpg',
     description:
       'A beautiful succulent with thick, woody stems and oval-shaped leaves. Symbolizes good luck and prosperity in many Asian cultures.',
     size: 'small',
@@ -115,7 +115,7 @@ export const products: Product[] = [
     slug: 'aloe-vera',
     category: 'indoor',
     price: 400,
-    image: '/images/plants/plant-7.jpg',
+    image: '/uploads/1773556212652-nfcwiz.jpg',
     description:
       'A medicinal succulent known for its healing gel. Easy to grow and perfect for sunny windowsills. Great for treating minor burns and skin irritations.',
     size: 'small',
@@ -129,7 +129,7 @@ export const products: Product[] = [
     slug: 'rubber-plant',
     category: 'indoor',
     price: 1500,
-    image: '/images/plants/plant-8.jpg',
+    image: '/uploads/1773556212674-3qmm3f.jpg',
     description:
       'A striking indoor tree with large, glossy dark green leaves. Makes a bold statement in any room and is excellent at purifying indoor air.',
     size: 'large',
@@ -145,7 +145,7 @@ export const products: Product[] = [
     slug: 'marigold',
     category: 'outdoor',
     price: 200,
-    image: '/images/plants/plant-9.jpg',
+    image: '/uploads/1773556212662-4ghup0.jpg',
     description:
       'Bright and cheerful marigolds are a staple in Nepali gardens and festivals. Easy to grow and blooms abundantly throughout the season.',
     size: 'small',
@@ -160,7 +160,7 @@ export const products: Product[] = [
     category: 'outdoor',
     price: 750,
     salePrice: 600,
-    image: '/images/plants/plant-10.jpg',
+    image: '/uploads/1773556212663-q5e325.jpg',
     description:
       'Stunning flowers with intricate petal patterns available in vibrant colors. A showstopper in any garden throughout the Terai region.',
     size: 'medium',
@@ -174,7 +174,7 @@ export const products: Product[] = [
     slug: 'rose',
     category: 'outdoor',
     price: 1200,
-    image: '/images/plants/plant-11.jpg',
+    image: '/uploads/1773556212663-q5e325.jpg',
     description:
       'The queen of flowers, our rose plants produce fragrant blooms in deep red. Perfect for gardens in the Jhapa climate and makes wonderful cut flowers.',
     size: 'medium',
@@ -188,7 +188,7 @@ export const products: Product[] = [
     slug: 'hibiscus',
     category: 'outdoor',
     price: 900,
-    image: '/images/plants/plant-12.jpg',
+    image: '/uploads/1773556212669-u3m0ay.jpg',
     description:
       'Tropical flowering plant with large, colorful blooms. Thrives in the warm climate of Gauradaha and attracts butterflies and hummingbirds.',
     size: 'medium',
@@ -202,7 +202,7 @@ export const products: Product[] = [
     slug: 'jasmine',
     category: 'outdoor',
     price: 550,
-    image: '/images/plants/plant-13.jpg',
+    image: '/uploads/1773556212671-rs2qts.jpg',
     description:
       'Fragrant white flowers that fill your garden with a sweet aroma, especially in the evening. A beloved plant in Nepali households for puja and decoration.',
     size: 'small',
@@ -217,7 +217,7 @@ export const products: Product[] = [
     category: 'outdoor',
     price: 1800,
     salePrice: 1500,
-    image: '/images/plants/plant-14.jpg',
+    image: '/uploads/1773556212662-4ghup0.jpg',
     description:
       'A vigorous climbing plant covered in vibrant magenta bracts. Perfect for walls, fences, and pergolas. Drought-tolerant once established.',
     size: 'large',
@@ -231,7 +231,7 @@ export const products: Product[] = [
     slug: 'chrysanthemum',
     category: 'outdoor',
     price: 450,
-    image: '/images/plants/plant-15.jpg',
+    image: '/uploads/1773556212669-u3m0ay.jpg',
     description:
       'Beautiful autumn-blooming flowers in shades of yellow, white, and purple. Popular during Tihar festival for garlands and decoration.',
     size: 'small',
@@ -245,7 +245,7 @@ export const products: Product[] = [
     slug: 'sunflower',
     category: 'outdoor',
     price: 2500,
-    image: '/images/plants/plant-16.jpg',
+    image: '/uploads/1773556212672-cfl640.jpg',
     description:
       'Tall and majestic sunflowers that brighten up any garden. Grows well in the fertile soil of Jhapa and produces edible seeds when mature.',
     size: 'large',

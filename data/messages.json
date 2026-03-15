@@ -1,0 +1,11 @@
+[
+  {
+    "id": "MSG-001",
+    "name": "Min",
+    "email": "min@gmail.com",
+    "phone": "98400063808",
+    "message": "Hello",
+    "read": true,
+    "createdAt": "2026-03-15T06:17:12.420Z"
+  }
+]
