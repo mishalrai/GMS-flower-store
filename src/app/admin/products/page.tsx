@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Plus, Search, Edit, Trash2 } from "lucide-react";
 import StatusBadge from "@/components/admin/StatusBadge";
 import Modal from "@/components/admin/Modal";
+import { useToast } from "@/components/admin/Toast";
 
 interface Product {
   id: number;
@@ -31,6 +32,7 @@ export default function ProductsPage() {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<number | null>(null);
+  const { toast } = useToast();
 
   const fetchProducts = async () => {
     const [prodRes, catRes] = await Promise.all([
@@ -51,6 +53,7 @@ export default function ProductsPage() {
     await fetch(`/api/products/${deleteId}`, { method: "DELETE" });
     setProducts(products.filter((p) => p.id !== deleteId));
     setDeleteId(null);
+    toast("Product deleted successfully");
   };
 
   const filtered = products.filter((p) => {

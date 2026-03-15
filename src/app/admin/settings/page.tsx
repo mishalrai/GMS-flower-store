@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
 import { Save, Upload, Trash2, Plus, QrCode } from "lucide-react";
+import { useToast } from "@/components/admin/Toast";
 
 interface PaymentQR {
   id: string;
@@ -19,7 +20,7 @@ interface StoreSettings {
   whatsappNumber: string;
   freeDeliveryThreshold: number;
   currency: string;
-  socialLinks: { facebook: string; instagram: string };
+  socialLinks: { facebook: string; instagram: string; youtube: string; tiktok: string };
   paymentQRCodes: PaymentQR[];
 }
 
@@ -27,7 +28,7 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState<StoreSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
+  const { toast } = useToast();
   const [uploadingQR, setUploadingQR] = useState(false);
   const [newQRLabel, setNewQRLabel] = useState("");
   const qrFileRef = useRef<HTMLInputElement>(null);
@@ -54,8 +55,7 @@ export default function SettingsPage() {
       body: JSON.stringify(settings),
     });
     setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    toast("Settings saved successfully");
   };
 
   const handleQRUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -121,12 +121,6 @@ export default function SettingsPage() {
   return (
     <div>
       <h1 className="text-2xl font-bold text-gray-800 mb-6">Store Settings</h1>
-
-      {saved && (
-        <div className="bg-green-50 text-green-700 px-4 py-3 rounded-lg text-sm mb-6">
-          Settings saved successfully!
-        </div>
-      )}
 
       <form
         onSubmit={handleSubmit}
@@ -256,6 +250,7 @@ export default function SettingsPage() {
                 })
               }
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
+              placeholder="https://facebook.com/yourpage"
             />
           </div>
           <div>
@@ -274,6 +269,45 @@ export default function SettingsPage() {
                 })
               }
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
+              placeholder="https://instagram.com/yourpage"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              YouTube URL
+            </label>
+            <input
+              value={settings.socialLinks.youtube || ""}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  socialLinks: {
+                    ...settings.socialLinks,
+                    youtube: e.target.value,
+                  },
+                })
+              }
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
+              placeholder="https://youtube.com/@yourchannel"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              TikTok URL
+            </label>
+            <input
+              value={settings.socialLinks.tiktok || ""}
+              onChange={(e) =>
+                setSettings({
+                  ...settings,
+                  socialLinks: {
+                    ...settings.socialLinks,
+                    tiktok: e.target.value,
+                  },
+                })
+              }
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
+              placeholder="https://tiktok.com/@yourpage"
             />
           </div>
         </div>

@@ -92,22 +92,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           />
         </button>
 
-        {/* Quick Actions */}
-        <div className="absolute bottom-3 left-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-          <button
-            onClick={handleAddToCart}
-            className="flex-1 flex items-center justify-center gap-1.5 bg-[#6FB644] text-white py-2 rounded-lg text-sm font-medium hover:bg-[#5a9636] transition-colors"
-          >
-            <ShoppingCart className="w-4 h-4" />
-            Add to Cart
-          </button>
-          <Link
-            href={`/products/${product.slug}`}
-            className="w-10 h-10 bg-white rounded-lg flex items-center justify-center shadow-md hover:bg-gray-50"
-          >
-            <Eye className="w-4 h-4 text-gray-600" />
-          </Link>
-        </div>
       </div>
 
       {/* Info */}
@@ -120,15 +104,23 @@ export default function ProductCard({ product }: ProductCardProps) {
             {product.name}
           </h3>
         </Link>
-        <div className="flex items-center gap-2 mt-2">
-          <span className="text-lg font-bold text-[#6FB644]">
-            Rs {(product.salePrice || product.price).toLocaleString()}
-          </span>
-          {product.salePrice && (
-            <span className="text-sm text-gray-400 line-through">
-              Rs {product.price.toLocaleString()}
+        <div className="flex items-center justify-between mt-2">
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-bold text-[#6FB644]">
+              Rs {(product.salePrice || product.price).toLocaleString()}
             </span>
-          )}
+            {product.salePrice && (
+              <span className="text-sm text-gray-400 line-through">
+                Rs {product.price.toLocaleString()}
+              </span>
+            )}
+          </div>
+          <button
+            onClick={handleAddToCart}
+            className="w-9 h-9 bg-[#6FB644] rounded-full flex items-center justify-center hover:bg-[#5a9636] transition-colors"
+          >
+            <ShoppingCart className="w-4 h-4 text-white" />
+          </button>
         </div>
         {!product.inStock && (
           <p className="text-xs text-red-500 mt-1 font-medium">Out of Stock</p>

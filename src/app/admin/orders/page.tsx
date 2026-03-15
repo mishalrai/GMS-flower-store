@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Eye, Plus } from "lucide-react";
 import StatusBadge from "@/components/admin/StatusBadge";
+import { useToast } from "@/components/admin/Toast";
 
 interface Order {
   id: string;
@@ -22,6 +23,7 @@ export default function OrdersPage() {
   const [activeTab, setActiveTab] = useState("all");
   const [loading, setLoading] = useState(true);
   const [showNewOrder, setShowNewOrder] = useState(false);
+  const { toast } = useToast();
   const [newOrder, setNewOrder] = useState({
     customerName: "",
     customerPhone: "",
@@ -60,6 +62,9 @@ export default function OrdersPage() {
       setOrders([...orders, order]);
       setShowNewOrder(false);
       setNewOrder({ customerName: "", customerPhone: "", customerAddress: "", note: "", total: "" });
+      toast("Order created successfully");
+    } else {
+      toast("Failed to create order", "error");
     }
   };
 

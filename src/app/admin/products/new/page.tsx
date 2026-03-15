@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Save, Upload, X } from "lucide-react";
+import { useToast } from "@/components/admin/Toast";
 
 interface Category {
   id: number;
@@ -16,6 +17,7 @@ export default function NewProductPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [imagePreview, setImagePreview] = useState<string>("");
@@ -98,7 +100,10 @@ export default function NewProductPage() {
     });
 
     if (res.ok) {
+      toast("Product created successfully");
       router.push("/admin/products");
+    } else {
+      toast("Failed to create product", "error");
     }
     setSaving(false);
   };

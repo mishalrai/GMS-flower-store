@@ -25,7 +25,7 @@ const features = [
 
 export default function TrustBanner() {
   return (
-    <section className="bg-gray-50 py-8 border-b">
+    <section className="bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {features.map((feature) => (

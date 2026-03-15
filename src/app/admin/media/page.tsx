@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import Modal from "@/components/admin/Modal";
 import ImageCropModal from "@/components/admin/ImageCropModal";
+import { useToast } from "@/components/admin/Toast";
 
 interface MediaItem {
   id: number;
@@ -63,6 +64,7 @@ export default function MediaPage() {
   const [bulkDeleteOpen, setBulkDeleteOpen] = useState(false);
   const [cropItem, setCropItem] = useState<MediaItem | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const fetchMedia = useCallback(async () => {
     const params = new URLSearchParams();
@@ -89,9 +91,12 @@ export default function MediaPage() {
       });
       if (res.ok) {
         await fetchMedia();
+        toast("Files uploaded successfully");
+      } else {
+        toast("Upload failed", "error");
       }
     } catch {
-      // Upload failed
+      toast("Upload failed", "error");
     } finally {
       setUploading(false);
       if (fileInputRef.current) fileInputRef.current.value = "";
@@ -122,6 +127,7 @@ export default function MediaPage() {
     setMedia(media.filter((m) => m.id !== deleteId));
     if (selected?.id === deleteId) setSelected(null);
     setDeleteId(null);
+    toast("File deleted successfully");
   };
 
   const handleBulkDelete = async () => {
@@ -131,6 +137,7 @@ export default function MediaPage() {
     setSelectedIds(new Set());
     setBulkDeleteOpen(false);
     if (selected && selectedIds.has(selected.id)) setSelected(null);
+    toast(`${ids.length} files deleted successfully`);
   };
 
   const handleSaveAlt = async () => {
@@ -145,6 +152,7 @@ export default function MediaPage() {
       setMedia(media.map((m) => (m.id === updated.id ? updated : m)));
       setSelected(updated);
       setEditingAlt(false);
+      toast("Alt text saved");
     }
   };
 
@@ -162,6 +170,7 @@ export default function MediaPage() {
       setMedia(media.map((m) => (m.id === updated.id ? updated : m)));
       if (selected?.id === updated.id) setSelected(updated);
       setCropItem(null);
+      toast("Image cropped successfully");
     }
   };
 

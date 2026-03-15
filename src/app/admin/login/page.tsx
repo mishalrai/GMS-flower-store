@@ -3,18 +3,18 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Leaf, Eye, EyeOff } from "lucide-react";
+import { useToast } from "@/components/admin/Toast";
 
 export default function AdminLogin() {
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const { toast } = useToast();
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError("");
 
     try {
       const res = await fetch("/api/auth/login", {
@@ -26,10 +26,10 @@ export default function AdminLogin() {
       if (res.ok) {
         router.push("/admin");
       } else {
-        setError("Invalid password. Please try again.");
+        toast("Invalid password. Please try again.", "error");
       }
     } catch {
-      setError("Something went wrong. Please try again.");
+      toast("Something went wrong. Please try again.", "error");
     } finally {
       setLoading(false);
     }
@@ -45,12 +45,6 @@ export default function AdminLogin() {
           <h1 className="text-2xl font-bold text-gray-800">Admin Dashboard</h1>
           <p className="text-gray-500 text-sm mt-1">GMS Flower Store</p>
         </div>
-
-        {error && (
-          <div className="bg-red-50 text-red-600 px-4 py-3 rounded-lg text-sm mb-6">
-            {error}
-          </div>
-        )}
 
         <form onSubmit={handleSubmit}>
           <label className="block text-sm font-medium text-gray-700 mb-2">

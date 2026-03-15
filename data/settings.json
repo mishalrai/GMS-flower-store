@@ -9,7 +9,9 @@
   "currency": "NPR",
   "socialLinks": {
     "facebook": "https://facebook.com",
-    "instagram": "https://instagram.com"
+    "instagram": "https://instagram.com",
+    "youtube": "",
+    "tiktok": ""
   },
   "paymentQRCodes": [
     {

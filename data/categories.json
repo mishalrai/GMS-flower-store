@@ -1,8 +1,51 @@
 [
-  {"id":1,"name":"Indoor Plants","slug":"indoor","image":"/images/categories/indoor-plants.jpg","description":"Transform your living space with our collection of beautiful indoor plants, perfect for homes and offices in Nepal."},
-  {"id":2,"name":"Outdoor Plants","slug":"outdoor","image":"/images/categories/outdoor-plants.jpg","description":"Hardy and vibrant outdoor plants suited for the Terai climate, ideal for gardens, balconies, and patios."},
-  {"id":3,"name":"Succulents","slug":"succulents","image":"/images/categories/succulents.jpg","description":"Low-maintenance succulents and cacti that thrive with minimal care. Perfect for busy plant parents."},
-  {"id":4,"name":"Flowering Plants","slug":"flowering-plants","image":"/images/categories/flowering-plants.jpg","description":"Add a splash of color to your space with our gorgeous flowering plants, from roses to jasmine and beyond."},
-  {"id":5,"name":"Air Purifying","slug":"air-purifying","image":"/images/categories/air-purifying.jpg","description":"Breathe cleaner air with our selection of NASA-recommended air-purifying plants for healthier indoor living."},
-  {"id":6,"name":"Gift Plants","slug":"gift-plants","image":"/images/categories/gift-plants.jpg","description":"Thoughtful and unique plant gifts for every occasion — birthdays, housewarmings, festivals, and more."}
+  {
+    "id": 1,
+    "name": "Indoor Plants",
+    "slug": "indoor",
+    "image": "/uploads/1773556212660-n4qo7a.jpg",
+    "description": "Transform your living space with our collection of beautiful indoor plants, perfect for homes and offices in Nepal."
+  },
+  {
+    "id": 2,
+    "name": "Outdoor Plants",
+    "slug": "outdoor",
+    "image": "/uploads/1773556212672-cfl640.jpg",
+    "description": "Hardy and vibrant outdoor plants suited for the Terai climate, ideal for gardens, balconies, and patios."
+  },
+  {
+    "id": 3,
+    "name": "Succulents",
+    "slug": "succulents",
+    "image": "/uploads/1773556212674-3qmm3f.jpg",
+    "description": "Low-maintenance succulents and cacti that thrive with minimal care. Perfect for busy plant parents."
+  },
+  {
+    "id": 4,
+    "name": "Flowering Plants",
+    "slug": "flowering-plants",
+    "image": "/uploads/1773556212652-nfcwiz.jpg",
+    "description": "Add a splash of color to your space with our gorgeous flowering plants, from roses to jasmine and beyond."
+  },
+  {
+    "id": 5,
+    "name": "Air Purifying",
+    "slug": "air-purifying",
+    "image": "/uploads/1773556212665-wnugmm.jpg",
+    "description": "Breathe cleaner air with our selection of NASA-recommended air-purifying plants for healthier indoor living."
+  },
+  {
+    "id": 6,
+    "name": "Gift Plants",
+    "slug": "gift-plants",
+    "image": "/uploads/1773556212671-rs2qts.jpg",
+    "description": "Thoughtful and unique plant gifts for every occasion — birthdays, housewarmings, festivals, and more."
+  },
+  {
+    "name": "New Category",
+    "description": "Details",
+    "image": "/uploads/1773556212666-zs8ueh.jpg",
+    "id": 7,
+    "slug": "new-category"
+  }
 ]

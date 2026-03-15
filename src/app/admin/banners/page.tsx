@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Edit, Trash2, Save, X } from "lucide-react";
 import Modal from "@/components/admin/Modal";
+import { useToast } from "@/components/admin/Toast";
 
 interface Banner {
   id: number;
@@ -26,6 +27,7 @@ export default function BannersPage() {
     buttonLink: "/shop",
     image: "",
   });
+  const { toast } = useToast();
 
   useEffect(() => {
     fetch("/api/banners")
@@ -47,6 +49,9 @@ export default function BannersPage() {
       setBanners([...banners, newBanner]);
       setShowNew(false);
       setForm({ title: "", subtitle: "", buttonText: "Shop Now", buttonLink: "/shop", image: "" });
+      toast("Banner created successfully");
+    } else {
+      toast("Failed to create banner", "error");
     }
   };
 
@@ -61,6 +66,9 @@ export default function BannersPage() {
       const updated = await res.json();
       setBanners(banners.map((b) => (b.id === editId ? updated : b)));
       setEditId(null);
+      toast("Banner updated successfully");
+    } else {
+      toast("Failed to update banner", "error");
     }
   };
 
@@ -69,6 +77,7 @@ export default function BannersPage() {
     await fetch(`/api/banners/${deleteId}`, { method: "DELETE" });
     setBanners(banners.filter((b) => b.id !== deleteId));
     setDeleteId(null);
+    toast("Banner deleted successfully");
   };
 
   const startEdit = (banner: Banner) => {

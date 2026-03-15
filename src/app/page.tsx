@@ -13,9 +13,9 @@ export default function Home() {
       <Header />
       <main>
         <HeroBanner />
-        <TrustBanner />
-        <FeaturedProducts />
         <CategoryGrid />
+        <FeaturedProducts />
+        <TrustBanner />
         <Testimonials />
       </main>
       <Footer />

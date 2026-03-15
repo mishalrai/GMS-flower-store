@@ -11,6 +11,7 @@ import {
   MessageSquare,
 } from "lucide-react";
 import Modal from "@/components/admin/Modal";
+import { useToast } from "@/components/admin/Toast";
 
 interface Message {
   id: string;
@@ -38,6 +39,7 @@ export default function MessagesPage() {
   const [selected, setSelected] = useState<Message | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
+  const { toast } = useToast();
 
   useEffect(() => {
     fetch("/api/messages")
@@ -81,6 +83,7 @@ export default function MessagesPage() {
     setMessages(messages.filter((m) => m.id !== deleteId));
     if (selected?.id === deleteId) setSelected(null);
     setDeleteId(null);
+    toast("Message deleted successfully");
   };
 
   const openMessage = (msg: Message) => {

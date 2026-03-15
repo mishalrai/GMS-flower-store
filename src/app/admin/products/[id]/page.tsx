@@ -5,6 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, Save, Upload, X } from "lucide-react";
+import { useToast } from "@/components/admin/Toast";
 
 interface Category {
   id: number;
@@ -18,6 +19,7 @@ export default function EditProductPage() {
   const id = params.id as string;
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
+  const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -112,7 +114,10 @@ export default function EditProductPage() {
     });
 
     if (res.ok) {
+      toast("Product updated successfully");
       router.push("/admin/products");
+    } else {
+      toast("Failed to update product", "error");
     }
     setSaving(false);
   };

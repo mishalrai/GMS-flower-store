@@ -6,6 +6,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowLeft, MessageCircle, CheckCircle, XCircle, QrCode, Banknote } from "lucide-react";
 import StatusBadge from "@/components/admin/StatusBadge";
+import { useToast } from "@/components/admin/Toast";
 
 interface OrderItem {
   productId: number;
@@ -41,6 +42,7 @@ export default function OrderDetailPage() {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetch(`/api/orders/${id}`)
@@ -61,6 +63,9 @@ export default function OrderDetailPage() {
     if (res.ok) {
       const updated = await res.json();
       setOrder(updated);
+      toast("Order updated successfully");
+    } else {
+      toast("Failed to update order", "error");
     }
     setUpdating(false);
   };

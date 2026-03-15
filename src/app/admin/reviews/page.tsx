@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Trash2, Star } from "lucide-react";
 import Modal from "@/components/admin/Modal";
+import { useToast } from "@/components/admin/Toast";
 
 interface Review {
   id: string;
@@ -20,6 +21,7 @@ export default function ReviewsPage() {
   const [reviews, setReviews] = useState<Review[]>([]);
   const [loading, setLoading] = useState(true);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     fetch("/api/reviews")
@@ -35,6 +37,7 @@ export default function ReviewsPage() {
     await fetch(`/api/reviews/${deleteId}`, { method: "DELETE" });
     setReviews(reviews.filter((r) => r.id !== deleteId));
     setDeleteId(null);
+    toast("Review deleted successfully");
   };
 
   if (loading) {

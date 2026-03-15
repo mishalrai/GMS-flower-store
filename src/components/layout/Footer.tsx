@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
+import SocialLinks from "./SocialLinks";
 
 export default function Footer() {
   return (
@@ -18,32 +19,7 @@ export default function Footer() {
               in Gauradaha, Jhapa, Nepal. Making every home greener, one plant
               at a time.
             </p>
-            <div className="flex gap-3">
-              <a
-                href="https://facebook.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center hover:bg-[#6FB644] transition-colors text-sm"
-              >
-                FB
-              </a>
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center hover:bg-[#6FB644] transition-colors text-sm"
-              >
-                IG
-              </a>
-              <a
-                href="https://wa.me/977XXXXXXXXXX"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center hover:bg-[#25D366] transition-colors text-sm"
-              >
-                WA
-              </a>
-            </div>
+            <SocialLinks />
           </div>
 
           {/* Quick Links */}
