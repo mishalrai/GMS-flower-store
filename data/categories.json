@@ -1,0 +1,8 @@
+[
+  {"id":1,"name":"Indoor Plants","slug":"indoor","image":"/images/categories/indoor-plants.jpg","description":"Transform your living space with our collection of beautiful indoor plants, perfect for homes and offices in Nepal."},
+  {"id":2,"name":"Outdoor Plants","slug":"outdoor","image":"/images/categories/outdoor-plants.jpg","description":"Hardy and vibrant outdoor plants suited for the Terai climate, ideal for gardens, balconies, and patios."},
+  {"id":3,"name":"Succulents","slug":"succulents","image":"/images/categories/succulents.jpg","description":"Low-maintenance succulents and cacti that thrive with minimal care. Perfect for busy plant parents."},
+  {"id":4,"name":"Flowering Plants","slug":"flowering-plants","image":"/images/categories/flowering-plants.jpg","description":"Add a splash of color to your space with our gorgeous flowering plants, from roses to jasmine and beyond."},
+  {"id":5,"name":"Air Purifying","slug":"air-purifying","image":"/images/categories/air-purifying.jpg","description":"Breathe cleaner air with our selection of NASA-recommended air-purifying plants for healthier indoor living."},
+  {"id":6,"name":"Gift Plants","slug":"gift-plants","image":"/images/categories/gift-plants.jpg","description":"Thoughtful and unique plant gifts for every occasion — birthdays, housewarmings, festivals, and more."}
+]

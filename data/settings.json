@@ -1,0 +1,14 @@
+{
+  "storeName": "GMS Flower Store",
+  "phone": "+977-XXX-XXXXXXX",
+  "email": "gmsflowerstore@gmail.com",
+  "address": "Gauradaha, Jhapa, Nepal",
+  "hours": "Sun-Fri: 7:00 AM - 6:00 PM",
+  "whatsappNumber": "977XXXXXXXXXX",
+  "freeDeliveryThreshold": 2000,
+  "currency": "NPR",
+  "socialLinks": {
+    "facebook": "https://facebook.com",
+    "instagram": "https://instagram.com"
+  }
+}

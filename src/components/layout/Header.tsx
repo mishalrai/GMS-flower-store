@@ -111,7 +111,7 @@ export default function Header() {
             </button>
 
             <Link
-              href="/about"
+              href="/admin/login"
               className="hidden md:flex p-2 hover:bg-gray-100 rounded-lg"
             >
               <User className="w-5 h-5 text-gray-700" />

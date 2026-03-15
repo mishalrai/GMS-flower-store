@@ -1,0 +1,24 @@
+[
+  {
+    "id": "REV-001",
+    "productId": 1,
+    "productName": "Money Plant",
+    "orderId": "ORD-001",
+    "customerName": "Sita Sharma",
+    "customerPhone": "+977-9812345678",
+    "rating": 5,
+    "text": "Beautiful money plant! It arrived healthy and is thriving on my windowsill. Great packaging too.",
+    "createdAt": "2026-03-13T10:00:00Z"
+  },
+  {
+    "id": "REV-002",
+    "productId": 11,
+    "productName": "Rose",
+    "orderId": "ORD-001",
+    "customerName": "Sita Sharma",
+    "customerPhone": "+977-9812345678",
+    "rating": 4,
+    "text": "Lovely rose plant with buds already forming. Only giving 4 stars because one branch was slightly damaged during delivery.",
+    "createdAt": "2026-03-13T10:05:00Z"
+  }
+]
