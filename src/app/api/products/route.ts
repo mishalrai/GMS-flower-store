@@ -3,6 +3,7 @@ import { readData, writeData } from '@/lib/db';
 
 interface Product {
   id: number;
+  sku: string;
   name: string;
   slug: string;
   category: string;
@@ -28,7 +29,10 @@ export async function GET(request: NextRequest) {
   }
   if (search) {
     const q = search.toLowerCase();
-    products = products.filter(p => p.name.toLowerCase().includes(q));
+    products = products.filter(p =>
+      p.name.toLowerCase().includes(q) ||
+      (p.sku && p.sku.toLowerCase().includes(q))
+    );
   }
 
   return NextResponse.json(products);
@@ -39,9 +43,11 @@ export async function POST(request: NextRequest) {
   const products = readData<Product>('products.json');
 
   const maxId = products.reduce((max, p) => Math.max(max, p.id), 0);
+  const newId = maxId + 1;
   const newProduct: Product = {
     ...body,
-    id: maxId + 1,
+    id: newId,
+    sku: `GMS-${String(newId).padStart(4, '0')}`,
     slug: body.slug || body.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
   };
 

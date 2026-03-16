@@ -1,47 +1,42 @@
 "use client";
 
 import { Swiper, SwiperSlide } from "swiper/react";
-import { Autoplay, Pagination, Navigation, EffectFade } from "swiper/modules";
+import { Autoplay, Pagination, EffectFade } from "swiper/modules";
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import "swiper/css";
 import "swiper/css/pagination";
-import "swiper/css/navigation";
 import "swiper/css/effect-fade";
 
-const slides = [
-  {
-    title: "Make Your Home Beautiful with Plants",
-    subtitle: "Fresh indoor & outdoor plants grown in our home garden",
-    buttonText: "Shop Now",
-    buttonLink: "/shop",
-    image: "/uploads/1773556212666-zs8ueh.jpg",
-  },
-  {
-    title: "Fresh From Our Garden to Your Home",
-    subtitle: "Locally grown plants in Gauradaha, Jhapa, Nepal",
-    buttonText: "Explore Plants",
-    buttonLink: "/shop",
-    image: "/uploads/1773556212663-q5e325.jpg",
-  },
-  {
-    title: "Gift a Plant, Gift Life",
-    subtitle: "Perfect plants for every occasion — birthdays, festivals & more",
-    buttonText: "View Collection",
-    buttonLink: "/shop",
-    image: "/uploads/1773556212662-4ghup0.jpg",
-  },
-];
+interface Banner {
+  id: number;
+  title: string;
+  subtitle: string;
+  buttonText: string;
+  buttonLink: string;
+  image: string;
+}
 
 export default function HeroBanner() {
+  const [slides, setSlides] = useState<Banner[]>([]);
+
+  useEffect(() => {
+    fetch("/api/banners")
+      .then((r) => r.json())
+      .then((data) => setSlides(data))
+      .catch(() => {});
+  }, []);
+
+  if (slides.length === 0) return null;
+
   return (
     <section className="relative">
       <Swiper
-        modules={[Autoplay, Pagination, Navigation, EffectFade]}
+        modules={[Autoplay, Pagination, EffectFade]}
         effect="fade"
         autoplay={{ delay: 5000, disableOnInteraction: false }}
         pagination={{ clickable: true }}
-        navigation
         loop
         className="w-full"
       >

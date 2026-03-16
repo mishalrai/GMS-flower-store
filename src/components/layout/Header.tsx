@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   Search,
   Heart,
@@ -21,7 +22,9 @@ export default function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [shopDropdown, setShopDropdown] = useState(false);
+  const [categories, setCategories] = useState<{ id: number; name: string; slug: string }[]>([]);
 
+  const router = useRouter();
   const toggleCart = useCartStore((state) => state.toggleCart);
   const isCartOpen = useCartStore((state) => state.isCartOpen);
   const cartItemCount = useCartStore((state) => state.getItemCount());
@@ -31,6 +34,13 @@ export default function Header() {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((data) => setCategories(data))
+      .catch(() => {});
   }, []);
 
   return (
@@ -84,18 +94,15 @@ export default function Header() {
                   >
                     All Plants
                   </Link>
-                  <Link
-                    href="/shop?category=indoor"
-                    className="block px-4 py-2 text-sm hover:bg-green-50 hover:text-[#6FB644]"
-                  >
-                    Indoor Plants
-                  </Link>
-                  <Link
-                    href="/shop?category=outdoor"
-                    className="block px-4 py-2 text-sm hover:bg-green-50 hover:text-[#6FB644]"
-                  >
-                    Outdoor Plants
-                  </Link>
+                  {categories.map((cat) => (
+                    <Link
+                      key={cat.id}
+                      href={`/shop?category=${cat.slug}`}
+                      className="block px-4 py-2 text-sm hover:bg-green-50 hover:text-[#6FB644]"
+                    >
+                      {cat.name}
+                    </Link>
+                  ))}
                 </div>
               )}
             </div>
@@ -158,7 +165,17 @@ export default function Header() {
         {/* Search Bar - Expandable */}
         {isSearchOpen && (
           <div className="px-4 pb-3">
-            <div className="max-w-xl mx-auto relative">
+            <form
+              className="max-w-xl mx-auto relative"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (searchQuery.trim()) {
+                  router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+                  setIsSearchOpen(false);
+                  setSearchQuery("");
+                }
+              }}
+            >
               <input
                 type="text"
                 placeholder="Search plants..."
@@ -168,12 +185,13 @@ export default function Header() {
                 autoFocus
               />
               <button
+                type="button"
                 onClick={() => setIsSearchOpen(false)}
                 className="absolute right-3 top-1/2 -translate-y-1/2"
               >
                 <X className="w-4 h-4 text-gray-400" />
               </button>
-            </div>
+            </form>
           </div>
         )}
       </header>

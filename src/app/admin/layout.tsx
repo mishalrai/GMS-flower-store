@@ -23,7 +23,7 @@ export default function AdminLayout({
         <AdminSidebar />
         <div className="ml-64">
           <AdminTopbar />
-          <main className="p-6">{children}</main>
+          <main className="p-6 max-w-6xl mx-auto">{children}</main>
         </div>
       </div>
     </ToastProvider>

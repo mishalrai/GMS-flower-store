@@ -4,7 +4,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import WhatsAppButton from "@/components/home/WhatsAppButton";
 import ProductCard from "@/components/home/ProductCard";
-import { products } from "@/data/products";
+import { products as staticProducts, Product } from "@/data/products";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 import Image from "next/image";
@@ -19,19 +19,60 @@ import {
   Star,
   MessageCircle,
   ChevronRight,
+  ChevronLeft,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
+
+interface ApiProduct extends Product {
+  sku?: string;
+  images?: string[];
+}
 
 export default function ProductPage() {
   const params = useParams();
   const slug = params.slug as string;
-  const product = products.find((p) => p.slug === slug);
+  const [product, setProduct] = useState<ApiProduct | null>(null);
+  const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const addItem = useCartStore((state) => state.addItem);
   const toggleCart = useCartStore((state) => state.toggleCart);
   const { toggleItem, isInWishlist } = useWishlistStore();
+
+  useEffect(() => {
+    fetch("/api/products")
+      .then((r) => r.json())
+      .then((data: ApiProduct[]) => {
+        const found = data.find((p) => p.slug === slug);
+        if (found) {
+          setProduct(found);
+        } else {
+          // Fallback to static data
+          const staticMatch = staticProducts.find((p) => p.slug === slug);
+          if (staticMatch) setProduct(staticMatch);
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        const staticMatch = staticProducts.find((p) => p.slug === slug);
+        if (staticMatch) setProduct(staticMatch);
+        setLoading(false);
+      });
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <main className="min-h-screen flex items-center justify-center">
+          <div className="animate-spin w-8 h-8 border-4 border-[#6FB644] border-t-transparent rounded-full" />
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   if (!product) {
     return (
@@ -55,11 +96,17 @@ export default function ProductPage() {
     );
   }
 
-  const relatedProducts = products
+  // Build images array from both images and legacy image field
+  const allImages = product.images && product.images.length > 0
+    ? product.images
+    : [product.image];
+
+  const relatedProducts = staticProducts
     .filter((p) => p.category === product.category && p.id !== product.id)
-    .slice(0, 4);
+    .slice(0, 5);
 
   const handleAddToCart = () => {
+    if (!product.inStock) return;
     for (let i = 0; i < quantity; i++) {
       addItem(product);
     }
@@ -97,18 +144,21 @@ export default function ProductPage() {
           <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12">
             {/* Image */}
             <div className="relative">
+              {/* Main Image */}
               <div className="relative rounded-2xl aspect-square overflow-hidden bg-gray-100">
                 <Image
-                  src={product.image}
+                  src={allImages[activeImageIndex]}
                   alt={product.name}
                   fill
                   className="object-cover"
                   priority
                 />
+
               </div>
+
               {product.badge && (
                 <span
-                  className={`absolute top-4 left-4 px-3 py-1 text-white text-sm font-bold rounded-full ${
+                  className={`absolute top-4 left-4 px-3 py-1 text-white text-sm font-bold rounded-full z-10 ${
                     product.badge === "SALE"
                       ? "bg-red-500"
                       : product.badge === "NEW"
@@ -119,23 +169,55 @@ export default function ProductPage() {
                   {product.badge === "SALE" ? `-${discount}%` : product.badge}
                 </span>
               )}
+
+              {/* Thumbnail Slider */}
+              {allImages.length > 1 && (
+                <ThumbnailSlider
+                  images={allImages}
+                  activeIndex={activeImageIndex}
+                  onSelect={setActiveImageIndex}
+                  productName={product.name}
+                />
+              )}
             </div>
 
             {/* Info */}
             <div>
-              <div className="flex items-center gap-2 mb-2">
+              <div className="flex items-center gap-2 mb-2 flex-wrap">
+                {product.sku && (
+                  <>
+                    <span className="text-sm font-mono text-gray-400">
+                      {product.sku}
+                    </span>
+                    <span className="text-sm text-gray-300">|</span>
+                  </>
+                )}
                 <span className="text-sm text-gray-500 uppercase tracking-wide">
                   {product.category} Plant
                 </span>
-                <span className="text-sm text-gray-400">|</span>
+                <span className="text-sm text-gray-300">|</span>
                 <span className="text-sm text-gray-500 capitalize">
                   {product.size} size
                 </span>
               </div>
 
-              <h1 className="text-3xl font-bold text-gray-800 mb-4">
-                {product.name}
-              </h1>
+              <div className="flex items-start justify-between mb-4">
+                <h1 className="text-3xl font-bold text-gray-800">
+                  {product.name}
+                </h1>
+                <button
+                  onClick={() => toggleItem(product)}
+                  className={`p-2 rounded-full transition-colors flex-shrink-0 ${
+                    isInWishlist(product.id)
+                      ? "text-red-500"
+                      : "text-gray-400 hover:text-red-500"
+                  }`}
+                >
+                  <Heart
+                    className={`w-6 h-6 ${isInWishlist(product.id) ? "fill-red-500" : ""}`}
+                  />
+                </button>
+              </div>
 
               {/* Rating */}
               <div className="flex items-center gap-2 mb-4">
@@ -196,36 +278,35 @@ export default function ProductPage() {
               </div>
 
               {/* Actions */}
-              <div className="flex flex-wrap gap-3 mb-6">
+              {!product.inStock && (
+                <div className="bg-red-50 text-red-600 text-sm font-medium px-4 py-2 rounded-lg mb-4">
+                  This product is currently out of stock
+                </div>
+              )}
+
+              <div className="flex flex-col gap-2 mb-8">
                 <button
                   onClick={handleAddToCart}
-                  className="flex-1 flex items-center justify-center gap-2 bg-[#6FB644] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[#5a9636] transition-colors"
-                >
-                  <ShoppingCart className="w-5 h-5" />
-                  Add to Cart
-                </button>
-                <button
-                  onClick={() => toggleItem(product)}
-                  className={`p-3 rounded-lg border-2 transition-colors ${
-                    isInWishlist(product.id)
-                      ? "border-red-400 bg-red-50 text-red-500"
-                      : "border-gray-300 text-gray-500 hover:border-red-400 hover:text-red-500"
+                  disabled={!product.inStock}
+                  className={`w-full flex items-center justify-center gap-2 py-3 px-6 rounded-lg font-semibold transition-colors ${
+                    product.inStock
+                      ? "bg-[#6FB644] text-white hover:bg-[#5a9636]"
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}
                 >
-                  <Heart
-                    className={`w-6 h-6 ${isInWishlist(product.id) ? "fill-red-500" : ""}`}
-                  />
+                  <ShoppingCart className="w-5 h-5" />
+                  {product.inStock ? "Add to Cart" : "Out of Stock"}
                 </button>
-              </div>
 
-              {/* WhatsApp Order */}
-              <a
-                href={`https://wa.me/977XXXXXXXXXX?text=${encodeURIComponent(whatsappMessage)}`}
-                className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[#1da851] transition-colors mb-8"
-              >
-                <MessageCircle className="w-5 h-5" />
-                Order via WhatsApp
-              </a>
+                {/* WhatsApp Order */}
+                <a
+                  href={`https://wa.me/9779840036888?text=${encodeURIComponent(whatsappMessage)}`}
+                  className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white py-3 px-6 rounded-lg font-semibold hover:bg-[#1da851] transition-colors"
+                >
+                  <MessageCircle className="w-5 h-5" />
+                  Order via WhatsApp
+                </a>
+              </div>
 
               {/* Trust */}
               <div className="grid grid-cols-3 gap-4 border-t pt-6">
@@ -253,7 +334,7 @@ export default function ProductPage() {
               <h2 className="text-2xl font-bold text-gray-800 mb-8">
                 You May Also Like
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
                 {relatedProducts.map((p) => (
                   <ProductCard key={p.id} product={p} />
                 ))}
@@ -265,5 +346,87 @@ export default function ProductPage() {
       <Footer />
       <WhatsAppButton />
     </>
+  );
+}
+
+function ThumbnailSlider({
+  images,
+  activeIndex,
+  onSelect,
+  productName,
+}: {
+  images: string[];
+  activeIndex: number;
+  onSelect: (index: number) => void;
+  productName: string;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScroll, setCanScroll] = useState(false);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const check = () => setCanScroll(el.scrollWidth > el.clientWidth);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, [images]);
+
+  const scroll = (direction: "left" | "right") => {
+    if (!scrollRef.current) return;
+    const amount = 80;
+    scrollRef.current.scrollBy({
+      left: direction === "left" ? -amount : amount,
+      behavior: "smooth",
+    });
+  };
+
+  return (
+    <div className="relative mt-4 group/slider">
+      {/* Left arrow - only when scrollable */}
+      {canScroll && (
+        <button
+          onClick={() => scroll("left")}
+          className="absolute -left-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 bg-white rounded-full shadow-md flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity hover:bg-gray-50"
+        >
+          <ChevronLeft className="w-4 h-4 text-gray-600" />
+        </button>
+      )}
+
+      {/* Thumbnails */}
+      <div
+        ref={scrollRef}
+        className="flex gap-2 overflow-x-auto scrollbar-hide px-1"
+      >
+        {images.map((img, index) => (
+          <button
+            key={index}
+            onClick={() => onSelect(index)}
+            className={`relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden border-2 transition-all ${
+              activeIndex === index
+                ? "border-[#6FB644] ring-1 ring-[#6FB644]"
+                : "border-gray-200 hover:border-gray-300"
+            }`}
+          >
+            <Image
+              src={img}
+              alt={`${productName} ${index + 1}`}
+              fill
+              className="object-cover"
+            />
+          </button>
+        ))}
+      </div>
+
+      {/* Right arrow - only when scrollable */}
+      {canScroll && (
+        <button
+          onClick={() => scroll("right")}
+          className="absolute -right-2 top-1/2 -translate-y-1/2 z-10 w-7 h-7 bg-white rounded-full shadow-md flex items-center justify-center opacity-0 group-hover/slider:opacity-100 transition-opacity hover:bg-gray-50"
+        >
+          <ChevronRight className="w-4 h-4 text-gray-600" />
+        </button>
+      )}
+    </div>
   );
 }

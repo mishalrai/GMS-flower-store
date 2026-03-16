@@ -4,15 +4,55 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import WhatsAppButton from "@/components/home/WhatsAppButton";
 import ProductCard from "@/components/home/ProductCard";
-import { products, categories } from "@/data/products";
-import { useState, useRef } from "react";
-import { SlidersHorizontal, Grid3X3, LayoutList } from "lucide-react";
+import { products } from "@/data/products";
+import { useState, useRef, useEffect, Suspense } from "react";
+import { useSearchParams } from "next/navigation";
+import { SlidersHorizontal, ChevronDown, Check } from "lucide-react";
 
 export default function ShopPage() {
-  const [selectedCategory, setSelectedCategory] = useState("all");
-  const [selectedSize, setSelectedSize] = useState("all");
+  return (
+    <Suspense>
+      <ShopContent />
+    </Suspense>
+  );
+}
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
+
+function ShopContent() {
+  const searchParams = useSearchParams();
+  const categoryParam = searchParams.get("category");
+  const filterParam = searchParams.get("filter");
+  const searchQuery = searchParams.get("search") || "";
+  const [selectedCategory, setSelectedCategory] = useState(categoryParam || "all");
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((data) => setCategories(data))
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    setSelectedCategory(categoryParam || "all");
+  }, [categoryParam]);
+
   const [sortBy, setSortBy] = useState("default");
-  const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  const [sortOpen, setSortOpen] = useState(false);
+  const sortRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (sortRef.current && !sortRef.current.contains(e.target as Node)) setSortOpen(false);
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Drag-to-scroll for category pills
   const categoryScrollRef = useRef<HTMLDivElement>(null);
@@ -45,14 +85,26 @@ export default function ShopPage() {
     setTimeout(() => setIsDragging(false), 0);
   };
 
-  const filteredProducts = products
+  // Apply filter param (from homepage "View All" links)
+  let baseProducts = [...products];
+  if (filterParam === "flash-sale") {
+    baseProducts = baseProducts.filter((p) => p.salePrice);
+  } else if (filterParam === "new-arrivals") {
+    baseProducts.sort((a, b) => b.id - a.id);
+  } else if (filterParam === "most-popular") {
+    baseProducts.sort((a, b) => b.rating - a.rating);
+  }
+
+  const filteredProducts = baseProducts
     .filter((p) => {
       if (selectedCategory !== "all" && p.category !== selectedCategory)
         return false;
-      if (selectedSize !== "all" && p.size !== selectedSize) return false;
+      if (searchQuery && !p.name.toLowerCase().includes(searchQuery.toLowerCase()) && !p.description.toLowerCase().includes(searchQuery.toLowerCase()))
+        return false;
       return true;
     })
     .sort((a, b) => {
+      if (sortBy === "default") return 0;
       switch (sortBy) {
         case "price-low":
           return (a.salePrice || a.price) - (b.salePrice || b.price);
@@ -72,9 +124,11 @@ export default function ShopPage() {
         {/* Hero */}
         <section className="bg-gradient-to-r from-green-700 to-green-500 text-white py-16 px-4">
           <div className="max-w-6xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">Our Plants</h1>
+            <h1 className="text-4xl md:text-5xl font-bold mb-4">
+              {searchQuery ? `Search: "${searchQuery}"` : filterParam === "new-arrivals" ? "New Arrivals" : filterParam === "flash-sale" ? "Flash Sale" : filterParam === "most-popular" ? "Most Popular" : "Our Plants"}
+            </h1>
             <p className="text-lg opacity-90">
-              Browse our collection of fresh, home-grown plants
+              {searchQuery ? `Showing results for "${searchQuery}"` : filterParam === "new-arrivals" ? "Check out our latest additions" : filterParam === "flash-sale" ? "Grab these deals before they're gone" : filterParam === "most-popular" ? "Our customers' top-rated favorites" : "Browse our collection of fresh, home-grown plants"}
             </p>
           </div>
         </section>
@@ -123,43 +177,45 @@ export default function ShopPage() {
               </div>
 
               <div className="flex flex-wrap gap-3">
-                <select
-                  value={selectedSize}
-                  onChange={(e) => setSelectedSize(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
-                >
-                  <option value="all">All Sizes</option>
-                  <option value="small">Small</option>
-                  <option value="medium">Medium</option>
-                  <option value="large">Large</option>
-                </select>
-
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
-                >
-                  <option value="default">Sort By: Default</option>
-                  <option value="price-low">Price: Low to High</option>
-                  <option value="price-high">Price: High to Low</option>
-                  <option value="name">Name: A to Z</option>
-                </select>
+                {/* Sort Dropdown */}
+                <div ref={sortRef} className="relative">
+                  <button
+                    onClick={() => setSortOpen(!sortOpen)}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-[2px] text-sm font-medium transition-all border ${
+                      sortBy !== "default"
+                        ? "bg-[#6FB644]/10 border-[#6FB644] text-[#6FB644]"
+                        : "bg-white border-gray-200 text-gray-700 hover:border-gray-300"
+                    }`}
+                  >
+                    {sortBy === "default" ? "Sort By" : sortBy === "price-low" ? "Price: Low to High" : sortBy === "price-high" ? "Price: High to Low" : "Name: A to Z"}
+                    <ChevronDown className={`w-4 h-4 transition-transform ${sortOpen ? "rotate-180" : ""}`} />
+                  </button>
+                  {sortOpen && (
+                    <div className="absolute top-full right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-gray-100 py-1.5 z-30 animate-in fade-in slide-in-from-top-2 duration-200">
+                      {[
+                        { value: "default", label: "Default" },
+                        { value: "price-low", label: "Price: Low to High" },
+                        { value: "price-high", label: "Price: High to Low" },
+                        { value: "name", label: "Name: A to Z" },
+                      ].map((opt) => (
+                        <button
+                          key={opt.value}
+                          onClick={() => { setSortBy(opt.value); setSortOpen(false); }}
+                          className={`w-full flex items-center justify-between px-4 py-2.5 text-sm transition-colors ${
+                            sortBy === opt.value
+                              ? "bg-[#6FB644]/10 text-[#6FB644] font-medium"
+                              : "text-gray-700 hover:bg-gray-50"
+                          }`}
+                        >
+                          {opt.label}
+                          {sortBy === opt.value && <Check className="w-4 h-4" />}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
 
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setViewMode("grid")}
-                  className={`p-2 rounded ${viewMode === "grid" ? "bg-[#6FB644] text-white" : "bg-white text-gray-500"}`}
-                >
-                  <Grid3X3 className="w-5 h-5" />
-                </button>
-                <button
-                  onClick={() => setViewMode("list")}
-                  className={`p-2 rounded ${viewMode === "list" ? "bg-[#6FB644] text-white" : "bg-white text-gray-500"}`}
-                >
-                  <LayoutList className="w-5 h-5" />
-                </button>
-              </div>
             </div>
 
             {/* Results count */}
@@ -169,13 +225,7 @@ export default function ShopPage() {
 
             {/* Products Grid */}
             {filteredProducts.length > 0 ? (
-              <div
-                className={
-                  viewMode === "grid"
-                    ? "grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-                    : "space-y-4"
-                }
-              >
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
                 {filteredProducts.map((product) => (
                   <ProductCard key={product.id} product={product} />
                 ))}
@@ -188,7 +238,6 @@ export default function ShopPage() {
                 <button
                   onClick={() => {
                     setSelectedCategory("all");
-                    setSelectedSize("all");
                   }}
                   className="mt-4 text-[#6FB644] font-medium hover:underline"
                 >

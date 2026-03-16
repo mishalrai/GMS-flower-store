@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, ShoppingCart, Eye } from "lucide-react";
+import { Heart, ShoppingCart } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
 import { Product } from "@/data/products";
@@ -37,6 +37,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
+    if (!product.inStock) return;
     addItem(product);
     toggleCart();
   };
@@ -81,13 +82,17 @@ export default function ProductCard({ product }: ProductCardProps) {
         {/* Wishlist */}
         <button
           onClick={handleToggleWishlist}
-          className="absolute top-3 right-3 w-8 h-8 bg-white rounded-full flex items-center justify-center shadow-md hover:scale-110 transition-transform"
+          className={`absolute top-3 right-3 w-9 h-9 rounded-full flex items-center justify-center shadow-sm hover:scale-110 transition-all ${
+            isInWishlist(product.id)
+              ? "bg-red-50"
+              : "bg-white/90 backdrop-blur-sm"
+          }`}
         >
           <Heart
-            className={`w-4 h-4 ${
+            className={`w-[18px] h-[18px] ${
               isInWishlist(product.id)
                 ? "text-red-500 fill-red-500"
-                : "text-gray-400"
+                : "text-gray-500"
             }`}
           />
         </button>
@@ -117,7 +122,12 @@ export default function ProductCard({ product }: ProductCardProps) {
           </div>
           <button
             onClick={handleAddToCart}
-            className="w-9 h-9 bg-[#6FB644] rounded-full flex items-center justify-center hover:bg-[#5a9636] transition-colors"
+            disabled={!product.inStock}
+            className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
+              product.inStock
+                ? "bg-[#6FB644] hover:bg-[#5a9636]"
+                : "bg-gray-300 cursor-not-allowed"
+            }`}
           >
             <ShoppingCart className="w-4 h-4 text-white" />
           </button>

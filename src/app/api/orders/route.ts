@@ -6,7 +6,7 @@ interface Payment { method: 'cod' | 'qr'; qrLabel?: string; screenshotUrl?: stri
 interface Order {
   id: string;
   items: OrderItem[];
-  customer: { name: string; phone: string; address: string; note?: string };
+  customer: { name: string; phone: string; address: string; note?: string; location?: { lat: number; lng: number } };
   payment: Payment;
   status: string;
   reviewEnabled: boolean;

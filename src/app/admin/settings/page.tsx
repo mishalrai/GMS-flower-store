@@ -2,13 +2,19 @@
 
 import { useEffect, useState, useRef } from "react";
 import Image from "next/image";
-import { Save, Upload, Trash2, Plus, QrCode } from "lucide-react";
+import { Save, Upload, Trash2, Plus, QrCode, LayoutGrid } from "lucide-react";
 import { useToast } from "@/components/admin/Toast";
 
 interface PaymentQR {
   id: string;
   label: string;
   image: string;
+}
+
+interface HomepageTabs {
+  "new-arrivals": boolean;
+  "flash-sale": boolean;
+  "most-popular": boolean;
 }
 
 interface StoreSettings {
@@ -21,6 +27,7 @@ interface StoreSettings {
   freeDeliveryThreshold: number;
   currency: string;
   socialLinks: { facebook: string; instagram: string; youtube: string; tiktok: string };
+  homepageTabs: HomepageTabs;
   paymentQRCodes: PaymentQR[];
 }
 
@@ -39,6 +46,7 @@ export default function SettingsPage() {
       .then((data) => {
         setSettings({
           ...data,
+          homepageTabs: data.homepageTabs || { "new-arrivals": true, "flash-sale": true, "most-popular": true },
           paymentQRCodes: data.paymentQRCodes || [],
         });
         setLoading(false);
@@ -49,13 +57,22 @@ export default function SettingsPage() {
     e.preventDefault();
     if (!settings) return;
     setSaving(true);
-    await fetch("/api/settings", {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(settings),
-    });
-    setSaving(false);
-    toast("Settings saved successfully");
+    try {
+      const res = await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(settings),
+      });
+      if (res.ok) {
+        toast("Settings saved successfully");
+      } else {
+        toast("Failed to save settings", "error");
+      }
+    } catch {
+      toast("Failed to save settings", "error");
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleQRUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,7 +141,7 @@ export default function SettingsPage() {
 
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-xl border border-gray-100 p-6 max-w-3xl"
+        className="bg-white rounded-xl p-6"
       >
         <h3 className="font-semibold text-gray-800 mb-4">Store Information</h3>
         <div className="grid md:grid-cols-2 gap-6">
@@ -310,6 +327,57 @@ export default function SettingsPage() {
               placeholder="https://tiktok.com/@yourpage"
             />
           </div>
+        </div>
+
+        {/* Homepage Tabs */}
+        <h3 className="font-semibold text-gray-800 mb-4 mt-8 flex items-center gap-2">
+          <LayoutGrid className="w-5 h-5 text-[#6FB644]" />
+          Homepage Product Tabs
+        </h3>
+        <p className="text-sm text-gray-500 mb-4">
+          Control which product tabs are visible on the homepage.
+        </p>
+        <div className="space-y-3 mb-2">
+          {([
+            { key: "new-arrivals" as const, label: "New Arrivals", desc: "Shows latest products sorted by newest first" },
+            { key: "flash-sale" as const, label: "Flash Sale", desc: "Shows products currently on sale" },
+            { key: "most-popular" as const, label: "Most Popular", desc: "Shows top-rated products" },
+          ]).map((tab) => (
+            <div
+              key={tab.key}
+              className={`flex items-center justify-between p-4 rounded-xl border transition-colors ${
+                settings.homepageTabs[tab.key]
+                  ? "border-[#6FB644]/30 bg-green-50/50"
+                  : "border-gray-200 bg-gray-50/50"
+              }`}
+            >
+              <div>
+                <p className="text-sm font-medium text-gray-800">{tab.label}</p>
+                <p className="text-xs text-gray-400 mt-0.5">{tab.desc}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() =>
+                  setSettings({
+                    ...settings,
+                    homepageTabs: {
+                      ...settings.homepageTabs,
+                      [tab.key]: !settings.homepageTabs[tab.key],
+                    },
+                  })
+                }
+                className={`relative w-11 h-6 rounded-full transition-colors ${
+                  settings.homepageTabs[tab.key] ? "bg-[#6FB644]" : "bg-gray-300"
+                }`}
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                    settings.homepageTabs[tab.key] ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+          ))}
         </div>
 
         {/* Payment QR Codes */}

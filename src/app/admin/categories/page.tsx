@@ -112,7 +112,7 @@ export default function CategoriesPage() {
 
       {/* Add/Edit Form */}
       {(showNew || editId) && (
-        <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
+        <div className="bg-white rounded-xl p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">
               {editId ? "Edit Category" : "New Category"}
@@ -196,7 +196,7 @@ export default function CategoriesPage() {
         {categories.map((cat) => (
           <div
             key={cat.id}
-            className="bg-white rounded-xl border border-gray-100 overflow-hidden"
+            className="bg-white rounded-xl overflow-hidden"
           >
             {cat.image && (
               <div className="relative h-36">

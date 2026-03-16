@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Edit, Trash2, Save, X } from "lucide-react";
+import Image from "next/image";
+import { Plus, Edit, Trash2, Save, X, ImageIcon } from "lucide-react";
 import Modal from "@/components/admin/Modal";
+import MediaPickerModal from "@/components/admin/MediaPickerModal";
 import { useToast } from "@/components/admin/Toast";
 
 interface Banner {
@@ -27,6 +29,7 @@ export default function BannersPage() {
     buttonLink: "/shop",
     image: "",
   });
+  const [showMediaPicker, setShowMediaPicker] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -121,7 +124,7 @@ export default function BannersPage() {
 
       {/* Form */}
       {(showNew || editId) && (
-        <div className="bg-white rounded-xl border border-gray-100 p-6 mb-6">
+        <div className="bg-white rounded-xl p-6 mb-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="font-semibold">
               {editId ? "Edit Banner" : "New Banner"}
@@ -130,6 +133,34 @@ export default function BannersPage() {
               <X className="w-5 h-5" />
             </button>
           </div>
+          {/* Image Picker */}
+          <div className="mb-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">Banner Image</label>
+            {form.image ? (
+              <div className="relative w-full h-48 rounded-lg overflow-hidden border border-gray-200 group">
+                <Image src={form.image} alt="Banner preview" fill className="object-cover" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-colors flex items-center justify-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowMediaPicker(true)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity bg-white text-gray-700 px-4 py-2 rounded-lg text-sm font-medium shadow"
+                  >
+                    Change Image
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setShowMediaPicker(true)}
+                className="w-full h-48 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center text-gray-400 hover:border-[#6FB644] hover:text-[#6FB644] transition-colors"
+              >
+                <ImageIcon className="w-10 h-10 mb-2" />
+                <span className="text-sm font-medium">Click to select an image</span>
+              </button>
+            )}
+          </div>
+
           <div className="grid md:grid-cols-2 gap-4">
             <input placeholder="Title" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none" />
             <input placeholder="Subtitle" value={form.subtitle} onChange={(e) => setForm({ ...form, subtitle: e.target.value })} className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none" />
@@ -148,9 +179,18 @@ export default function BannersPage() {
       {/* Banner Cards */}
       <div className="space-y-4">
         {banners.map((banner) => (
-          <div key={banner.id} className="bg-white rounded-xl border border-gray-100 p-6">
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
+          <div key={banner.id} className="bg-white rounded-xl p-6">
+            <div className="flex items-start gap-4">
+              {banner.image ? (
+                <div className="relative w-32 h-20 rounded-lg overflow-hidden flex-shrink-0 border border-gray-200">
+                  <Image src={banner.image} alt={banner.title} fill className="object-cover" />
+                </div>
+              ) : (
+                <div className="w-32 h-20 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
+                  <ImageIcon className="w-8 h-8 text-gray-300" />
+                </div>
+              )}
+              <div className="flex-1 min-w-0">
                 <h3 className="font-semibold text-gray-800">{banner.title}</h3>
                 <p className="text-sm text-gray-500 mt-1">{banner.subtitle}</p>
                 <div className="flex gap-4 mt-2 text-xs text-gray-400">
@@ -158,7 +198,7 @@ export default function BannersPage() {
                   <span>Link: {banner.buttonLink}</span>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 flex-shrink-0">
                 <button onClick={() => startEdit(banner)} title="Edit banner" className="p-1.5 text-blue-500 hover:bg-blue-50 rounded">
                   <Edit className="w-4 h-4" />
                 </button>
@@ -174,6 +214,13 @@ export default function BannersPage() {
       <Modal isOpen={deleteId !== null} onClose={() => setDeleteId(null)} title="Delete Banner" onConfirm={handleDelete} confirmText="Delete" confirmColor="bg-red-500 hover:bg-red-600">
         <p className="text-gray-600">Delete this banner?</p>
       </Modal>
+
+      <MediaPickerModal
+        isOpen={showMediaPicker}
+        onClose={() => setShowMediaPicker(false)}
+        onSelect={(url) => setForm({ ...form, image: url })}
+        currentImage={form.image}
+      />
     </div>
   );
 }

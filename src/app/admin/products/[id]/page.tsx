@@ -1,11 +1,13 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Save, Upload, X } from "lucide-react";
+import { ArrowLeft, Save, X, Plus, Star as StarIcon } from "lucide-react";
 import { useToast } from "@/components/admin/Toast";
+import CustomSelect from "@/components/ui/CustomSelect";
+import MediaPickerModal from "@/components/admin/MediaPickerModal";
 
 interface Category {
   id: number;
@@ -17,16 +19,17 @@ export default function EditProductPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
-  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [imagePreview, setImagePreview] = useState<string>("");
+  const [images, setImages] = useState<string[]>([]);
+  const [featuredIndex, setFeaturedIndex] = useState(0);
+  const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const [form, setForm] = useState({
     name: "",
     category: "indoor",
+    costPrice: "",
     price: "",
     salePrice: "",
     size: "small",
@@ -34,7 +37,7 @@ export default function EditProductPage() {
     description: "",
     rating: "4.5",
     inStock: true,
-    image: "",
+    inventory: "",
   });
 
   useEffect(() => {
@@ -45,6 +48,7 @@ export default function EditProductPage() {
       setForm({
         name: data.name as string,
         category: data.category as string,
+        costPrice: data.costPrice ? String(data.costPrice) : "",
         price: String(data.price),
         salePrice: data.salePrice ? String(data.salePrice) : "",
         size: data.size as string,
@@ -52,43 +56,48 @@ export default function EditProductPage() {
         description: data.description as string,
         rating: String(data.rating),
         inStock: data.inStock as boolean,
-        image: (data.image as string) || "",
+        inventory: data.inventory != null ? String(data.inventory) : "",
       });
+
+      // Load images - support both images array and legacy single image
+      const productImages = data.images as string[] | undefined;
+      const singleImage = data.image as string | undefined;
+      if (productImages && productImages.length > 0) {
+        setImages(productImages);
+        // Set featured index based on which image matches the main image
+        if (singleImage) {
+          const idx = productImages.indexOf(singleImage);
+          if (idx >= 0) setFeaturedIndex(idx);
+        }
+      } else if (singleImage) {
+        setImages([singleImage]);
+      }
+
       setCategories(cats);
       setLoading(false);
     });
   }, [id]);
 
-  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setImagePreview(URL.createObjectURL(file));
-    setUploading(true);
-
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      if (res.ok) {
-        setForm((prev) => ({ ...prev, image: data.url }));
-      }
-    } catch {
-      setImagePreview("");
-    } finally {
-      setUploading(false);
+  const handleMediaSelect = (url: string) => {
+    if (!images.includes(url)) {
+      setImages((prev) => [...prev, url]);
     }
   };
 
-  const removeImage = () => {
-    setForm((prev) => ({ ...prev, image: "" }));
-    setImagePreview("");
-    if (fileInputRef.current) fileInputRef.current.value = "";
+  const handleMediaSelectMultiple = (urls: string[]) => {
+    setImages((prev) => {
+      const newUrls = urls.filter((u) => !prev.includes(u));
+      return [...prev, ...newUrls];
+    });
+  };
+
+  const removeImage = (index: number) => {
+    setImages((prev) => prev.filter((_, i) => i !== index));
+    if (featuredIndex === index) {
+      setFeaturedIndex(0);
+    } else if (featuredIndex > index) {
+      setFeaturedIndex(featuredIndex - 1);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,10 +106,14 @@ export default function EditProductPage() {
 
     const product = {
       ...form,
+      costPrice: form.costPrice ? Number(form.costPrice) : undefined,
       price: Number(form.price),
       salePrice: form.salePrice ? Number(form.salePrice) : undefined,
       rating: Number(form.rating),
       badge: form.badge || null,
+      inventory: form.inventory ? Number(form.inventory) : undefined,
+      image: images[featuredIndex] || "",
+      images,
       slug: form.name
         .toLowerCase()
         .replace(/\s+/g, "-")
@@ -130,8 +143,6 @@ export default function EditProductPage() {
     );
   }
 
-  const displayImage = imagePreview || form.image;
-
   return (
     <div>
       <div className="flex items-center gap-4 mb-6">
@@ -147,52 +158,54 @@ export default function EditProductPage() {
 
       <form
         onSubmit={handleSubmit}
-        className="bg-white rounded-xl border border-gray-100 p-6 max-w-3xl"
+        className="bg-white rounded-xl p-6"
       >
-        {/* Image Upload */}
+        {/* Images */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Product Image
+            Product Images
           </label>
-          {displayImage ? (
-            <div className="relative w-40 h-40 rounded-lg overflow-hidden border border-gray-200">
-              <Image
-                src={displayImage}
-                alt="Product preview"
-                fill
-                className="object-cover"
-              />
-              <button
-                type="button"
-                onClick={removeImage}
-                title="Remove image"
-                className="absolute top-1 right-1 bg-white rounded-full p-1 shadow-md hover:bg-gray-100"
+          <div className="flex flex-wrap gap-3">
+            {images.map((url, index) => (
+              <div
+                key={url}
+                className={`relative w-28 h-28 rounded-lg overflow-hidden border-2 group cursor-pointer ${
+                  index === featuredIndex
+                    ? "border-[#6FB644]"
+                    : "border-gray-200 hover:border-gray-300"
+                }`}
+                onClick={() => setFeaturedIndex(index)}
               >
-                <X className="w-4 h-4 text-gray-600" />
-              </button>
-              {uploading && (
-                <div className="absolute inset-0 bg-white/70 flex items-center justify-center">
-                  <div className="animate-spin w-6 h-6 border-2 border-[#6FB644] border-t-transparent rounded-full" />
-                </div>
-              )}
-            </div>
-          ) : (
+                <Image src={url} alt={`Product ${index + 1}`} fill className="object-cover" />
+                {index === featuredIndex && (
+                  <div className="absolute top-1 left-1 bg-[#6FB644] text-white rounded-full p-0.5">
+                    <StarIcon className="w-3 h-3 fill-white" />
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); removeImage(index); }}
+                  title="Remove image"
+                  className="absolute top-1 right-1 bg-white rounded-full p-0.5 shadow-md hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  <X className="w-3.5 h-3.5 text-gray-600" />
+                </button>
+              </div>
+            ))}
             <button
               type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="w-40 h-40 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center gap-2 hover:border-[#6FB644] hover:bg-green-50 transition-colors"
+              onClick={() => setMediaPickerOpen(true)}
+              className="w-28 h-28 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center gap-1 hover:border-[#6FB644] hover:bg-green-50 transition-colors"
             >
-              <Upload className="w-6 h-6 text-gray-400" />
-              <span className="text-xs text-gray-500">Upload Image</span>
+              <Plus className="w-5 h-5 text-gray-400" />
+              <span className="text-[10px] text-gray-500">Add Image</span>
             </button>
+          </div>
+          {images.length > 1 && (
+            <p className="text-xs text-gray-400 mt-2">
+              Click an image to set it as the featured image (shown with star).
+            </p>
           )}
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/*"
-            onChange={handleImageUpload}
-            className="hidden"
-          />
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">
@@ -213,22 +226,31 @@ export default function EditProductPage() {
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Category *
             </label>
-            <select
+            <CustomSelect
               value={form.category}
-              onChange={(e) => setForm({ ...form, category: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
-            >
-              {categories.map((cat) => (
-                <option key={cat.id} value={cat.slug}>
-                  {cat.name}
-                </option>
-              ))}
-            </select>
+              onChange={(val) => setForm({ ...form, category: val })}
+              options={categories.map((cat) => ({ value: cat.slug, label: cat.name }))}
+              placeholder="Select category"
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              Price (Rs) *
+              Cost Price (Rs)
+            </label>
+            <input
+              type="number"
+              min="0"
+              value={form.costPrice}
+              onChange={(e) => setForm({ ...form, costPrice: e.target.value })}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
+              placeholder="Actual cost price"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Selling Price (Rs) *
             </label>
             <input
               type="number"
@@ -256,33 +278,47 @@ export default function EditProductPage() {
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
+              Inventory (Stock Qty)
+            </label>
+            <input
+              type="number"
+              min="0"
+              value={form.inventory}
+              onChange={(e) => setForm({ ...form, inventory: e.target.value })}
+              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
+              placeholder="e.g. 50"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
               Size *
             </label>
-            <select
+            <CustomSelect
               value={form.size}
-              onChange={(e) => setForm({ ...form, size: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
-            >
-              <option value="small">Small</option>
-              <option value="medium">Medium</option>
-              <option value="large">Large</option>
-            </select>
+              onChange={(val) => setForm({ ...form, size: val })}
+              options={[
+                { value: "small", label: "Small" },
+                { value: "medium", label: "Medium" },
+                { value: "large", label: "Large" },
+              ]}
+            />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Badge
             </label>
-            <select
+            <CustomSelect
               value={form.badge}
-              onChange={(e) => setForm({ ...form, badge: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
-            >
-              <option value="">None</option>
-              <option value="NEW">NEW</option>
-              <option value="HOT">HOT</option>
-              <option value="SALE">SALE</option>
-            </select>
+              onChange={(val) => setForm({ ...form, badge: val })}
+              options={[
+                { value: "", label: "None" },
+                { value: "NEW", label: "NEW" },
+                { value: "HOT", label: "HOT" },
+                { value: "SALE", label: "SALE" },
+              ]}
+            />
           </div>
 
           <div>
@@ -327,7 +363,7 @@ export default function EditProductPage() {
           />
         </div>
 
-        <div className="flex justify-end gap-3 mt-8 pt-6 border-t">
+        <div className="flex justify-end gap-3 mt-8 pt-6">
           <Link
             href="/admin/products"
             className="px-6 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
@@ -336,7 +372,7 @@ export default function EditProductPage() {
           </Link>
           <button
             type="submit"
-            disabled={saving || uploading}
+            disabled={saving}
             className="flex items-center gap-2 bg-[#6FB644] text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-[#5a9636] transition-colors disabled:opacity-50"
           >
             <Save className="w-4 h-4" />
@@ -344,6 +380,14 @@ export default function EditProductPage() {
           </button>
         </div>
       </form>
+
+      <MediaPickerModal
+        isOpen={mediaPickerOpen}
+        onClose={() => setMediaPickerOpen(false)}
+        onSelect={handleMediaSelect}
+        onSelectMultiple={handleMediaSelectMultiple}
+        multiple
+      />
     </div>
   );
 }

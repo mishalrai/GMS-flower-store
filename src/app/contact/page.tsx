@@ -14,12 +14,13 @@ export default function ContactPage() {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
-
+  const [error, setError] = useState(false);
   const [sending, setSending] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSending(true);
+    setError(false);
 
     try {
       const res = await fetch("/api/messages", {
@@ -31,9 +32,13 @@ export default function ContactPage() {
         setSubmitted(true);
         setFormData({ name: "", email: "", phone: "", message: "" });
         setTimeout(() => setSubmitted(false), 3000);
+      } else {
+        setError(true);
+        setTimeout(() => setError(false), 3000);
       }
     } catch {
-      // failed
+      setError(true);
+      setTimeout(() => setError(false), 3000);
     } finally {
       setSending(false);
     }
@@ -71,7 +76,7 @@ export default function ContactPage() {
                   {
                     icon: Phone,
                     title: "Phone",
-                    text: "+977-XXX-XXXXXXX",
+                    text: "+977-9840036888",
                   },
                   {
                     icon: Mail,
@@ -100,7 +105,7 @@ export default function ContactPage() {
 
               <div className="mt-8">
                 <a
-                  href="https://wa.me/977XXXXXXXXXX?text=Hi! I'd like to place an order."
+                  href="https://wa.me/9779840036888?text=Hi! I'd like to place an order."
                   className="inline-flex items-center gap-2 bg-[#25D366] text-white px-6 py-3 rounded-full font-semibold hover:bg-[#1da851] transition-colors"
                 >
                   <MessageCircle className="w-5 h-5" />
@@ -117,6 +122,11 @@ export default function ContactPage() {
               {submitted && (
                 <div className="bg-green-100 text-green-800 p-4 rounded-lg mb-6">
                   Thank you! We&apos;ll get back to you soon.
+                </div>
+              )}
+              {error && (
+                <div className="bg-red-100 text-red-800 p-4 rounded-lg mb-6">
+                  Failed to send message. Please try again or contact us via WhatsApp.
                 </div>
               )}
               <form onSubmit={handleSubmit} className="space-y-4">

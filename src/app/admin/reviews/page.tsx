@@ -62,7 +62,7 @@ export default function ReviewsPage() {
       </div>
 
       {reviews.length === 0 ? (
-        <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+        <div className="bg-white rounded-xl p-12 text-center">
           <Star className="w-12 h-12 text-gray-300 mx-auto mb-3" />
           <p className="text-gray-500">No reviews yet</p>
           <p className="text-sm text-gray-400 mt-1">
@@ -71,7 +71,7 @@ export default function ReviewsPage() {
           </p>
         </div>
       ) : (
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-xl overflow-hidden">
           <table className="w-full">
             <thead className="bg-gray-50">
               <tr>

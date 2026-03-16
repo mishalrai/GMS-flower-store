@@ -77,7 +77,7 @@ export default function Footer() {
               </li>
               <li className="flex items-start gap-2 text-sm">
                 <Phone className="w-4 h-4 mt-0.5 flex-shrink-0 text-[#6FB644]" />
-                +977-XXX-XXXXXXX
+                +977-9840036888
               </li>
               <li className="flex items-start gap-2 text-sm">
                 <Mail className="w-4 h-4 mt-0.5 flex-shrink-0 text-[#6FB644]" />
@@ -95,7 +95,7 @@ export default function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-gray-800">
         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-2 text-sm">
-          <p>© 2024 GMS Flower Store. All Rights Reserved.</p>
+          <p>© 2025 GMS Flower Store. All Rights Reserved.</p>
           <p className="text-gray-500">
             Made with 🌿 in Gauradaha, Jhapa, Nepal
           </p>

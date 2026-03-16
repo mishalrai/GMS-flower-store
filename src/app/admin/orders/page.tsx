@@ -100,7 +100,7 @@ export default function OrdersPage() {
       {showNewOrder && (
         <form
           onSubmit={handleCreateOrder}
-          className="bg-white rounded-xl border border-gray-100 p-6 mb-6"
+          className="bg-white rounded-xl p-6 mb-6"
         >
           <h3 className="font-semibold mb-4">Create Order (WhatsApp Purchase)</h3>
           <div className="grid md:grid-cols-2 gap-4">
@@ -182,7 +182,7 @@ export default function OrdersPage() {
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-xl overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>

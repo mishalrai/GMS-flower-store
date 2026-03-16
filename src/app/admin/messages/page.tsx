@@ -151,7 +151,7 @@ export default function MessagesPage() {
         {/* Message List */}
         <div className="flex-1 min-w-0">
           {filtered.length === 0 ? (
-            <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+            <div className="bg-white rounded-xl p-12 text-center">
               <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500 font-medium">No messages yet</p>
               <p className="text-gray-400 text-sm mt-1">
@@ -231,7 +231,7 @@ export default function MessagesPage() {
         {/* Message Detail */}
         {selected && (
           <div className="w-96 flex-shrink-0">
-            <div className="bg-white rounded-xl border border-gray-100 sticky top-6">
+            <div className="bg-white rounded-xl sticky top-6">
               {/* Header */}
               <div className="flex items-center justify-between p-4 border-b">
                 <h3 className="font-semibold text-gray-800 text-sm">

@@ -1,5 +1,26 @@
 [
-  {"id":1,"title":"Make Your Home Beautiful with Plants","subtitle":"Fresh indoor & outdoor plants grown in our home garden","buttonText":"Shop Now","buttonLink":"/shop","image":"/images/banners/banner-1.jpg"},
-  {"id":2,"title":"Fresh From Our Garden to Your Home","subtitle":"Locally grown plants in Gauradaha, Jhapa, Nepal","buttonText":"Explore Plants","buttonLink":"/shop","image":"/images/banners/banner-2.jpg"},
-  {"id":3,"title":"Gift a Plant, Gift Life","subtitle":"Perfect plants for every occasion — birthdays, festivals & more","buttonText":"View Collection","buttonLink":"/shop","image":"/images/banners/banner-3.jpg"}
+  {
+    "id": 1,
+    "title": "Make Your Home Beautiful with Plants",
+    "subtitle": "Fresh indoor & outdoor plants grown in our home garden",
+    "buttonText": "Shop Now",
+    "buttonLink": "/shop",
+    "image": "/uploads/1773556212672-cfl640.jpg"
+  },
+  {
+    "id": 2,
+    "title": "Fresh From Our Garden to Your Home",
+    "subtitle": "Locally grown plants in Gauradaha, Jhapa, Nepal",
+    "buttonText": "Explore Plants",
+    "buttonLink": "/shop",
+    "image": "/uploads/1773556212660-n4qo7a.jpg"
+  },
+  {
+    "id": 3,
+    "title": "Gift a Plant, Gift Life",
+    "subtitle": "Perfect plants for every occasion — birthdays, festivals & more",
+    "buttonText": "View Collection",
+    "buttonLink": "/shop",
+    "image": "/uploads/1773556212663-q5e325.jpg"
+  }
 ]

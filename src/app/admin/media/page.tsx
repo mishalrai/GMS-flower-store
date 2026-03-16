@@ -20,6 +20,7 @@ import {
 import Modal from "@/components/admin/Modal";
 import ImageCropModal from "@/components/admin/ImageCropModal";
 import { useToast } from "@/components/admin/Toast";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 interface MediaItem {
   id: number;
@@ -270,7 +271,7 @@ export default function MediaPage() {
         </div>
 
         {/* Filters & View Toggle */}
-        <div className="bg-white rounded-xl border border-gray-100 p-4 mb-6 flex flex-wrap items-center gap-4">
+        <div className="bg-white rounded-xl p-4 mb-6 flex flex-wrap items-center gap-4">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
             <input
@@ -281,14 +282,15 @@ export default function MediaPage() {
               className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
             />
           </div>
-          <select
+          <CustomSelect
             value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
-          >
-            <option value="all">All Types</option>
-            <option value="image">Images</option>
-          </select>
+            onChange={(val) => setTypeFilter(val)}
+            className="min-w-[150px]"
+            options={[
+              { value: "all", label: "All Types" },
+              { value: "image", label: "Images" },
+            ]}
+          />
           <div className="flex border border-gray-300 rounded-lg overflow-hidden">
             <button
               onClick={() => setViewMode("grid")}
@@ -309,7 +311,7 @@ export default function MediaPage() {
 
         {/* Media Grid */}
         {media.length === 0 ? (
-          <div className="bg-white rounded-xl border border-gray-100 p-12 text-center">
+          <div className="bg-white rounded-xl p-12 text-center">
             <ImageIcon className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <p className="text-gray-500 font-medium">No media files yet</p>
             <p className="text-gray-400 text-sm mt-1">
@@ -419,7 +421,7 @@ export default function MediaPage() {
           </div>
         ) : (
           /* List View */
-          <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+          <div className="bg-white rounded-xl overflow-hidden">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
@@ -566,7 +568,7 @@ export default function MediaPage() {
       {/* Detail Sidebar */}
       {selected && (
         <div className="w-80 flex-shrink-0">
-          <div className="bg-white rounded-xl border border-gray-100 sticky top-6">
+          <div className="bg-white rounded-xl sticky top-6">
             {/* Preview */}
             <div className="aspect-square relative bg-gray-50 rounded-t-xl overflow-hidden">
               {isImage(selected.type) ? (

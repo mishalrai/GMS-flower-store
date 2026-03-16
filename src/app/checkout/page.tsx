@@ -17,6 +17,12 @@ import {
   Banknote,
   ImageIcon,
 } from "lucide-react";
+import dynamic from "next/dynamic";
+
+const LocationPicker = dynamic(
+  () => import("@/components/checkout/LocationPicker"),
+  { ssr: false }
+);
 
 interface PaymentQR {
   id: string;
@@ -38,6 +44,7 @@ export default function CheckoutPage() {
   const [screenshotPreview, setScreenshotPreview] = useState("");
   const [screenshotUrl, setScreenshotUrl] = useState("");
   const [uploadingScreenshot, setUploadingScreenshot] = useState(false);
+  const [location, setLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [form, setForm] = useState({
     name: "",
     phone: "",
@@ -123,6 +130,7 @@ export default function CheckoutPage() {
           phone: form.phone,
           address: form.address,
           note: form.note || undefined,
+          location: location || undefined,
         },
         payment,
         total,
@@ -281,6 +289,16 @@ export default function CheckoutPage() {
                     />
                   </div>
 
+                  {/* Map Location Picker */}
+                  <LocationPicker
+                    onLocationSelect={(lat, lng, address) => {
+                      setLocation({ lat, lng });
+                      if (!form.address) {
+                        setForm((prev) => ({ ...prev, address }));
+                      }
+                    }}
+                  />
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1">
                       Order Note{" "}
@@ -408,8 +426,8 @@ export default function CheckoutPage() {
 
                       {/* QR Image */}
                       {selectedQR && (
-                        <div className="flex flex-col items-center">
-                          <div className="relative w-64 h-64 bg-white border-2 border-gray-200 rounded-xl overflow-hidden p-2">
+                        <div className="flex items-start gap-4">
+                          <div className="relative w-48 h-48 bg-white border-2 border-gray-200 rounded-xl overflow-hidden p-2 flex-shrink-0">
                             <Image
                               src={selectedQR.image}
                               alt={selectedQR.label}
@@ -417,15 +435,17 @@ export default function CheckoutPage() {
                               className="object-contain p-2"
                             />
                           </div>
-                          <p className="text-sm font-medium text-gray-700 mt-3">
-                            {selectedQR.label}
-                          </p>
-                          <p className="text-lg font-bold text-[#6FB644]">
-                            Rs {total.toLocaleString()}
-                          </p>
-                          <p className="text-xs text-gray-400 mt-1">
-                            Scan the QR code and pay the exact amount shown above
-                          </p>
+                          <div>
+                            <p className="text-sm font-medium text-gray-700">
+                              {selectedQR.label}
+                            </p>
+                            <p className="text-lg font-bold text-[#6FB644] mt-1">
+                              Rs {total.toLocaleString()}
+                            </p>
+                            <p className="text-xs text-gray-400 mt-2">
+                              Scan the QR code and pay the exact amount shown above
+                            </p>
+                          </div>
                         </div>
                       )}
                     </div>

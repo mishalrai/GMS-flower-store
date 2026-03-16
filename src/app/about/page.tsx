@@ -101,7 +101,7 @@ export default function AboutPage() {
             <p className="text-gray-600 mb-2">Gauradaha, Jhapa, Nepal</p>
             <p className="text-gray-600 mb-6">Open: 7:00 AM - 6:00 PM (Sun-Fri)</p>
             <a
-              href="https://wa.me/977XXXXXXXXXX?text=Hi! I'd like to visit your store."
+              href="https://wa.me/9779840036888?text=Hi! I'd like to visit your store."
               className="inline-block bg-[#6FB644] text-white px-8 py-3 rounded-full font-semibold hover:bg-[#5a9636] transition-colors"
             >
               Contact Us on WhatsApp

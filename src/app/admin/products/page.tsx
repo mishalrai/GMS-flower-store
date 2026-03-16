@@ -6,9 +6,11 @@ import { Plus, Search, Edit, Trash2 } from "lucide-react";
 import StatusBadge from "@/components/admin/StatusBadge";
 import Modal from "@/components/admin/Modal";
 import { useToast } from "@/components/admin/Toast";
+import CustomSelect from "@/components/ui/CustomSelect";
 
 interface Product {
   id: number;
+  sku?: string;
   name: string;
   slug: string;
   category: string;
@@ -87,7 +89,7 @@ export default function ProductsPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-gray-100 p-4 mb-6 flex flex-wrap gap-4">
+      <div className="bg-white rounded-xl p-4 mb-6 flex flex-wrap gap-4">
         <div className="relative flex-1 min-w-[200px]">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -98,25 +100,25 @@ export default function ProductsPage() {
             className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
           />
         </div>
-        <select
+        <CustomSelect
           value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
-        >
-          <option value="all">All Categories</option>
-          {categories.map((cat) => (
-            <option key={cat.id} value={cat.slug}>
-              {cat.name}
-            </option>
-          ))}
-        </select>
+          onChange={(val) => setCategoryFilter(val)}
+          className="min-w-[180px]"
+          options={[
+            { value: "all", label: "All Categories" },
+            ...categories.map((cat) => ({ value: cat.slug, label: cat.name })),
+          ]}
+        />
       </div>
 
       {/* Table */}
-      <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-xl overflow-hidden">
         <table className="w-full">
           <thead className="bg-gray-50">
             <tr>
+              <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">
+                SKU
+              </th>
               <th className="text-left px-4 py-3 text-xs font-medium text-gray-500 uppercase">
                 Product
               </th>
@@ -143,6 +145,9 @@ export default function ProductsPage() {
           <tbody className="divide-y divide-gray-100">
             {filtered.map((product) => (
               <tr key={product.id} className="hover:bg-gray-50">
+                <td className="px-4 py-3">
+                  <span className="text-xs font-mono text-gray-500">{product.sku || '—'}</span>
+                </td>
                 <td className="px-4 py-3">
                   <span className="font-medium text-sm">{product.name}</span>
                 </td>

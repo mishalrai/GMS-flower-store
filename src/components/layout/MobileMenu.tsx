@@ -2,12 +2,27 @@
 
 import Link from "next/link";
 import { X, Home, ShoppingBag, Info, Phone, ChevronRight } from "lucide-react";
+import { useEffect, useState } from "react";
+
+interface Category {
+  id: number;
+  name: string;
+  slug: string;
+}
 
 interface MobileMenuProps {
   onClose: () => void;
 }
 
 export default function MobileMenu({ onClose }: MobileMenuProps) {
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((data) => setCategories(data))
+      .catch(() => {});
+  }, []);
   const links = [
     { href: "/", label: "Home", icon: Home },
     { href: "/shop", label: "Shop All Plants", icon: ShoppingBag },
@@ -57,25 +72,23 @@ export default function MobileMenu({ onClose }: MobileMenuProps) {
             <p className="text-sm font-semibold text-gray-800 mb-3">
               Categories
             </p>
-            {["Indoor Plants", "Outdoor Plants", "Succulents", "Flowering Plants"].map(
-              (cat) => (
+            {categories.map((cat) => (
                 <Link
-                  key={cat}
-                  href="/shop"
+                  key={cat.id}
+                  href={`/shop?category=${cat.slug}`}
                   onClick={onClose}
                   className="block py-2 text-sm text-gray-600 hover:text-[#6FB644]"
                 >
-                  {cat}
+                  {cat.name}
                 </Link>
-              )
-            )}
+              ))}
           </div>
         </nav>
 
         {/* Bottom */}
         <div className="p-4 border-t bg-gray-50">
           <a
-            href="https://wa.me/977XXXXXXXXXX"
+            href="https://wa.me/9779840036888"
             className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white py-3 rounded-lg font-semibold hover:bg-[#1da851] transition-colors"
           >
             <Phone className="w-4 h-4" />

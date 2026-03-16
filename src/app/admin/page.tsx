@@ -120,7 +120,7 @@ export default function AdminDashboard() {
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Recent Orders */}
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-xl overflow-hidden">
           <div className="p-4 border-b flex items-center justify-between">
             <h3 className="font-semibold text-gray-800">Recent Orders</h3>
             <Link
@@ -186,7 +186,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Low Stock Alerts */}
-        <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-xl overflow-hidden">
           <div className="p-4 border-b flex items-center justify-between">
             <h3 className="font-semibold text-gray-800">Stock Alerts</h3>
             <Link

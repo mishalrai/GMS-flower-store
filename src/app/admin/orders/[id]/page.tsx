@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, MessageCircle, CheckCircle, XCircle, QrCode, Banknote } from "lucide-react";
+import { ArrowLeft, MessageCircle, CheckCircle, XCircle, QrCode, Banknote, MapPin, Navigation } from "lucide-react";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { useToast } from "@/components/admin/Toast";
 
@@ -25,7 +25,7 @@ interface Payment {
 interface Order {
   id: string;
   items: OrderItem[];
-  customer: { name: string; phone: string; address: string; note?: string };
+  customer: { name: string; phone: string; address: string; note?: string; location?: { lat: number; lng: number } };
   payment?: Payment;
   status: string;
   reviewEnabled: boolean;
@@ -104,7 +104,7 @@ export default function OrderDetailPage() {
         {/* Order Info */}
         <div className="lg:col-span-2 space-y-6">
           {/* Status & Actions */}
-          <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <div className="bg-white rounded-xl p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-semibold text-gray-800">Order Status</h3>
               <StatusBadge status={order.status} />
@@ -128,7 +128,7 @@ export default function OrderDetailPage() {
           </div>
 
           {/* Items */}
-          <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <div className="bg-white rounded-xl p-6">
             <h3 className="font-semibold text-gray-800 mb-4">Order Items</h3>
             {order.items.length === 0 ? (
               <p className="text-gray-500 text-sm">
@@ -175,7 +175,7 @@ export default function OrderDetailPage() {
           </div>
 
           {/* Review Permission */}
-          <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <div className="bg-white rounded-xl p-6">
             <div className="flex items-center justify-between">
               <div>
                 <h3 className="font-semibold text-gray-800">
@@ -192,13 +192,15 @@ export default function OrderDetailPage() {
                   updateOrder({ reviewEnabled: !order.reviewEnabled })
                 }
                 disabled={updating}
-                className={`px-4 py-2 text-sm rounded-lg font-medium transition-colors ${
-                  order.reviewEnabled
-                    ? "bg-green-100 text-green-700 hover:bg-green-200"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
+                className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${
+                  order.reviewEnabled ? "bg-[#6FB644]" : "bg-gray-300"
+                } disabled:opacity-50`}
               >
-                {order.reviewEnabled ? "✅ Enabled" : "❌ Disabled"}
+                <span
+                  className={`absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${
+                    order.reviewEnabled ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
               </button>
             </div>
           </div>
@@ -206,7 +208,7 @@ export default function OrderDetailPage() {
 
         {/* Customer Info */}
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <div className="bg-white rounded-xl p-6">
             <h3 className="font-semibold text-gray-800 mb-4">Customer</h3>
             <div className="space-y-3 text-sm">
               <div>
@@ -229,6 +231,35 @@ export default function OrderDetailPage() {
               )}
             </div>
 
+            {/* Delivery Location Map */}
+            {order.customer.location && (
+              <div className="mt-4 pt-4 border-t border-gray-100">
+                <div className="flex items-center gap-2 mb-3">
+                  <MapPin className="w-4 h-4 text-[#6FB644]" />
+                  <p className="text-sm font-medium text-gray-700">Delivery Location</p>
+                </div>
+                <div className="rounded-lg overflow-hidden border border-gray-200 mb-3">
+                  <iframe
+                    src={`https://www.openstreetmap.org/export/embed.html?bbox=${order.customer.location.lng - 0.005}%2C${order.customer.location.lat - 0.003}%2C${order.customer.location.lng + 0.005}%2C${order.customer.location.lat + 0.003}&layer=mapnik&marker=${order.customer.location.lat}%2C${order.customer.location.lng}`}
+                    className="w-full h-40"
+                    style={{ border: 0 }}
+                  />
+                </div>
+                <div className="text-xs text-gray-400 mb-3">
+                  {order.customer.location.lat.toFixed(6)}, {order.customer.location.lng.toFixed(6)}
+                </div>
+                <a
+                  href={`https://www.google.com/maps/dir/?api=1&destination=${order.customer.location.lat},${order.customer.location.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 w-full bg-blue-500 text-white py-2.5 rounded-lg text-sm font-medium hover:bg-blue-600 transition-colors"
+                >
+                  <Navigation className="w-4 h-4" />
+                  Get Directions
+                </a>
+              </div>
+            )}
+
             <a
               href={`https://wa.me/${order.customer.phone.replace(/[^0-9]/g, "")}?text=${encodeURIComponent(whatsappMessage)}`}
               target="_blank"
@@ -241,7 +272,7 @@ export default function OrderDetailPage() {
           </div>
 
           {/* Payment Info */}
-          <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <div className="bg-white rounded-xl p-6">
             <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
               {order.payment?.method === "qr" ? (
                 <QrCode className="w-4 h-4 text-[#6FB644]" />
@@ -280,7 +311,7 @@ export default function OrderDetailPage() {
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-100 p-6">
+          <div className="bg-white rounded-xl p-6">
             <h3 className="font-semibold text-gray-800 mb-3">Timeline</h3>
             <div className="text-sm space-y-2">
               <div className="flex justify-between">

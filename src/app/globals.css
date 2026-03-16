@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
+/* Ensure cursor pointer on all clickable elements */
+button,
+[role="button"],
+a,
+select,
+input[type="checkbox"],
+input[type="radio"],
+input[type="submit"],
+input[type="button"],
+label[for],
+[onclick] {
+  cursor: pointer;
+}
+
+/* Override react-image-crop dark borders */
+.ReactCrop__crop-selection:not(.ReactCrop--no-animate .ReactCrop__crop-selection) {
+  background-image:
+    linear-gradient(to right, #fff 50%, #ccc 50%),
+    linear-gradient(to right, #fff 50%, #ccc 50%),
+    linear-gradient(to bottom, #fff 50%, #ccc 50%),
+    linear-gradient(to bottom, #fff 50%, #ccc 50%) !important;
+}
+.ReactCrop__drag-handle {
+  border-color: #fff !important;
+  background-color: rgba(111, 182, 68, 0.3) !important;
+}
+
 /* Hide scrollbar for drag-scrollable elements */
 .scrollbar-hide {
   -ms-overflow-style: none;
@@ -46,11 +73,15 @@ body {
   font-family: var(--font-sans);
 }
 
-/* Global: remove all border radius */
+/* Global: consistent border radius */
 *,
 *::before,
 *::after {
-  border-radius: 0 !important;
+  border-radius: 2px !important;
+}
+/* Keep circles for avatars, badges, dots etc. */
+.rounded-full {
+  border-radius: 9999px !important;
 }
 
 /* Swiper custom styles */

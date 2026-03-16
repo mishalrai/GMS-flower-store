@@ -128,7 +128,7 @@ export default function CategoryGrid() {
           {categories.map((category) => (
             <Link
               key={category.id}
-              href="/shop"
+              href={`/shop?category=${category.slug}`}
               onClick={scrollToCenter}
               className="group relative overflow-hidden rounded-xl aspect-[2/1] flex items-center justify-center flex-shrink-0 w-[calc(50%-8px)] md:w-[calc(16.666%-14px)]"
             >

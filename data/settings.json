@@ -13,6 +13,11 @@
     "youtube": "",
     "tiktok": ""
   },
+  "homepageTabs": {
+    "new-arrivals": true,
+    "flash-sale": true,
+    "most-popular": true
+  },
   "paymentQRCodes": [
     {
       "id": "1773553533407",

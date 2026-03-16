@@ -18,7 +18,7 @@ export default function CartSidebar() {
     )
     .join("\n");
 
-  const whatsappLink = `https://wa.me/977XXXXXXXXXX?text=${encodeURIComponent(
+  const whatsappLink = `https://wa.me/9779840036888?text=${encodeURIComponent(
     `Hi! I'd like to place an order:\n\n${whatsappOrderMessage}\n\nTotal: Rs ${total.toLocaleString()}\n\nPlease confirm availability and delivery.`
   )}`;
 
@@ -33,7 +33,7 @@ export default function CartSidebar() {
       {/* Sidebar */}
       <div className="fixed right-0 top-0 h-full w-full max-w-md bg-white z-50 animate-slide-in-right flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center justify-between p-4 border-b border-gray-100">
           <h2 className="text-lg font-bold flex items-center gap-2">
             <ShoppingBag className="w-5 h-5 text-[#6FB644]" />
             Shopping Cart ({items.length})
@@ -69,7 +69,7 @@ export default function CartSidebar() {
                 return (
                   <div
                     key={item.product.id}
-                    className="flex gap-3 p-3 bg-gray-50 rounded-lg"
+                    className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
                   >
                     {/* Image */}
                     <div className="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 relative bg-gray-100">
@@ -92,7 +92,7 @@ export default function CartSidebar() {
                         Rs {price.toLocaleString()}
                       </p>
 
-                      <div className="flex items-center justify-between mt-2">
+                      <div className="flex items-center mt-2">
                         <div className="flex items-center border border-gray-300 rounded">
                           <button
                             onClick={() =>
@@ -120,15 +120,15 @@ export default function CartSidebar() {
                             <Plus className="w-3 h-3" />
                           </button>
                         </div>
-
-                        <button
-                          onClick={() => removeItem(item.product.id)}
-                          className="text-red-400 hover:text-red-600 p-1"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
                       </div>
                     </div>
+
+                    <button
+                      onClick={() => removeItem(item.product.id)}
+                      className="text-red-400 hover:text-red-600 p-1 flex-shrink-0"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                 );
               })}
@@ -138,7 +138,7 @@ export default function CartSidebar() {
 
         {/* Footer */}
         {items.length > 0 && (
-          <div className="border-t p-4 space-y-3">
+          <div className="border-t border-gray-100 p-4 space-y-3">
             <div className="flex items-center justify-between text-lg font-bold">
               <span>Subtotal:</span>
               <span className="text-[#6FB644]">
