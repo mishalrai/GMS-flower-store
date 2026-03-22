@@ -60,7 +60,7 @@ export default function HeroBanner() {
                 </p>
                 <Link
                   href={slide.buttonLink}
-                  className="inline-block bg-[#6FB644] text-white px-8 py-3 rounded-full font-semibold text-lg hover:bg-[#5a9636] transition-colors shadow-lg"
+                  className="inline-block bg-[#6FB644] text-white px-8 py-3 font-semibold text-lg hover:bg-[#5a9636] transition-colors shadow-lg"
                 >
                   {slide.buttonText}
                 </Link>

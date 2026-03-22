@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   Search,
   Heart,
@@ -23,6 +24,8 @@ export default function Header() {
   const [searchQuery, setSearchQuery] = useState("");
   const [shopDropdown, setShopDropdown] = useState(false);
   const [categories, setCategories] = useState<{ id: number; name: string; slug: string }[]>([]);
+  const [storeLogo, setStoreLogo] = useState("");
+  const [storeName, setStoreName] = useState("GMS Flower Store");
 
   const router = useRouter();
   const toggleCart = useCartStore((state) => state.toggleCart);
@@ -40,6 +43,13 @@ export default function Header() {
     fetch("/api/categories")
       .then((r) => r.json())
       .then((data) => setCategories(data))
+      .catch(() => {});
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.logo) setStoreLogo(data.logo);
+        if (data.storeName) setStoreName(data.storeName);
+      })
       .catch(() => {});
   }, []);
 
@@ -61,9 +71,19 @@ export default function Header() {
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
-            <span className="text-xl">🌱</span>
+            {storeLogo ? (
+              <Image
+                src={storeLogo}
+                alt={storeName}
+                width={36}
+                height={36}
+                className="w-9 h-9 object-contain"
+              />
+            ) : (
+              <span className="text-xl">🌱</span>
+            )}
             <h1 className="text-lg font-bold text-gray-800">
-              GMS Flower Store
+              {storeName}
             </h1>
           </Link>
 

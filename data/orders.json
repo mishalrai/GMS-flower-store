@@ -23,11 +23,11 @@
       "address": "Gauradaha, Jhapa",
       "note": "Please deliver before 3 PM"
     },
-    "status": "delivered",
+    "status": "pending",
     "reviewEnabled": true,
     "total": 1900,
     "createdAt": "2026-03-10T08:00:00Z",
-    "updatedAt": "2026-03-16T04:47:53.873Z"
+    "updatedAt": "2026-03-22T11:06:06.568Z"
   },
   {
     "id": "ORD-002",

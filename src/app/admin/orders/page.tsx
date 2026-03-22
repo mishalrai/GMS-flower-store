@@ -16,7 +16,8 @@ interface Order {
   createdAt: string;
 }
 
-const statusTabs = ["all", "pending", "confirmed", "processing", "delivered", "cancelled"];
+const statusTabs = ["all", "pending", "confirmed", "processing", "out-for-delivery", "delivered", "cancelled"];
+const tabLabels: Record<string, string> = { "out-for-delivery": "Out for Delivery" };
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -175,7 +176,7 @@ export default function OrdersPage() {
                   : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
               }`}
             >
-              {tab} ({count})
+              {tabLabels[tab] || tab} ({count})
             </button>
           );
         })}

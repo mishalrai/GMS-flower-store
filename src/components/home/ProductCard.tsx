@@ -123,7 +123,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           <button
             onClick={handleAddToCart}
             disabled={!product.inStock}
-            className={`w-9 h-9 rounded-full flex items-center justify-center transition-colors ${
+            className={`w-9 h-9 flex items-center justify-center transition-colors ${
               product.inStock
                 ? "bg-[#6FB644] hover:bg-[#5a9636]"
                 : "bg-gray-300 cursor-not-allowed"

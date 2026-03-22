@@ -1,5 +1,5 @@
 {
-  "storeName": "GMS Flower Store",
+  "storeName": "GMS Store",
   "phone": "9840036888",
   "email": "gmsflowerstore@gmail.com",
   "address": "Gauradaha, Jhapa, Nepal",
@@ -29,5 +29,6 @@
       "label": "Fone Pay",
       "image": "/uploads/1773553550083-g8ogxn.jpg"
     }
-  ]
+  ],
+  "logo": "/uploads/1774160629552-crop-erw7n7.jpg"
 }

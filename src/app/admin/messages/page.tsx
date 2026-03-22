@@ -9,6 +9,7 @@ import {
   Clock,
   X,
   MessageSquare,
+  Search,
 } from "lucide-react";
 import Modal from "@/components/admin/Modal";
 import { useToast } from "@/components/admin/Toast";
@@ -39,6 +40,7 @@ export default function MessagesPage() {
   const [selected, setSelected] = useState<Message | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "unread" | "read">("all");
+  const [search, setSearch] = useState("");
   const { toast } = useToast();
 
   useEffect(() => {
@@ -94,8 +96,12 @@ export default function MessagesPage() {
   const unreadCount = messages.filter((m) => !m.read).length;
 
   const filtered = messages.filter((m) => {
-    if (filter === "unread") return !m.read;
-    if (filter === "read") return m.read;
+    if (filter === "unread" && m.read) return false;
+    if (filter === "read" && !m.read) return false;
+    if (search) {
+      const q = search.toLowerCase();
+      return m.name.toLowerCase().includes(q) || m.email.toLowerCase().includes(q) || m.message.toLowerCase().includes(q);
+    }
     return true;
   });
 
@@ -108,229 +114,223 @@ export default function MessagesPage() {
   }
 
   return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-800">
-            Messages ({messages.length})
-          </h1>
+    <div className="h-[calc(100vh-73px)] flex flex-col">
+      {/* Top Bar */}
+      <div className="flex items-center justify-between mb-4 flex-shrink-0">
+        <h1 className="text-2xl font-bold text-gray-800">
+          Messages
           {unreadCount > 0 && (
-            <p className="text-sm text-[#6FB644] font-medium mt-1">
+            <span className="ml-2 text-sm font-medium text-[#6FB644]">
               {unreadCount} unread
-            </p>
+            </span>
           )}
+        </h1>
+        {/* Filter Tabs */}
+        <div className="flex gap-1">
+          {(["all", "unread", "read"] as const).map((tab) => {
+            const count =
+              tab === "all"
+                ? messages.length
+                : tab === "unread"
+                  ? unreadCount
+                  : messages.length - unreadCount;
+            return (
+              <button
+                key={tab}
+                onClick={() => setFilter(tab)}
+                className={`px-3 py-1.5 text-xs font-medium capitalize transition-colors ${
+                  filter === tab
+                    ? "bg-[#6FB644] text-white"
+                    : "text-gray-500 hover:bg-gray-100"
+                }`}
+              >
+                {tab} ({count})
+              </button>
+            );
+          })}
         </div>
       </div>
 
-      {/* Filter Tabs */}
-      <div className="flex gap-2 mb-6">
-        {(["all", "unread", "read"] as const).map((tab) => {
-          const count =
-            tab === "all"
-              ? messages.length
-              : tab === "unread"
-                ? unreadCount
-                : messages.length - unreadCount;
-          return (
-            <button
-              key={tab}
-              onClick={() => setFilter(tab)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${
-                filter === tab
-                  ? "bg-[#6FB644] text-white"
-                  : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
-              }`}
-            >
-              {tab} ({count})
-            </button>
-          );
-        })}
-      </div>
+      {/* Gmail-style Split View */}
+      <div className="flex flex-1 min-h-0 bg-white rounded-xl overflow-hidden">
+        {/* Left: Message List */}
+        <div
+          className="w-[380px] flex-shrink-0 border-r border-gray-100 flex flex-col"
+        >
+          {/* Search */}
+          <div className="p-3 border-b border-gray-100 flex-shrink-0">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search messages..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-9 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] focus:bg-white outline-none"
+              />
+            </div>
+          </div>
 
-      <div className="flex gap-6">
-        {/* Message List */}
-        <div className="flex-1 min-w-0">
+          <div className="flex-1 overflow-y-auto">
           {filtered.length === 0 ? (
-            <div className="bg-white rounded-xl p-12 text-center">
-              <MessageSquare className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-              <p className="text-gray-500 font-medium">No messages yet</p>
-              <p className="text-gray-400 text-sm mt-1">
-                Customer messages from the contact form will appear here
+            <div className="flex flex-col items-center justify-center h-full text-center p-8">
+              <MessageSquare className="w-12 h-12 text-gray-200 mb-3" />
+              <p className="text-gray-500 font-medium">No messages</p>
+              <p className="text-gray-400 text-xs mt-1">
+                Messages from the contact form will appear here
               </p>
             </div>
           ) : (
-            <div className="space-y-2">
+            <div>
               {filtered.map((msg) => (
                 <div
                   key={msg.id}
                   onClick={() => openMessage(msg)}
-                  className={`bg-white rounded-xl border p-4 cursor-pointer transition-all hover:shadow-sm ${
+                  className={`group flex items-start gap-3 px-4 py-3 cursor-pointer border-b border-gray-50 transition-colors ${
                     selected?.id === msg.id
-                      ? "ring-2 ring-[#6FB644] border-[#6FB644]"
-                      : "border-gray-100"
-                  } ${!msg.read ? "border-l-4 border-l-[#6FB644]" : ""}`}
+                      ? "bg-[#6FB644]/5 border-l-2 border-l-[#6FB644]"
+                      : "hover:bg-gray-50"
+                  } ${!msg.read ? "bg-green-50/40" : ""}`}
                 >
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-start gap-3 flex-1 min-w-0">
-                      <div
-                        className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 ${
-                          msg.read ? "bg-gray-100" : "bg-green-100"
+                  {/* Avatar */}
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 text-xs font-bold mt-0.5 ${
+                      !msg.read
+                        ? "bg-[#6FB644] text-white"
+                        : "bg-gray-200 text-gray-500"
+                    }`}
+                  >
+                    {msg.name.charAt(0).toUpperCase()}
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <p
+                        className={`text-sm truncate ${
+                          !msg.read
+                            ? "font-semibold text-gray-900"
+                            : "text-gray-700"
                         }`}
                       >
-                        {msg.read ? (
-                          <MailOpen className="w-4 h-4 text-gray-400" />
-                        ) : (
-                          <Mail className="w-4 h-4 text-[#6FB644]" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2">
-                          <p
-                            className={`text-sm truncate ${
-                              msg.read
-                                ? "text-gray-700"
-                                : "text-gray-900 font-semibold"
-                            }`}
-                          >
-                            {msg.name}
-                          </p>
-                          {!msg.read && (
-                            <span className="w-2 h-2 rounded-full bg-[#6FB644] flex-shrink-0" />
-                          )}
-                        </div>
-                        <p className="text-xs text-gray-500 truncate mt-0.5">
-                          {msg.email}
-                        </p>
-                        <p className="text-sm text-gray-600 truncate mt-1">
-                          {msg.message}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end gap-2 flex-shrink-0">
-                      <span className="text-[10px] text-gray-400 whitespace-nowrap">
+                        {msg.name}
+                      </p>
+                      <span className="text-[10px] text-gray-400 whitespace-nowrap flex-shrink-0">
                         {formatDate(msg.createdAt)}
                       </span>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDeleteId(msg.id);
-                        }}
-                        title="Delete message"
-                        className="p-1 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded opacity-0 group-hover:opacity-100"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
                     </div>
+                    <p className={`text-xs truncate mt-0.5 ${!msg.read ? "text-gray-700 font-medium" : "text-gray-500"}`}>
+                      {msg.message}
+                    </p>
+                    <p className="text-[10px] text-gray-400 truncate mt-0.5">
+                      {msg.email}
+                    </p>
                   </div>
+
+                  {/* Unread dot */}
+                  {!msg.read && (
+                    <div className="w-2 h-2 rounded-full bg-[#6FB644] flex-shrink-0 mt-2" />
+                  )}
                 </div>
               ))}
             </div>
           )}
+          </div>
         </div>
 
-        {/* Message Detail */}
-        {selected && (
-          <div className="w-96 flex-shrink-0">
-            <div className="bg-white rounded-xl sticky top-6">
-              {/* Header */}
-              <div className="flex items-center justify-between p-4 border-b">
-                <h3 className="font-semibold text-gray-800 text-sm">
-                  Message Details
-                </h3>
+        {/* Right: Message Detail */}
+        {selected ? (
+          <div className="flex-1 overflow-y-auto">
+            {/* Detail Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-[#6FB644] flex items-center justify-center">
+                  <span className="text-base font-bold text-white">
+                    {selected.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div>
+                  <p className="font-semibold text-gray-800">{selected.name}</p>
+                  <p className="text-xs text-gray-400">{selected.email}</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-gray-400">
+                  {formatDate(selected.createdAt)}
+                </span>
                 <button
                   onClick={() => setSelected(null)}
                   title="Close"
-                  className="p-1 hover:bg-gray-100 rounded"
+                  className="p-1.5 hover:bg-gray-100 rounded"
                 >
-                  <X className="w-4 h-4 text-gray-500" />
+                  <X className="w-4 h-4 text-gray-400" />
                 </button>
               </div>
+            </div>
 
-              <div className="p-4 space-y-4">
-                {/* Sender Info */}
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                    <span className="text-lg font-bold text-[#6FB644]">
-                      {selected.name.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                  <div>
-                    <p className="font-semibold text-gray-800">
-                      {selected.name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {formatDate(selected.createdAt)}
-                    </p>
-                  </div>
-                </div>
-
-                {/* Contact Details */}
-                <div className="space-y-2 text-sm">
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Mail className="w-4 h-4 text-gray-400" />
-                    <a
-                      href={`mailto:${selected.email}`}
-                      className="hover:text-[#6FB644]"
-                    >
-                      {selected.email}
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <Phone className="w-4 h-4 text-gray-400" />
-                    <a
-                      href={`tel:${selected.phone}`}
-                      className="hover:text-[#6FB644]"
-                    >
-                      {selected.phone}
-                    </a>
-                  </div>
-                  <div className="flex items-center gap-2 text-gray-400 text-xs">
-                    <Clock className="w-3.5 h-3.5" />
-                    {formatDate(selected.createdAt)}
-                  </div>
-                </div>
-
-                {/* Message */}
-                <div className="border-t pt-4">
-                  <p className="text-xs text-gray-400 mb-2 font-medium uppercase">
-                    Message
-                  </p>
-                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                    {selected.message}
-                  </p>
-                </div>
-
-                {/* Actions */}
-                <div className="flex gap-2 pt-2 border-t">
-                  <button
-                    onClick={() =>
-                      selected.read
-                        ? markAsUnread(selected)
-                        : markAsRead(selected)
-                    }
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200"
-                  >
-                    {selected.read ? (
-                      <>
-                        <Mail className="w-3.5 h-3.5" />
-                        Mark Unread
-                      </>
-                    ) : (
-                      <>
-                        <MailOpen className="w-3.5 h-3.5" />
-                        Mark Read
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => setDeleteId(selected.id)}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-red-500 hover:bg-red-50 rounded-lg border border-red-200"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                    Delete
-                  </button>
-                </div>
+            {/* Detail Body */}
+            <div className="px-6 py-6">
+              {/* Contact Info */}
+              <div className="flex items-center gap-6 text-sm text-gray-500 mb-6">
+                <a href={`mailto:${selected.email}`} className="flex items-center gap-1.5 hover:text-[#6FB644]">
+                  <Mail className="w-4 h-4" />
+                  {selected.email}
+                </a>
+                {selected.phone && (
+                  <a href={`tel:${selected.phone}`} className="flex items-center gap-1.5 hover:text-[#6FB644]">
+                    <Phone className="w-4 h-4" />
+                    {selected.phone}
+                  </a>
+                )}
               </div>
+
+              {/* Message Content */}
+              <div className="bg-gray-50 rounded-lg p-5">
+                <p className="text-sm text-gray-800 leading-relaxed whitespace-pre-wrap">
+                  {selected.message}
+                </p>
+              </div>
+
+              {/* Actions */}
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() =>
+                    selected.read
+                      ? markAsUnread(selected)
+                      : markAsRead(selected)
+                  }
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200"
+                >
+                  {selected.read ? (
+                    <>
+                      <Mail className="w-4 h-4" />
+                      Mark Unread
+                    </>
+                  ) : (
+                    <>
+                      <MailOpen className="w-4 h-4" />
+                      Mark Read
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => setDeleteId(selected.id)}
+                  className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-red-500 hover:bg-red-50 rounded-lg border border-red-200"
+                >
+                  <Trash2 className="w-4 h-4" />
+                  Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-center">
+            <div>
+              <Mail className="w-16 h-16 text-gray-200 mx-auto mb-3" />
+              <p className="text-gray-400 font-medium">Select a message to read</p>
+              <p className="text-gray-300 text-sm mt-1">
+                Choose from the list on the left
+              </p>
             </div>
           </div>
         )}

@@ -18,7 +18,8 @@
       "/uploads/1773556212663-q5e325.jpg",
       "/uploads/1773556212674-3qmm3f.jpg",
       "/uploads/1773556212672-cfl640.jpg"
-    ]
+    ],
+    "richText": "<h1>Hello</h1><p></p><p><img src=\"/uploads/1773556212659-sr70uz.jpg\"></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>"
   },
   {
     "id": 2,
@@ -148,13 +149,22 @@
     "category": "outdoor",
     "price": 750,
     "salePrice": 600,
-    "image": "/images/plants/plant-10.jpg",
+    "image": "/uploads/1773636931102-crop-j7v3ro.jpg",
     "description": "Stunning flowers with intricate petal patterns available in vibrant colors. A showstopper in any garden throughout the Terai region.",
     "size": "medium",
     "badge": "SALE",
     "rating": 4.8,
     "inStock": true,
-    "sku": "GMS-0010"
+    "sku": "GMS-0010",
+    "richText": "<p></p>",
+    "images": [
+      "/uploads/1773636931102-crop-j7v3ro.jpg",
+      "/uploads/1773556212675-6uw8zf.jpg",
+      "/uploads/1773556212672-cfl640.jpg",
+      "/uploads/1773556212669-u3m0ay.jpg",
+      "/uploads/1773556212668-w0sk9g.jpg",
+      "/uploads/1773556212674-3qmm3f.jpg"
+    ]
   },
   {
     "id": 11,
@@ -225,7 +235,12 @@
     "badge": null,
     "rating": 4.4,
     "inStock": false,
-    "sku": "GMS-0015"
+    "sku": "GMS-0015",
+    "inventory": 100,
+    "richText": "<p></p>",
+    "images": [
+      "/images/plants/plant-15.jpg"
+    ]
   },
   {
     "id": 16,
@@ -233,12 +248,19 @@
     "slug": "sunflower",
     "category": "outdoor",
     "price": 2500,
-    "image": "/images/plants/plant-16.jpg",
+    "image": "/uploads/1773556212675-6uw8zf.jpg",
     "description": "Tall and majestic sunflowers that brighten up any garden. Grows well in the fertile soil of Jhapa and produces edible seeds when mature.",
     "size": "large",
     "badge": "HOT",
     "rating": 4.8,
     "inStock": true,
-    "sku": "GMS-0016"
+    "sku": "GMS-0016",
+    "images": [
+      "/uploads/1773556212675-6uw8zf.jpg",
+      "/uploads/1773636931102-crop-j7v3ro.jpg",
+      "/uploads/1773556212672-cfl640.jpg",
+      "/uploads/1773556212668-w0sk9g.jpg",
+      "/uploads/1773556212663-q5e325.jpg"
+    ]
   }
 ]

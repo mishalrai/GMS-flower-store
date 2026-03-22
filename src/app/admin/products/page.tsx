@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, Edit, Trash2 } from "lucide-react";
+import { Plus, Search, Edit, Trash2, Eye } from "lucide-react";
 import StatusBadge from "@/components/admin/StatusBadge";
 import Modal from "@/components/admin/Modal";
 import { useToast } from "@/components/admin/Toast";
@@ -191,6 +191,14 @@ export default function ProductsPage() {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex items-center gap-2">
+                    <Link
+                      href={`/products/${product.slug}`}
+                      target="_blank"
+                      title="View product"
+                      className="p-1.5 text-gray-500 hover:bg-gray-100 rounded"
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Link>
                     <Link
                       href={`/admin/products/${product.id}`}
                       title="Edit product"

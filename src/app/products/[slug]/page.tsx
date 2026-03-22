@@ -20,6 +20,7 @@ import {
   MessageCircle,
   ChevronRight,
   ChevronLeft,
+  Pencil,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
@@ -28,6 +29,7 @@ import { useState, useEffect, useRef } from "react";
 interface ApiProduct extends Product {
   sku?: string;
   images?: string[];
+  richText?: string;
 }
 
 export default function ProductPage() {
@@ -37,9 +39,17 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isAdmin, setIsAdmin] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
   const toggleCart = useCartStore((state) => state.toggleCart);
   const { toggleItem, isInWishlist } = useWishlistStore();
+
+  useEffect(() => {
+    fetch("/api/auth/check")
+      .then((r) => r.json())
+      .then((data) => setIsAdmin(data.isAdmin))
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch("/api/products")
@@ -126,7 +136,7 @@ export default function ProductPage() {
       <main className="min-h-screen">
         {/* Breadcrumb */}
         <div className="bg-gray-50 py-3 px-4">
-          <div className="max-w-6xl mx-auto flex items-center gap-2 text-sm text-gray-600">
+          <div className="max-w-7xl mx-auto flex items-center gap-2 text-sm text-gray-600">
             <Link href="/" className="hover:text-[#6FB644]">
               Home
             </Link>
@@ -141,7 +151,7 @@ export default function ProductPage() {
 
         {/* Product Detail */}
         <section className="py-12 px-4">
-          <div className="max-w-6xl mx-auto grid md:grid-cols-2 gap-12">
+          <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12">
             {/* Image */}
             <div className="relative">
               {/* Main Image */}
@@ -183,6 +193,17 @@ export default function ProductPage() {
 
             {/* Info */}
             <div>
+              {isAdmin && (
+                <div className="flex justify-end mb-2">
+                  <Link
+                    href={`/admin/products/${product.id}`}
+                    className="flex items-center gap-1.5 text-[#6FB644] text-sm font-medium hover:text-[#5a9636] transition-colors"
+                  >
+                    <Pencil className="w-3.5 h-3.5" />
+                    Edit Product
+                  </Link>
+                </div>
+              )}
               <div className="flex items-center gap-2 mb-2 flex-wrap">
                 {product.sku && (
                   <>
@@ -326,6 +347,18 @@ export default function ProductPage() {
             </div>
           </div>
         </section>
+
+        {/* Rich Text Content */}
+        {product.richText && product.richText !== "<p><br></p>" && (
+          <section className="py-12 px-4 border-t border-gray-100">
+            <div className="max-w-7xl mx-auto">
+              <div
+                className="rich-text-content prose prose-lg max-w-none prose-headings:text-gray-800 prose-p:text-gray-600 prose-a:text-[#6FB644] prose-img:rounded-xl"
+                dangerouslySetInnerHTML={{ __html: product.richText }}
+              />
+            </div>
+          </section>
+        )}
 
         {/* Related Products */}
         {relatedProducts.length > 0 && (

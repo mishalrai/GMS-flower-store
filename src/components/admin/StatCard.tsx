@@ -1,4 +1,5 @@
 import { LucideIcon } from "lucide-react";
+import Link from "next/link";
 
 interface StatCardProps {
   title: string;
@@ -6,11 +7,14 @@ interface StatCardProps {
   icon: LucideIcon;
   trend?: string;
   color?: string;
+  href?: string;
 }
 
-export default function StatCard({ title, value, icon: Icon, trend, color = "#6FB644" }: StatCardProps) {
+export default function StatCard({ title, value, icon: Icon, trend, color = "#6FB644", href }: StatCardProps) {
+  const Wrapper = href ? Link : "div";
+  const wrapperProps = href ? { href } : {};
   return (
-    <div className="bg-white rounded-xl p-6 border border-gray-100">
+    <Wrapper {...wrapperProps as any} className={`bg-white rounded-xl p-6 border border-gray-100 block ${href ? "hover:shadow-md transition-shadow" : ""}`}>
       <div className="flex items-center justify-between mb-4">
         <div
           className="w-12 h-12 rounded-lg flex items-center justify-center"
@@ -26,6 +30,6 @@ export default function StatCard({ title, value, icon: Icon, trend, color = "#6F
       </div>
       <h3 className="text-2xl font-bold text-gray-800">{value}</h3>
       <p className="text-sm text-gray-500 mt-1">{title}</p>
-    </div>
+    </Wrapper>
   );
 }

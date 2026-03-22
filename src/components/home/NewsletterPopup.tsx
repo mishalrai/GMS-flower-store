@@ -43,11 +43,11 @@ export default function NewsletterSection() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="Enter your email"
-              className="flex-1 px-5 py-3 rounded-full text-gray-800 outline-none focus:ring-2 focus:ring-white"
+              className="flex-1 px-5 py-3 text-gray-800 outline-none focus:ring-2 focus:ring-white"
             />
             <button
               type="submit"
-              className="flex items-center justify-center gap-2 bg-white text-[#6FB644] px-6 py-3 rounded-full font-semibold hover:bg-green-50 transition-colors"
+              className="flex items-center justify-center gap-2 bg-white text-[#6FB644] px-6 py-3 font-semibold hover:bg-green-50 transition-colors"
             >
               <Send className="w-4 h-4" />
               Subscribe

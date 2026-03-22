@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { X, Home, ShoppingBag, Info, Phone, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 
@@ -16,11 +17,20 @@ interface MobileMenuProps {
 
 export default function MobileMenu({ onClose }: MobileMenuProps) {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [storeLogo, setStoreLogo] = useState("");
+  const [storeName, setStoreName] = useState("GMS Flower Store");
 
   useEffect(() => {
     fetch("/api/categories")
       .then((r) => r.json())
       .then((data) => setCategories(data))
+      .catch(() => {});
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.logo) setStoreLogo(data.logo);
+        if (data.storeName) setStoreName(data.storeName);
+      })
       .catch(() => {});
   }, []);
   const links = [
@@ -40,8 +50,12 @@ export default function MobileMenu({ onClose }: MobileMenuProps) {
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b">
           <div className="flex items-center gap-2">
-            <span className="text-xl">🌱</span>
-            <span className="font-bold text-[#6FB644]">GMS Flower Store</span>
+            {storeLogo ? (
+              <Image src={storeLogo} alt={storeName} width={28} height={28} className="w-7 h-7 object-contain" />
+            ) : (
+              <span className="text-xl">🌱</span>
+            )}
+            <span className="font-bold text-[#6FB644]">{storeName}</span>
           </div>
           <button
             onClick={onClose}

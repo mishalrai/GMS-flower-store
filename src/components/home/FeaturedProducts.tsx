@@ -66,21 +66,18 @@ export default function FeaturedProducts() {
     <section className="py-16 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Main Tabs */}
-        <div className="flex items-center justify-center gap-6 mb-10 border-b border-gray-200">
+        <div className="flex items-center justify-center gap-3 mb-10">
           {visibleTabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveMainTab(tab.id)}
-              className={`pb-3 px-2 font-semibold text-base transition-colors relative ${
+              className={`px-5 py-2 text-sm font-medium transition-all ${
                 activeMainTab === tab.id
-                  ? "text-[#6FB644]"
-                  : "text-gray-400 hover:text-gray-600"
+                  ? "bg-[#6FB644] text-white shadow-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
               {tab.label}
-              {activeMainTab === tab.id && (
-                <span className="absolute bottom-0 left-0 right-0 h-[3px] bg-[#6FB644] rounded-full" />
-              )}
             </button>
           ))}
         </div>
@@ -103,7 +100,7 @@ export default function FeaturedProducts() {
           <div className="text-center mt-10">
             <Link
               href={`/shop?filter=${activeMainTab}`}
-              className="inline-block border-2 border-[#6FB644] text-[#6FB644] px-8 py-3 rounded-full font-semibold hover:bg-[#6FB644] hover:text-white transition-colors"
+              className="inline-block border-2 border-[#6FB644] text-[#6FB644] px-8 py-3 font-semibold hover:bg-[#6FB644] hover:text-white transition-colors"
             >
               {visibleTabs.find((t) => t.id === activeMainTab)?.viewAllText ?? "View All Products"}
             </Link>

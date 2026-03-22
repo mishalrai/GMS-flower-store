@@ -97,24 +97,28 @@ export default function AdminDashboard() {
           value={products.length}
           icon={Package}
           color="#6FB644"
+          href="/admin/products"
         />
         <StatCard
           title="Total Orders"
           value={orders.length}
           icon={ShoppingCart}
           color="#3B82F6"
+          href="/admin/orders"
         />
         <StatCard
           title="Revenue"
           value={`Rs ${totalRevenue.toLocaleString()}`}
           icon={DollarSign}
           color="#10B981"
+          href="/admin/orders"
         />
         <StatCard
           title="Pending Orders"
           value={pendingOrders}
           icon={Clock}
           color={pendingOrders > 0 ? "#F59E0B" : "#10B981"}
+          href="/admin/orders"
         />
       </div>
 

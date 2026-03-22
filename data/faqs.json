@@ -1,0 +1,23 @@
+[
+  {
+    "id": 1,
+    "question": "Location",
+    "answer": "Kathmandu Nepal",
+    "order": 2,
+    "active": true
+  },
+  {
+    "id": 2,
+    "question": "Contact detail",
+    "answer": "Here it is",
+    "order": 3,
+    "active": true
+  },
+  {
+    "id": 3,
+    "question": "New Questions",
+    "answer": "My New answer :)",
+    "order": 1,
+    "active": true
+  }
+]

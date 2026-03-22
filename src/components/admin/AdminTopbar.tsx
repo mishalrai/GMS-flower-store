@@ -2,11 +2,21 @@
 
 import { useRouter } from "next/navigation";
 import { LogOut, Menu } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function AdminTopbar() {
   const router = useRouter();
   const [loggingOut, setLoggingOut] = useState(false);
+  const [storeName, setStoreName] = useState("GMS Flower Store");
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.storeName) setStoreName(data.storeName);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleLogout = async () => {
     setLoggingOut(true);
@@ -21,7 +31,7 @@ export default function AdminTopbar() {
           <Menu className="w-5 h-5" />
         </button>
         <h2 className="text-lg font-semibold text-gray-800">
-          GMS Flower Store — Admin
+          {storeName} — Admin
         </h2>
       </div>
 

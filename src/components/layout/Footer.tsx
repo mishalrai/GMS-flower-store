@@ -1,8 +1,25 @@
+"use client";
+
 import Link from "next/link";
+import Image from "next/image";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import SocialLinks from "./SocialLinks";
+import { useState, useEffect } from "react";
 
 export default function Footer() {
+  const [storeLogo, setStoreLogo] = useState("");
+  const [storeName, setStoreName] = useState("GMS Flower Store");
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.logo) setStoreLogo(data.logo);
+        if (data.storeName) setStoreName(data.storeName);
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <footer className="bg-gray-900 text-gray-300">
       {/* Main Footer */}
@@ -11,8 +28,18 @@ export default function Footer() {
           {/* About */}
           <div>
             <div className="flex items-center gap-2 mb-4">
-              <span className="text-2xl">🌱</span>
-              <h3 className="text-xl font-bold text-white">GMS Flower Store</h3>
+              {storeLogo ? (
+                <Image
+                  src={storeLogo}
+                  alt={storeName}
+                  width={32}
+                  height={32}
+                  className="w-8 h-8 object-contain"
+                />
+              ) : (
+                <span className="text-2xl">🌱</span>
+              )}
+              <h3 className="text-xl font-bold text-white">{storeName}</h3>
             </div>
             <p className="text-sm leading-relaxed mb-4">
               Fresh indoor & outdoor plants grown with love in our home garden
@@ -49,18 +76,18 @@ export default function Footer() {
             <h4 className="text-white font-semibold mb-4">Customer Service</h4>
             <ul className="space-y-2.5">
               {[
-                "Shipping Policy",
-                "Return Policy",
-                "Plant Care Tips",
-                "FAQs",
-                "Terms & Conditions",
+                { label: "Shipping Policy", href: "/contact" },
+                { label: "Return Policy", href: "/contact" },
+                { label: "Plant Care Tips", href: "/contact" },
+                { label: "FAQs", href: "/faqs" },
+                { label: "Terms & Conditions", href: "/contact" },
               ].map((item) => (
-                <li key={item}>
+                <li key={item.label}>
                   <Link
-                    href="/contact"
+                    href={item.href}
                     className="text-sm hover:text-[#6FB644] transition-colors"
                   >
-                    {item}
+                    {item.label}
                   </Link>
                 </li>
               ))}
@@ -95,7 +122,7 @@ export default function Footer() {
       {/* Bottom Bar */}
       <div className="border-t border-gray-800">
         <div className="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row items-center justify-between gap-2 text-sm">
-          <p>© 2025 GMS Flower Store. All Rights Reserved.</p>
+          <p>© 2025 {storeName}. All Rights Reserved.</p>
           <p className="text-gray-500">
             Made with 🌿 in Gauradaha, Jhapa, Nepal
           </p>

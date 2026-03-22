@@ -8,6 +8,7 @@ import { ArrowLeft, Save, X, Plus, Star as StarIcon } from "lucide-react";
 import { useToast } from "@/components/admin/Toast";
 import CustomSelect from "@/components/ui/CustomSelect";
 import MediaPickerModal from "@/components/admin/MediaPickerModal";
+import RichTextEditor from "@/components/admin/RichTextEditor";
 
 interface Category {
   id: number;
@@ -26,6 +27,8 @@ export default function EditProductPage() {
   const [images, setImages] = useState<string[]>([]);
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
+  const [rteMediaPickerOpen, setRteMediaPickerOpen] = useState(false);
+  const [rteImageUrl, setRteImageUrl] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     category: "indoor",
@@ -38,6 +41,7 @@ export default function EditProductPage() {
     rating: "4.5",
     inStock: true,
     inventory: "",
+    richText: "",
   });
 
   useEffect(() => {
@@ -57,6 +61,7 @@ export default function EditProductPage() {
         rating: String(data.rating),
         inStock: data.inStock as boolean,
         inventory: data.inventory != null ? String(data.inventory) : "",
+        richText: (data.richText as string) || "",
       });
 
       // Load images - support both images array and legacy single image
@@ -112,6 +117,7 @@ export default function EditProductPage() {
       rating: Number(form.rating),
       badge: form.badge || null,
       inventory: form.inventory ? Number(form.inventory) : undefined,
+      richText: form.richText || undefined,
       image: images[featuredIndex] || "",
       images,
       slug: form.name
@@ -321,21 +327,6 @@ export default function EditProductPage() {
             />
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Rating (1-5)
-            </label>
-            <input
-              type="number"
-              min="1"
-              max="5"
-              step="0.1"
-              value={form.rating}
-              onChange={(e) => setForm({ ...form, rating: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
-            />
-          </div>
-
           <div className="flex items-center gap-3 pt-6">
             <input
               type="checkbox"
@@ -363,6 +354,19 @@ export default function EditProductPage() {
           />
         </div>
 
+        <div className="mt-6">
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Detailed Description (Rich Text)
+          </label>
+          <RichTextEditor
+            value={form.richText}
+            onChange={(val) => setForm({ ...form, richText: val })}
+            onImageClick={() => setRteMediaPickerOpen(true)}
+            pendingImageUrl={rteImageUrl}
+            onImageInserted={() => setRteImageUrl(null)}
+          />
+        </div>
+
         <div className="flex justify-end gap-3 mt-8 pt-6">
           <Link
             href="/admin/products"
@@ -387,6 +391,15 @@ export default function EditProductPage() {
         onSelect={handleMediaSelect}
         onSelectMultiple={handleMediaSelectMultiple}
         multiple
+      />
+
+      <MediaPickerModal
+        isOpen={rteMediaPickerOpen}
+        onClose={() => setRteMediaPickerOpen(false)}
+        onSelect={(url) => {
+          setRteImageUrl(url);
+          setRteMediaPickerOpen(false);
+        }}
       />
     </div>
   );

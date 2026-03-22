@@ -13,6 +13,7 @@ export interface Product {
   badge: 'NEW' | 'HOT' | 'SALE' | null;
   rating: number;
   inStock: boolean;
+  richText?: string;
 }
 
 export interface Category {

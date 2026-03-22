@@ -34,7 +34,8 @@ interface Order {
   updatedAt: string;
 }
 
-const statuses = ["pending", "confirmed", "processing", "delivered", "cancelled"];
+const statuses = ["pending", "confirmed", "processing", "out-for-delivery", "delivered", "cancelled"];
+const statusLabels: Record<string, string> = { "out-for-delivery": "Out for Delivery" };
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -121,7 +122,7 @@ export default function OrderDetailPage() {
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   } disabled:opacity-50`}
                 >
-                  {status}
+                  {statusLabels[status] || status}
                 </button>
               ))}
             </div>
@@ -135,7 +136,7 @@ export default function OrderDetailPage() {
                 No items (WhatsApp order — items managed offline)
               </p>
             ) : (
-              <div className="divide-y">
+              <div className="divide-y divide-gray-100">
                 {order.items.map((item, i) => (
                   <div
                     key={i}
@@ -168,7 +169,7 @@ export default function OrderDetailPage() {
                 ))}
               </div>
             )}
-            <div className="border-t mt-4 pt-4 flex justify-between font-bold">
+            <div className="border-t border-gray-200 mt-4 pt-4 flex justify-between font-bold">
               <span>Total</span>
               <span>Rs {order.total.toLocaleString()}</span>
             </div>

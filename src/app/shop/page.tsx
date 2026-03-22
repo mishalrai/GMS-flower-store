@@ -146,7 +146,7 @@ function ShopContent() {
             >
               <button
                 onClick={() => !isDragging && setSelectedCategory("all")}
-                className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex-shrink-0 ${
+                className={`px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors flex-shrink-0 ${
                   selectedCategory === "all"
                     ? "bg-[#6FB644] text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -158,7 +158,7 @@ function ShopContent() {
                 <button
                   key={cat.id}
                   onClick={() => !isDragging && setSelectedCategory(cat.slug)}
-                  className={`px-4 py-1.5 rounded-full text-xs font-medium whitespace-nowrap transition-colors flex-shrink-0 ${
+                  className={`px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors flex-shrink-0 ${
                     selectedCategory === cat.slug
                       ? "bg-[#6FB644] text-white"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"

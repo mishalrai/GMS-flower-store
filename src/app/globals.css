@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 /* Ensure cursor pointer on all clickable elements */
 button,
@@ -105,7 +106,6 @@ body {
 
 ::-webkit-scrollbar-thumb {
   background: var(--primary);
-  border-radius: 4px;
 }
 
 /* Animations */
@@ -161,4 +161,18 @@ body {
 
 .animate-slide-in-left {
   animation: slide-in-left 0.3s ease-out;
+}
+
+/* Rich text content styles */
+.rich-text-content img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 0.75rem !important;
+}
+.rich-text-content a {
+  color: var(--primary);
+  text-decoration: underline;
+}
+.rich-text-content a:hover {
+  color: var(--primary-dark);
 }

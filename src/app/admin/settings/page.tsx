@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { Save, Upload, Trash2, Plus, QrCode, LayoutGrid } from "lucide-react";
+import { Save, Upload, Trash2, Plus, QrCode, LayoutGrid, ImageIcon } from "lucide-react";
 import { useToast } from "@/components/admin/Toast";
+import MediaPickerModal from "@/components/admin/MediaPickerModal";
 
 interface PaymentQR {
   id: string;
@@ -26,6 +27,8 @@ interface StoreSettings {
   whatsappNumber: string;
   freeDeliveryThreshold: number;
   currency: string;
+  logo: string;
+  favicon: string;
   socialLinks: { facebook: string; instagram: string; youtube: string; tiktok: string };
   homepageTabs: HomepageTabs;
   paymentQRCodes: PaymentQR[];
@@ -36,9 +39,11 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
-  const [uploadingQR, setUploadingQR] = useState(false);
+  const [logoPickerOpen, setLogoPickerOpen] = useState(false);
+  const [faviconPickerOpen, setFaviconPickerOpen] = useState(false);
+  const [qrPickerOpen, setQrPickerOpen] = useState(false);
+  const [generatingFavicon, setGeneratingFavicon] = useState(false);
   const [newQRLabel, setNewQRLabel] = useState("");
-  const qrFileRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch("/api/settings")
@@ -46,6 +51,8 @@ export default function SettingsPage() {
       .then((data) => {
         setSettings({
           ...data,
+          logo: data.logo || "",
+          favicon: data.favicon || "",
           homepageTabs: data.homepageTabs || { "new-arrivals": true, "flash-sale": true, "most-popular": true },
           paymentQRCodes: data.paymentQRCodes || [],
         });
@@ -75,38 +82,19 @@ export default function SettingsPage() {
     }
   };
 
-  const handleQRUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !settings) return;
-
-    setUploadingQR(true);
-    const formData = new FormData();
-    formData.append("file", file);
-
-    try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-      const data = await res.json();
-      if (res.ok) {
-        const newQR: PaymentQR = {
-          id: Date.now().toString(),
-          label: newQRLabel || "Payment QR",
-          image: data.url,
-        };
-        setSettings({
-          ...settings,
-          paymentQRCodes: [...settings.paymentQRCodes, newQR],
-        });
-        setNewQRLabel("");
-      }
-    } catch {
-      // upload failed
-    } finally {
-      setUploadingQR(false);
-      if (qrFileRef.current) qrFileRef.current.value = "";
-    }
+  const handleQRSelect = (url: string) => {
+    if (!settings) return;
+    const newQR: PaymentQR = {
+      id: Date.now().toString(),
+      label: newQRLabel || "Payment QR",
+      image: url,
+    };
+    setSettings({
+      ...settings,
+      paymentQRCodes: [...settings.paymentQRCodes, newQR],
+    });
+    setNewQRLabel("");
+    setQrPickerOpen(false);
   };
 
   const removeQR = (id: string) => {
@@ -143,6 +131,118 @@ export default function SettingsPage() {
         onSubmit={handleSubmit}
         className="bg-white rounded-xl p-6"
       >
+        {/* Logo Upload */}
+        <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <ImageIcon className="w-5 h-5 text-[#6FB644]" />
+          Store Logo
+        </h3>
+        <div className="flex items-center gap-6 mb-8 pb-8 border-b border-gray-200">
+          <div className="relative w-24 h-24 border border-gray-200 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center flex-shrink-0">
+            {settings.logo ? (
+              <>
+                <Image
+                  src={settings.logo}
+                  alt="Store logo"
+                  fill
+                  className="object-contain p-2"
+                />
+                <button
+                  type="button"
+                  onClick={() => setSettings({ ...settings, logo: "" })}
+                  title="Remove logo"
+                  className="absolute top-1 right-1 p-1 bg-white rounded shadow-sm hover:bg-red-50"
+                >
+                  <Trash2 className="w-3 h-3 text-red-500" />
+                </button>
+              </>
+            ) : (
+              <ImageIcon className="w-8 h-8 text-gray-300" />
+            )}
+          </div>
+          <div>
+            <button
+              type="button"
+              onClick={() => setLogoPickerOpen(true)}
+              className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+            >
+              <Upload className="w-4 h-4" />
+              {settings.logo ? "Change Logo" : "Upload Logo"}
+            </button>
+            <p className="text-xs text-gray-400 mt-2">
+              Supports SVG, PNG, JPG, WebP
+            </p>
+          </div>
+        </div>
+
+        {/* Favicon Upload */}
+        <h3 className="font-semibold text-gray-800 mb-4 flex items-center gap-2">
+          <ImageIcon className="w-5 h-5 text-[#6FB644]" />
+          Favicon
+        </h3>
+        <div className="flex items-center gap-6 mb-8 pb-8 border-b border-gray-200">
+          <div className="relative w-16 h-16 border border-gray-200 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center flex-shrink-0">
+            {settings.favicon ? (
+              <Image
+                src={settings.favicon}
+                alt="Favicon"
+                fill
+                className="object-contain p-1"
+              />
+            ) : (
+              <ImageIcon className="w-6 h-6 text-gray-300" />
+            )}
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setFaviconPickerOpen(true)}
+                className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+              >
+                <Upload className="w-4 h-4" />
+                {settings.favicon ? "Change Favicon" : "Upload Favicon"}
+              </button>
+              {settings.favicon && (
+                <button
+                  type="button"
+                  onClick={async () => {
+                    setGeneratingFavicon(true);
+                    try {
+                      const res = await fetch("/api/favicon/generate", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ imageUrl: settings.favicon }),
+                      });
+                      if (res.ok) {
+                        toast("Favicon generated for all devices");
+                      } else {
+                        toast("Failed to generate favicon", "error");
+                      }
+                    } catch {
+                      toast("Failed to generate favicon", "error");
+                    }
+                    setGeneratingFavicon(false);
+                  }}
+                  disabled={generatingFavicon}
+                  className="flex items-center gap-2 bg-[#6FB644] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#5a9636] transition-colors disabled:opacity-50"
+                >
+                  {generatingFavicon ? (
+                    <>
+                      <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full" />
+                      Generating...
+                    </>
+                  ) : (
+                    "Apply Favicon"
+                  )}
+                </button>
+              )}
+            </div>
+            <p className="text-xs text-gray-400 mt-2">
+              Upload a square image (PNG, JPG, SVG). Auto-generates icons for all devices.
+            </p>
+          </div>
+        </div>
+
         <h3 className="font-semibold text-gray-800 mb-4">Store Information</h3>
         <div className="grid md:grid-cols-2 gap-6">
           <div>
@@ -442,29 +542,12 @@ export default function SettingsPage() {
           </div>
           <button
             type="button"
-            onClick={() => qrFileRef.current?.click()}
-            disabled={uploadingQR}
-            className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors disabled:opacity-50"
+            onClick={() => setQrPickerOpen(true)}
+            className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2.5 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
           >
-            {uploadingQR ? (
-              <>
-                <div className="animate-spin w-4 h-4 border-2 border-gray-500 border-t-transparent rounded-full" />
-                Uploading...
-              </>
-            ) : (
-              <>
-                <Plus className="w-4 h-4" />
-                Add QR Code
-              </>
-            )}
+            <Plus className="w-4 h-4" />
+            Add QR Code
           </button>
-          <input
-            ref={qrFileRef}
-            type="file"
-            accept="image/*"
-            onChange={handleQRUpload}
-            className="hidden"
-          />
         </div>
 
         <div className="flex justify-end mt-8 pt-6 border-t">
@@ -478,6 +561,30 @@ export default function SettingsPage() {
           </button>
         </div>
       </form>
+
+      <MediaPickerModal
+        isOpen={logoPickerOpen}
+        onClose={() => setLogoPickerOpen(false)}
+        onSelect={(url) => {
+          setSettings({ ...settings!, logo: url });
+          setLogoPickerOpen(false);
+        }}
+      />
+
+      <MediaPickerModal
+        isOpen={faviconPickerOpen}
+        onClose={() => setFaviconPickerOpen(false)}
+        onSelect={(url) => {
+          setSettings({ ...settings!, favicon: url });
+          setFaviconPickerOpen(false);
+        }}
+      />
+
+      <MediaPickerModal
+        isOpen={qrPickerOpen}
+        onClose={() => setQrPickerOpen(false)}
+        onSelect={handleQRSelect}
+      />
     </div>
   );
 }
