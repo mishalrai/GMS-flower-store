@@ -549,7 +549,7 @@ export default function CheckoutPage() {
                 })}
               </div>
 
-              <div className="border-t pt-4 space-y-2">
+              <div className="pt-4 space-y-2">
                 <div className="flex justify-between text-sm text-gray-500">
                   <span>Subtotal</span>
                   <span>Rs {total.toLocaleString()}</span>
@@ -568,7 +568,7 @@ export default function CheckoutPage() {
                       : selectedQR?.label || "QR Pay"}
                   </span>
                 </div>
-                <div className="flex justify-between text-lg font-bold pt-2 border-t">
+                <div className="flex justify-between text-lg font-bold pt-2">
                   <span>Total</span>
                   <span className="text-[#6FB644]">
                     Rs {total.toLocaleString()}

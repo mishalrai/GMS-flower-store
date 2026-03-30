@@ -9,6 +9,7 @@ import { useToast } from "@/components/admin/Toast";
 import CustomSelect from "@/components/ui/CustomSelect";
 import MediaPickerModal from "@/components/admin/MediaPickerModal";
 import RichTextEditor from "@/components/admin/RichTextEditor";
+import TagInput from "@/components/admin/TagInput";
 
 interface Category {
   id: number;
@@ -42,6 +43,7 @@ export default function EditProductPage() {
     inStock: true,
     inventory: "",
     richText: "",
+    tags: [] as string[],
   });
 
   useEffect(() => {
@@ -62,6 +64,7 @@ export default function EditProductPage() {
         inStock: data.inStock as boolean,
         inventory: data.inventory != null ? String(data.inventory) : "",
         richText: (data.richText as string) || "",
+        tags: (data.tags as string[]) || [],
       });
 
       // Load images - support both images array and legacy single image
@@ -163,6 +166,7 @@ export default function EditProductPage() {
       </div>
 
       <form
+        id="product-form"
         onSubmit={handleSubmit}
         className="bg-white rounded-xl p-6"
       >
@@ -354,6 +358,12 @@ export default function EditProductPage() {
           />
         </div>
 
+        {/* Tags */}
+        <div className="mt-6">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Tags</label>
+          <TagInput tags={form.tags} onChange={(tags) => setForm({ ...form, tags })} />
+        </div>
+
         <div className="mt-6">
           <label className="block text-sm font-medium text-gray-700 mb-1">
             Detailed Description (Rich Text)
@@ -367,23 +377,25 @@ export default function EditProductPage() {
           />
         </div>
 
-        <div className="flex justify-end gap-3 mt-8 pt-6">
-          <Link
-            href="/admin/products"
-            className="px-6 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
-          >
-            Cancel
-          </Link>
-          <button
-            type="submit"
-            disabled={saving}
-            className="flex items-center gap-2 bg-[#6FB644] text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-[#5a9636] transition-colors disabled:opacity-50"
-          >
-            <Save className="w-4 h-4" />
-            {saving ? "Saving..." : "Update Product"}
-          </button>
-        </div>
       </form>
+
+      <div className="sticky bottom-0 bg-white py-4 mt-6 rounded-b-xl flex justify-end gap-3 px-6 z-10">
+        <Link
+          href="/admin/products"
+          className="px-6 py-2.5 text-sm text-gray-600 hover:bg-gray-100 rounded-lg"
+        >
+          Cancel
+        </Link>
+        <button
+          type="submit"
+          form="product-form"
+          disabled={saving}
+          className="flex items-center gap-2 bg-[#6FB644] text-white px-6 py-2.5 rounded-lg text-sm font-medium hover:bg-[#5a9636] transition-colors disabled:opacity-50"
+        >
+          <Save className="w-4 h-4" />
+          {saving ? "Saving..." : "Update Product"}
+        </button>
+      </div>
 
       <MediaPickerModal
         isOpen={mediaPickerOpen}

@@ -13,10 +13,14 @@ import {
   MapPin,
   ArrowUpRight,
   X,
+  Calendar,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 const VisitorMap = dynamic(() => import("@/components/admin/VisitorMap"), { ssr: false });
 const MiniMap = dynamic(() => import("@/components/admin/MiniMap"), { ssr: false });
+import DateRangePicker from "@/components/admin/DateRangePicker";
 
 interface AnalyticsData {
   totalViews: number;
@@ -147,17 +151,25 @@ export default function AnalyticsPage() {
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(30);
   const [selectedVisitor, setSelectedVisitor] = useState<AnalyticsData["recent"][0] | null>(null);
+  const [datePickerOpen, setDatePickerOpen] = useState(false);
+  const [fromDate, setFromDate] = useState("");
+  const [toDate, setToDate] = useState("");
+  const [customActive, setCustomActive] = useState(false);
+  const [page, setPage] = useState(1);
+  const perPage = 20;
+
+  const fetchData = (params: string) => {
+    setLoading(true);
+    setPage(1);
+    fetch(`/api/analytics?${params}`)
+      .then((r) => r.json())
+      .then((d) => { setData(d); setLoading(false); })
+      .catch(() => setLoading(false));
+  };
 
   useEffect(() => {
-    setLoading(true);
-    fetch(`/api/analytics?days=${days}`)
-      .then((r) => r.json())
-      .then((d) => {
-        setData(d);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, [days]);
+    if (!customActive) fetchData(`days=${days}`);
+  }, [days, customActive]);
 
   if (loading || !data) {
     return (
@@ -173,22 +185,54 @@ export default function AnalyticsPage() {
     <div>
       <div className="flex items-center justify-between mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Analytics</h1>
-        <div className="flex gap-1">
-          {[7, 14, 30, 90].map((d) => (
-            <button
-              key={d}
-              onClick={() => setDays(d)}
-              className={`px-3 py-1.5 text-xs font-medium transition-colors ${
-                days === d
-                  ? "bg-[#6FB644] text-white"
-                  : "text-gray-500 hover:bg-gray-100"
-              }`}
-            >
-              {d}d
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          {/* Quick filters */}
+          <div className="flex gap-1">
+            {[7, 14, 30, 90].map((d) => (
+              <button
+                key={d}
+                onClick={() => { setCustomActive(false); setDays(d); }}
+                className={`px-3 py-1.5 text-xs font-medium transition-colors ${
+                  !customActive && days === d
+                    ? "bg-[#6FB644] text-white"
+                    : "text-gray-500 hover:bg-gray-100"
+                }`}
+              >
+                {d}d
+              </button>
+            ))}
+          </div>
+
+          <div className="w-px h-6 bg-gray-200" />
+
+          {/* Custom range button */}
+          <button
+            onClick={() => setDatePickerOpen(true)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium transition-colors ${
+              customActive ? "bg-[#6FB644] text-white" : "text-gray-500 hover:bg-gray-100"
+            }`}
+          >
+            <Calendar className="w-3.5 h-3.5" />
+            {customActive && fromDate && toDate
+              ? `${fromDate} — ${toDate}`
+              : "Custom"}
+          </button>
         </div>
       </div>
+
+      {/* Date Range Picker Popup */}
+      <DateRangePicker
+        isOpen={datePickerOpen}
+        onClose={() => setDatePickerOpen(false)}
+        initialFrom={fromDate}
+        initialTo={toDate}
+        onApply={(from, to) => {
+          setFromDate(from);
+          setToDate(to);
+          setCustomActive(true);
+          fetchData(`from=${from}&to=${to}`);
+        }}
+      />
 
       {/* Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
@@ -202,22 +246,24 @@ export default function AnalyticsPage() {
       {/* Daily Chart */}
       {data.daily.length > 0 && (
         <div className="bg-white rounded-xl p-5 border border-gray-100 mb-6">
-          <h3 className="text-sm font-semibold text-gray-800 mb-4">
-            Daily Traffic
-          </h3>
-          <div className="flex items-end gap-1 h-40">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-semibold text-gray-800">Daily Traffic</h3>
+            <span className="text-xs text-gray-400">{data.daily.length} day{data.daily.length !== 1 ? "s" : ""}</span>
+          </div>
+          <div className="flex items-end gap-[2px] h-40">
             {data.daily.map(([day, stats]) => (
               <div
                 key={day}
-                className="flex-1 group relative flex flex-col items-center"
+                style={{ flex: data.daily.length === 1 ? "0 0 60px" : "1" }}
+                className="group relative flex flex-col items-center"
               >
                 <div className="absolute -top-8 bg-gray-800 text-white text-[10px] px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
                   {day}: {stats.views} views, {stats.unique} unique
                 </div>
                 <div
-                  className="w-full bg-[#6FB644] rounded-t hover:bg-[#5a9636] transition-colors min-h-[2px]"
+                  className="w-full bg-[#6FB644] rounded-t hover:bg-[#5a9636] transition-colors min-h-[4px]"
                   style={{
-                    height: `${(stats.views / maxDaily) * 100}%`,
+                    height: `${maxDaily > 0 ? (stats.views / maxDaily) * 100 : 0}%`,
                   }}
                 />
               </div>
@@ -225,7 +271,7 @@ export default function AnalyticsPage() {
           </div>
           <div className="flex justify-between mt-2 text-[10px] text-gray-400">
             <span>{data.daily[0]?.[0]}</span>
-            <span>{data.daily[data.daily.length - 1]?.[0]}</span>
+            {data.daily.length > 1 && <span>{data.daily[data.daily.length - 1]?.[0]}</span>}
           </div>
         </div>
       )}
@@ -234,13 +280,14 @@ export default function AnalyticsPage() {
 
       {/* Recent Visitors */}
       <div className="bg-white rounded-xl border border-gray-100 overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-100">
+        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
           <h3 className="text-sm font-semibold text-gray-800">
             Recent Visitors
           </h3>
+          <span className="text-xs text-gray-400">{data.recent.length} total</span>
         </div>
         <div className="divide-y divide-gray-50">
-          {data.recent.map((v) => {
+          {data.recent.slice((page - 1) * perPage, page * perPage).map((v) => {
             const DeviceIcon = deviceIcon(v.device);
             const location = v.city !== "Unknown" ? `${v.city}, ${v.country}` : v.country;
             return (
@@ -277,6 +324,42 @@ export default function AnalyticsPage() {
             );
           })}
         </div>
+
+        {/* Pagination */}
+        {data.recent.length > perPage && (
+          <div className="px-5 py-3 border-t border-gray-100 flex items-center justify-between">
+            <span className="text-xs text-gray-400">
+              Showing {(page - 1) * perPage + 1}–{Math.min(page * perPage, data.recent.length)} of {data.recent.length}
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                onClick={() => setPage(Math.max(1, page - 1))}
+                disabled={page === 1}
+                className="p-1.5 text-gray-500 hover:bg-gray-100 rounded disabled:opacity-30"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              {Array.from({ length: Math.ceil(data.recent.length / perPage) }, (_, i) => i + 1).map((p) => (
+                <button
+                  key={p}
+                  onClick={() => setPage(p)}
+                  className={`w-8 h-8 text-xs font-medium rounded ${
+                    page === p ? "bg-[#6FB644] text-white" : "text-gray-500 hover:bg-gray-100"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+              <button
+                onClick={() => setPage(Math.min(Math.ceil(data.recent.length / perPage), page + 1))}
+                disabled={page >= Math.ceil(data.recent.length / perPage)}
+                className="p-1.5 text-gray-500 hover:bg-gray-100 rounded disabled:opacity-30"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Visitor Detail Modal */}

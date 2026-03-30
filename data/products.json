@@ -19,7 +19,11 @@
       "/uploads/1773556212674-3qmm3f.jpg",
       "/uploads/1773556212672-cfl640.jpg"
     ],
-    "richText": "<h1>Hello</h1><p></p><p><img src=\"/uploads/1773556212659-sr70uz.jpg\"></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>"
+    "richText": "<h1>Hello</h1><p></p><p><img src=\"/uploads/1773556212659-sr70uz.jpg\"></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>",
+    "tags": [
+      "hello",
+      "data"
+    ]
   },
   {
     "id": 2,
@@ -49,13 +53,21 @@
     "slug": "peace-lily",
     "category": "indoor",
     "price": 800,
-    "image": "/images/plants/plant-3.jpg",
+    "image": "/uploads/1773556212672-cfl640.jpg",
     "description": "An elegant flowering indoor plant known for its white blooms and excellent air-purifying qualities. Ideal for low-light environments.",
     "size": "medium",
     "badge": "NEW",
     "rating": 4.9,
     "inStock": true,
-    "sku": "GMS-0003"
+    "sku": "GMS-0003",
+    "images": [
+      "/uploads/1773556212675-6uw8zf.jpg",
+      "/uploads/1773556212672-cfl640.jpg",
+      "/uploads/1773636931102-crop-j7v3ro.jpg",
+      "/uploads/1773556212674-3qmm3f.jpg",
+      "/uploads/1773556212669-u3m0ay.jpg",
+      "/uploads/1773556212671-rs2qts.jpg"
+    ]
   },
   {
     "id": 4,
@@ -63,13 +75,18 @@
     "slug": "spider-plant",
     "category": "indoor",
     "price": 300,
-    "image": "/images/plants/plant-4.jpg",
+    "image": "/uploads/1773556212674-3qmm3f.jpg",
     "description": "A hardy and adaptable plant with arching green and white striped leaves. Great for hanging baskets and known for removing indoor pollutants.",
     "size": "small",
     "badge": null,
     "rating": 4.5,
     "inStock": true,
-    "sku": "GMS-0004"
+    "sku": "GMS-0004",
+    "images": [
+      "/uploads/1773556212674-3qmm3f.jpg",
+      "/uploads/1773556212672-cfl640.jpg",
+      "/uploads/1774160629552-crop-erw7n7.jpg"
+    ]
   },
   {
     "id": 5,
@@ -77,13 +94,16 @@
     "slug": "pothos",
     "category": "indoor",
     "price": 250,
-    "image": "/images/plants/plant-5.jpg",
+    "image": "/uploads/1773556212665-wnugmm.jpg",
     "description": "A trailing vine plant that is nearly impossible to kill. Perfect for beginners and looks stunning in hanging pots or climbing on a moss pole.",
     "size": "small",
     "badge": "HOT",
     "rating": 4.6,
     "inStock": true,
-    "sku": "GMS-0005"
+    "sku": "GMS-0005",
+    "images": [
+      "/uploads/1773556212665-wnugmm.jpg"
+    ]
   },
   {
     "id": 6,
@@ -92,13 +112,21 @@
     "category": "indoor",
     "price": 500,
     "salePrice": 420,
-    "image": "/images/plants/plant-6.jpg",
+    "image": "/uploads/1773556212675-6uw8zf.jpg",
     "description": "A beautiful succulent with thick, woody stems and oval-shaped leaves. Symbolizes good luck and prosperity in many Asian cultures.",
     "size": "small",
     "badge": "SALE",
     "rating": 4.4,
     "inStock": true,
-    "sku": "GMS-0006"
+    "sku": "GMS-0006",
+    "richText": "<p></p>",
+    "images": [
+      "/uploads/1773556212675-6uw8zf.jpg",
+      "/uploads/1773556212672-cfl640.jpg",
+      "/uploads/1773636931102-crop-j7v3ro.jpg",
+      "/uploads/1773556212674-3qmm3f.jpg",
+      "/uploads/1773556212669-u3m0ay.jpg"
+    ]
   },
   {
     "id": 7,
@@ -106,41 +134,16 @@
     "slug": "aloe-vera",
     "category": "indoor",
     "price": 400,
-    "image": "/images/plants/plant-7.jpg",
+    "image": "/uploads/1773556212672-cfl640.jpg",
     "description": "A medicinal succulent known for its healing gel. Easy to grow and perfect for sunny windowsills. Great for treating minor burns and skin irritations.",
     "size": "small",
     "badge": null,
     "rating": 4.7,
     "inStock": true,
-    "sku": "GMS-0007"
-  },
-  {
-    "id": 8,
-    "name": "Rubber Plant",
-    "slug": "rubber-plant",
-    "category": "indoor",
-    "price": 1500,
-    "image": "/images/plants/plant-8.jpg",
-    "description": "A striking indoor tree with large, glossy dark green leaves. Makes a bold statement in any room and is excellent at purifying indoor air.",
-    "size": "large",
-    "badge": "NEW",
-    "rating": 4.6,
-    "inStock": true,
-    "sku": "GMS-0008"
-  },
-  {
-    "id": 9,
-    "name": "Marigold",
-    "slug": "marigold",
-    "category": "outdoor",
-    "price": 200,
-    "image": "/images/plants/plant-9.jpg",
-    "description": "Bright and cheerful marigolds are a staple in Nepali gardens and festivals. Easy to grow and blooms abundantly throughout the season.",
-    "size": "small",
-    "badge": null,
-    "rating": 4.5,
-    "inStock": true,
-    "sku": "GMS-0009"
+    "sku": "GMS-0007",
+    "images": [
+      "/uploads/1773556212672-cfl640.jpg"
+    ]
   },
   {
     "id": 10,
@@ -156,7 +159,7 @@
     "rating": 4.8,
     "inStock": true,
     "sku": "GMS-0010",
-    "richText": "<p></p>",
+    "richText": "<p><img src=\"/uploads/1773636931102-crop-j7v3ro.jpg\"></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>",
     "images": [
       "/uploads/1773636931102-crop-j7v3ro.jpg",
       "/uploads/1773556212675-6uw8zf.jpg",
@@ -167,46 +170,23 @@
     ]
   },
   {
-    "id": 11,
-    "name": "Rose",
-    "slug": "rose",
-    "category": "outdoor",
-    "price": 1200,
-    "image": "/images/plants/plant-11.jpg",
-    "description": "The queen of flowers, our rose plants produce fragrant blooms in deep red. Perfect for gardens in the Jhapa climate and makes wonderful cut flowers.",
-    "size": "medium",
-    "badge": "HOT",
-    "rating": 4.9,
-    "inStock": true,
-    "sku": "GMS-0011"
-  },
-  {
-    "id": 12,
-    "name": "Hibiscus",
-    "slug": "hibiscus",
-    "category": "outdoor",
-    "price": 900,
-    "image": "/images/plants/plant-12.jpg",
-    "description": "Tropical flowering plant with large, colorful blooms. Thrives in the warm climate of Gauradaha and attracts butterflies and hummingbirds.",
-    "size": "medium",
-    "badge": null,
-    "rating": 4.6,
-    "inStock": true,
-    "sku": "GMS-0012"
-  },
-  {
     "id": 13,
     "name": "Jasmine",
     "slug": "jasmine",
     "category": "outdoor",
     "price": 550,
-    "image": "/images/plants/plant-13.jpg",
+    "image": "/uploads/1774191764125-crop-0spfbj.jpg",
     "description": "Fragrant white flowers that fill your garden with a sweet aroma, especially in the evening. A beloved plant in Nepali households for puja and decoration.",
     "size": "small",
     "badge": "NEW",
     "rating": 4.7,
     "inStock": true,
-    "sku": "GMS-0013"
+    "sku": "GMS-0013",
+    "richText": "<p></p>",
+    "images": [
+      "/uploads/1774191764125-crop-0spfbj.jpg",
+      "/uploads/1773556212674-3qmm3f.jpg"
+    ]
   },
   {
     "id": 14,
@@ -215,13 +195,18 @@
     "category": "outdoor",
     "price": 1800,
     "salePrice": 1500,
-    "image": "/images/plants/plant-14.jpg",
+    "image": "/uploads/1774191764125-crop-0spfbj.jpg",
     "description": "A vigorous climbing plant covered in vibrant magenta bracts. Perfect for walls, fences, and pergolas. Drought-tolerant once established.",
     "size": "large",
     "badge": "SALE",
     "rating": 4.5,
     "inStock": true,
-    "sku": "GMS-0014"
+    "sku": "GMS-0014",
+    "tags": [],
+    "images": [
+      "/uploads/1774191764125-crop-0spfbj.jpg",
+      "/uploads/1773556212659-sr70uz.jpg"
+    ]
   },
   {
     "id": 15,
@@ -229,18 +214,20 @@
     "slug": "chrysanthemum",
     "category": "outdoor",
     "price": 450,
-    "image": "/images/plants/plant-15.jpg",
+    "image": "/uploads/1773556212669-u3m0ay.jpg",
     "description": "Beautiful autumn-blooming flowers in shades of yellow, white, and purple. Popular during Tihar festival for garlands and decoration.",
     "size": "small",
     "badge": null,
     "rating": 4.4,
-    "inStock": false,
+    "inStock": true,
     "sku": "GMS-0015",
     "inventory": 100,
     "richText": "<p></p>",
     "images": [
-      "/images/plants/plant-15.jpg"
-    ]
+      "/uploads/1773556212669-u3m0ay.jpg",
+      "/uploads/1773556212662-4ghup0.jpg"
+    ],
+    "tags": []
   },
   {
     "id": 16,

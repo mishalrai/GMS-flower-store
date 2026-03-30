@@ -1,15 +1,5 @@
 [
   {
-    "id": 1,
-    "filename": "1773553533210-m438wt.jpg",
-    "originalName": "img_intro01_pc.n.jpg",
-    "url": "/uploads/1773553533210-m438wt.jpg",
-    "size": 1280844,
-    "type": "image/jpeg",
-    "alt": "img intro01 pc.n",
-    "uploadedAt": "2026-03-15T05:45:33.213Z"
-  },
-  {
     "id": 2,
     "filename": "1773554098291-crop-uglzea.jpg",
     "originalName": "img_intro01_sp.nd.jpg",
@@ -18,16 +8,6 @@
     "type": "image/jpeg",
     "alt": "img intro01 sp.nd",
     "uploadedAt": "2026-03-15T05:45:50.085Z"
-  },
-  {
-    "id": 3,
-    "filename": "1773554073732-crop-p970ec.jpg",
-    "originalName": "img_beauty01.n.jpg",
-    "url": "/uploads/1773554073732-crop-p970ec.jpg",
-    "size": 76264,
-    "type": "image/jpeg",
-    "alt": "img beauty01.n",
-    "uploadedAt": "2026-03-15T05:46:03.448Z"
   },
   {
     "id": 6,
@@ -101,10 +81,10 @@
   },
   {
     "id": 13,
-    "filename": "1774160629552-crop-erw7n7.jpg",
+    "filename": "1774192027554-crop-w0wdll.jpg",
     "originalName": "money-plant.jpg",
-    "url": "/uploads/1774160629552-crop-erw7n7.jpg",
-    "size": 42784,
+    "url": "/uploads/1774192027554-crop-w0wdll.jpg",
+    "size": 31330,
     "type": "image/jpeg",
     "alt": "Money plant",
     "uploadedAt": "2026-03-15T06:30:12.661Z"
@@ -161,10 +141,10 @@
   },
   {
     "id": 19,
-    "filename": "1773636931102-crop-j7v3ro.jpg",
+    "filename": "1774191764125-crop-0spfbj.jpg",
     "originalName": "succulent-collection.jpg",
-    "url": "/uploads/1773636931102-crop-j7v3ro.jpg",
-    "size": 37601,
+    "url": "/uploads/1774191764125-crop-0spfbj.jpg",
+    "size": 33243,
     "type": "image/jpeg",
     "alt": "Succulent collection",
     "uploadedAt": "2026-03-15T06:30:12.664Z"

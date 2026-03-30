@@ -3,14 +3,14 @@
     "id": 1,
     "question": "Location",
     "answer": "Kathmandu Nepal",
-    "order": 2,
+    "order": 3,
     "active": true
   },
   {
     "id": 2,
     "question": "Contact detail",
     "answer": "Here it is",
-    "order": 3,
+    "order": 2,
     "active": true
   },
   {

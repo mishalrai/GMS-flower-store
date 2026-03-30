@@ -36,18 +36,39 @@ const icons = {
   warning: AlertTriangle,
 };
 
-const colors = {
-  success: "bg-green-50 border-green-200 text-green-800",
-  error: "bg-red-50 border-red-200 text-red-800",
-  info: "bg-blue-50 border-blue-200 text-blue-800",
-  warning: "bg-yellow-50 border-yellow-200 text-yellow-800",
+const titles = {
+  success: "Success",
+  error: "Error",
+  info: "Information",
+  warning: "Warning",
+};
+
+const gradients = {
+  success: "from-green-50/80 via-white to-white",
+  error: "from-red-50/80 via-white to-white",
+  info: "from-blue-50/80 via-white to-white",
+  warning: "from-yellow-50/80 via-white to-white",
+};
+
+const iconBg = {
+  success: "bg-green-100",
+  error: "bg-red-100",
+  info: "bg-blue-100",
+  warning: "bg-yellow-100",
 };
 
 const iconColors = {
-  success: "text-green-500",
+  success: "text-green-600",
   error: "text-red-500",
   info: "text-blue-500",
-  warning: "text-yellow-500",
+  warning: "text-yellow-600",
+};
+
+const titleColors = {
+  success: "text-green-700",
+  error: "text-red-700",
+  info: "text-blue-700",
+  warning: "text-yellow-700",
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -69,21 +90,26 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={{ toast }}>
       {children}
       {/* Toast Container */}
-      <div className="fixed top-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
+      <div className="fixed bottom-4 right-4 z-[100] flex flex-col-reverse gap-3 pointer-events-none">
         {toasts.map((t) => {
           const Icon = icons[t.type];
           return (
             <div
               key={t.id}
-              className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg border shadow-lg animate-slide-in min-w-[300px] max-w-[420px] ${colors[t.type]}`}
+              className={`pointer-events-auto flex items-start gap-3 px-5 py-4 rounded-2xl shadow-xl animate-slide-in min-w-[360px] max-w-[440px] bg-gradient-to-r ${gradients[t.type]} border border-gray-100/60 backdrop-blur-sm`}
             >
-              <Icon className={`w-5 h-5 flex-shrink-0 ${iconColors[t.type]}`} />
-              <p className="text-sm font-medium flex-1">{t.message}</p>
+              <div className={`w-9 h-9 rounded-full ${iconBg[t.type]} flex items-center justify-center flex-shrink-0`}>
+                <Icon className={`w-4.5 h-4.5 ${iconColors[t.type]}`} />
+              </div>
+              <div className="flex-1 min-w-0 pt-0.5">
+                <p className={`text-sm font-semibold ${titleColors[t.type]}`}>{titles[t.type]}</p>
+                <p className="text-sm text-gray-500 mt-0.5">{t.message}</p>
+              </div>
               <button
                 onClick={() => dismiss(t.id)}
-                className="p-0.5 hover:opacity-70 flex-shrink-0"
+                className="p-1 hover:bg-gray-100 rounded-lg flex-shrink-0 mt-0.5"
               >
-                <X className="w-4 h-4" />
+                <X className="w-4 h-4 text-gray-400" />
               </button>
             </div>
           );

@@ -24,12 +24,27 @@ interface Visit {
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
+  const from = searchParams.get('from');
+  const to = searchParams.get('to');
   const days = parseInt(searchParams.get('days') || '30');
-  const cutoff = new Date();
-  cutoff.setDate(cutoff.getDate() - days);
+
+  let startDate: Date;
+  let endDate: Date;
+
+  if (from && to) {
+    startDate = new Date(from + 'T00:00:00');
+    endDate = new Date(to + 'T23:59:59');
+  } else {
+    endDate = new Date();
+    startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+  }
 
   const visits = readData<Visit>('analytics.json').filter(
-    (v) => new Date(v.timestamp) >= cutoff
+    (v) => {
+      const d = new Date(v.timestamp);
+      return d >= startDate && d <= endDate;
+    }
   );
 
   // Aggregate stats

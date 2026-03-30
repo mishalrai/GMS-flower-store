@@ -3,6 +3,14 @@ import { readData, writeData } from '@/lib/db';
 
 interface Category { id: number; [key: string]: unknown; }
 
+export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  const categories = readData<Category>('categories.json');
+  const cat = categories.find(c => c.id === Number(id));
+  if (!cat) return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  return NextResponse.json(cat);
+}
+
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const body = await request.json();
