@@ -32,6 +32,7 @@ export default function EditProductPage() {
   const [rteImageUrl, setRteImageUrl] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
+    sku: "",
     category: "indoor",
     costPrice: "",
     price: "",
@@ -53,6 +54,7 @@ export default function EditProductPage() {
     ]).then(([data, cats]: [Record<string, unknown>, Category[]]) => {
       setForm({
         name: data.name as string,
+        sku: (data.sku as string) || "",
         category: data.category as string,
         costPrice: data.costPrice ? String(data.costPrice) : "",
         price: String(data.price),
@@ -229,6 +231,18 @@ export default function EditProductPage() {
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              SKU
+            </label>
+            <input
+              type="text"
+              value={form.sku}
+              readOnly
+              className="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-500 cursor-not-allowed"
             />
           </div>
 

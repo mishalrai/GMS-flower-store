@@ -87,58 +87,90 @@ export default function Header() {
             </h1>
           </Link>
 
-          {/* Navigation - Desktop */}
-          <nav className="hidden lg:flex items-center gap-1">
-            <Link
-              href="/"
-              className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#6FB644] transition-colors"
-            >
-              Home
-            </Link>
-            <div
-              className="relative"
-              onMouseEnter={() => setShopDropdown(true)}
-              onMouseLeave={() => setShopDropdown(false)}
-            >
-              <Link
-                href="/shop"
-                className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#6FB644] transition-colors"
+          {/* Navigation / Search - Desktop (same row) */}
+          <div className="hidden lg:flex flex-1 justify-center">
+            {isSearchOpen ? (
+              <form
+                className="max-w-xl w-full relative"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (searchQuery.trim()) {
+                    router.push(`/shop?search=${encodeURIComponent(searchQuery.trim())}`);
+                    setIsSearchOpen(false);
+                    setSearchQuery("");
+                  }
+                }}
               >
-                Shop <ChevronDown className="w-3.5 h-3.5" />
-              </Link>
-              {shopDropdown && (
-                <div className="absolute top-full left-0 bg-white shadow-lg rounded-lg py-2 min-w-[180px] z-50 border border-gray-100">
+                <input
+                  type="text"
+                  placeholder="Search plants..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6FB644] focus:border-transparent outline-none text-sm"
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  onClick={() => setIsSearchOpen(false)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                >
+                  <X className="w-4 h-4 text-gray-400" />
+                </button>
+              </form>
+            ) : (
+              <nav className="flex items-center gap-1">
+                <Link
+                  href="/"
+                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#6FB644] transition-colors"
+                >
+                  Home
+                </Link>
+                <div
+                  className="relative"
+                  onMouseEnter={() => setShopDropdown(true)}
+                  onMouseLeave={() => setShopDropdown(false)}
+                >
                   <Link
                     href="/shop"
-                    className="block px-4 py-2 text-sm hover:bg-green-50 hover:text-[#6FB644]"
+                    className="flex items-center gap-1 px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#6FB644] transition-colors"
                   >
-                    All Plants
+                    Shop <ChevronDown className="w-3.5 h-3.5" />
                   </Link>
-                  {categories.map((cat) => (
-                    <Link
-                      key={cat.id}
-                      href={`/shop?category=${cat.slug}`}
-                      className="block px-4 py-2 text-sm hover:bg-green-50 hover:text-[#6FB644]"
-                    >
-                      {cat.name}
-                    </Link>
-                  ))}
+                  {shopDropdown && (
+                    <div className="absolute top-full left-0 bg-white shadow-lg rounded-lg py-2 min-w-[180px] z-50 border border-gray-100">
+                      <Link
+                        href="/shop"
+                        className="block px-4 py-2 text-sm hover:bg-green-50 hover:text-[#6FB644]"
+                      >
+                        All Plants
+                      </Link>
+                      {categories.map((cat) => (
+                        <Link
+                          key={cat.id}
+                          href={`/shop?category=${cat.slug}`}
+                          className="block px-4 py-2 text-sm hover:bg-green-50 hover:text-[#6FB644]"
+                        >
+                          {cat.name}
+                        </Link>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-            <Link
-              href="/about"
-              className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#6FB644] transition-colors"
-            >
-              About
-            </Link>
-            <Link
-              href="/contact"
-              className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#6FB644] transition-colors"
-            >
-              Contact
-            </Link>
-          </nav>
+                <Link
+                  href="/about"
+                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#6FB644] transition-colors"
+                >
+                  About
+                </Link>
+                <Link
+                  href="/contact"
+                  className="px-3 py-2 text-sm font-medium text-gray-700 hover:text-[#6FB644] transition-colors"
+                >
+                  Contact
+                </Link>
+              </nav>
+            )}
+          </div>
 
           {/* Right Section */}
           <div className="flex items-center gap-2 md:gap-3">
@@ -182,11 +214,11 @@ export default function Header() {
           </div>
         </div>
 
-        {/* Search Bar - Expandable */}
+        {/* Search Bar - Mobile */}
         {isSearchOpen && (
-          <div className="px-4 pb-3">
+          <div className="lg:hidden px-4 pb-2">
             <form
-              className="max-w-xl mx-auto relative"
+              className="relative"
               onSubmit={(e) => {
                 e.preventDefault();
                 if (searchQuery.trim()) {
@@ -201,7 +233,7 @@ export default function Header() {
                 placeholder="Search plants..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-full focus:ring-2 focus:ring-[#6FB644] focus:border-transparent outline-none text-sm"
+                className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6FB644] focus:border-transparent outline-none text-sm"
                 autoFocus
               />
               <button

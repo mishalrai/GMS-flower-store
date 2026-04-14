@@ -16,7 +16,6 @@ import {
   Truck,
   Shield,
   RefreshCw,
-  Star,
   MessageCircle,
   ChevronRight,
   ChevronLeft,
@@ -39,6 +38,8 @@ export default function ProductPage() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isZooming, setIsZooming] = useState(false);
+  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
   const [isAdmin, setIsAdmin] = useState(false);
   const addItem = useCartStore((state) => state.addItem);
   const toggleCart = useCartStore((state) => state.toggleCart);
@@ -238,21 +239,6 @@ export default function ProductPage() {
                     className={`w-6 h-6 ${isInWishlist(product.id) ? "fill-red-500" : ""}`}
                   />
                 </button>
-              </div>
-
-              {/* Rating */}
-              <div className="flex items-center gap-2 mb-4">
-                <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`w-5 h-5 ${i < product.rating ? "text-yellow-400 fill-yellow-400" : "text-gray-300"}`}
-                    />
-                  ))}
-                </div>
-                <span className="text-sm text-gray-500">
-                  ({product.rating}/5)
-                </span>
               </div>
 
               {/* Price */}

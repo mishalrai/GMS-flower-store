@@ -17,9 +17,10 @@
     "images": [
       "/uploads/1773556212663-q5e325.jpg",
       "/uploads/1773556212674-3qmm3f.jpg",
-      "/uploads/1773556212672-cfl640.jpg"
+      "/uploads/1773556212672-cfl640.jpg",
+      "/uploads/1773556212652-nfcwiz.jpg"
     ],
-    "richText": "<h1>Hello</h1><p></p><p><img src=\"/uploads/1773556212659-sr70uz.jpg\"></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>",
+    "richText": "<h1>Hello</h1><p></p><p><img src=\"/uploads/1773556212659-sr70uz.jpg\" width=\"400\"></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p><p></p>",
     "tags": [
       "hello",
       "data"
@@ -222,7 +223,7 @@
     "inStock": true,
     "sku": "GMS-0015",
     "inventory": 100,
-    "richText": "<p></p>",
+    "richText": "<h2>Indoor&nbsp;plant</h2><p></p><p><img src=\"/uploads/1774191764125-crop-0spfbj.jpg\"></p>",
     "images": [
       "/uploads/1773556212669-u3m0ay.jpg",
       "/uploads/1773556212662-4ghup0.jpg"
