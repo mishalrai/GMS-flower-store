@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { Product } from '@/data/products';
 
 interface WishlistState {
@@ -9,7 +10,9 @@ interface WishlistState {
   isInWishlist: (productId: number) => boolean;
 }
 
-export const useWishlistStore = create<WishlistState>((set, get) => ({
+export const useWishlistStore = create<WishlistState>()(
+  persist(
+    (set, get) => ({
   items: [],
 
   addItem: (product: Product) => {
@@ -39,4 +42,9 @@ export const useWishlistStore = create<WishlistState>((set, get) => ({
   isInWishlist: (productId: number) => {
     return get().items.some((item) => item.id === productId);
   },
-}));
+    }),
+    {
+      name: 'gmn-wishlist',
+    }
+  )
+);

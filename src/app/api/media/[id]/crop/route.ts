@@ -1,19 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readData, writeData } from '@/lib/db';
+import prisma from '@/lib/db';
 import { writeFile } from 'fs/promises';
 import path from 'path';
+import { randomBytes } from 'crypto';
 import { optimizeImage } from '@/lib/optimize-image';
-
-interface MediaItem {
-  id: number;
-  filename: string;
-  originalName: string;
-  url: string;
-  size: number;
-  type: string;
-  alt: string;
-  uploadedAt: string;
-}
 
 export async function POST(
   request: NextRequest,
@@ -27,10 +17,8 @@ export async function POST(
     return NextResponse.json({ error: 'No file provided' }, { status: 400 });
   }
 
-  const media = readData<MediaItem>('media.json');
-  const index = media.findIndex((m) => m.id === Number(id));
-
-  if (index === -1) {
+  const item = await prisma.media.findUnique({ where: { id: Number(id) } });
+  if (!item) {
     return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
 
@@ -38,23 +26,21 @@ export async function POST(
   const rawBuffer = Buffer.from(bytes);
   const { buffer, optimizedSize } = await optimizeImage(rawBuffer, file.type);
 
-  // Save as new file
-  const ext = path.extname(media[index].filename) || '.jpg';
-  const filename = `${Date.now()}-crop-${Math.random().toString(36).slice(2, 8)}${ext}`;
+  const ext = path.extname(item.filename) || '.jpg';
+  const filename = `${Date.now()}-crop-${randomBytes(4).toString('hex')}${ext}`;
   const filepath = path.join(process.cwd(), 'public', 'uploads', filename);
 
   await writeFile(filepath, buffer);
 
-  // Update media record
-  media[index] = {
-    ...media[index],
-    filename,
-    url: `/uploads/${filename}`,
-    size: optimizedSize,
-    type: file.type || media[index].type,
-  };
+  const updated = await prisma.media.update({
+    where: { id: Number(id) },
+    data: {
+      filename,
+      url: `/uploads/${filename}`,
+      size: optimizedSize,
+      type: file.type || item.type,
+    },
+  });
 
-  writeData('media.json', media);
-
-  return NextResponse.json(media[index]);
+  return NextResponse.json(updated);
 }

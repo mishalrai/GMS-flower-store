@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { Product } from '@/data/products';
 
 export interface CartItem {
@@ -18,7 +19,9 @@ interface CartState {
   getItemCount: () => number;
 }
 
-export const useCartStore = create<CartState>((set, get) => ({
+export const useCartStore = create<CartState>()(
+  persist(
+    (set, get) => ({
   items: [],
   isCartOpen: false,
 
@@ -79,4 +82,10 @@ export const useCartStore = create<CartState>((set, get) => ({
   getItemCount: () => {
     return get().items.reduce((count, item) => count + item.quantity, 0);
   },
-}));
+    }),
+    {
+      name: 'gmn-cart',
+      partialize: (state) => ({ items: state.items }),
+    }
+  )
+);

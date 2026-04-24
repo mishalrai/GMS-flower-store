@@ -1,24 +1,33 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readData, writeData } from '@/lib/db';
-
-interface Banner { id: number; [key: string]: unknown; }
+import prisma from '@/lib/db';
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const body = await request.json();
-  const banners = readData<Banner>('banners.json');
-  const index = banners.findIndex(b => b.id === Number(id));
-  if (index === -1) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  banners[index] = { ...banners[index], ...body, id: Number(id) };
-  writeData('banners.json', banners);
-  return NextResponse.json(banners[index]);
+  try {
+    const banner = await prisma.banner.update({
+      where: { id: Number(id) },
+      data: {
+        ...(body.title !== undefined && { title: body.title }),
+        ...(body.subtitle !== undefined && { subtitle: body.subtitle }),
+        ...(body.buttonText !== undefined && { buttonText: body.buttonText }),
+        ...(body.buttonLink !== undefined && { buttonLink: body.buttonLink }),
+        ...(body.image !== undefined && { image: body.image }),
+        ...(body.order !== undefined && { order: body.order }),
+      },
+    });
+    return NextResponse.json(banner);
+  } catch {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const banners = readData<Banner>('banners.json');
-  const filtered = banners.filter(b => b.id !== Number(id));
-  if (filtered.length === banners.length) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  writeData('banners.json', filtered);
-  return NextResponse.json({ success: true });
+  try {
+    await prisma.banner.delete({ where: { id: Number(id) } });
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 }

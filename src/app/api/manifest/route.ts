@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
-import { readSingle } from '@/lib/db';
+import prisma from '@/lib/db';
 import { existsSync } from 'fs';
 import { join } from 'path';
 
 export async function GET() {
-  const settings = readSingle<Record<string, unknown>>('settings.json');
-  const storeName = (settings?.storeName as string) || 'GMS Flower Store';
-  const hasFavicon = settings?.favicon && existsSync(join(process.cwd(), 'public', 'generated-icons', 'icon-192x192.png'));
+  const settings = await prisma.settings.findUnique({ where: { id: 1 } });
+  const storeName = settings?.storeName || 'GMS Flower Store';
+  const hasFavicon =
+    settings?.favicon &&
+    existsSync(join(process.cwd(), 'public', 'generated-icons', 'icon-192x192.png'));
 
   const manifest = {
     name: storeName,

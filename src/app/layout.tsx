@@ -5,6 +5,7 @@ import { existsSync } from "fs";
 import { join } from "path";
 import { readSingle } from "@/lib/db";
 import Analytics from "@/components/Analytics";
+import AuthProvider from "@/components/providers/AuthProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -50,8 +51,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.variable} antialiased font-sans`}>
-        <Analytics />
-        {children}
+        <AuthProvider>
+          <Analytics />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

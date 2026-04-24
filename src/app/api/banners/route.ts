@@ -1,18 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readData, writeData } from '@/lib/db';
-
-interface Banner { id: number; title: string; subtitle: string; buttonText: string; buttonLink: string; image: string; }
+import prisma from '@/lib/db';
 
 export async function GET() {
-  return NextResponse.json(readData<Banner>('banners.json'));
+  const banners = await prisma.banner.findMany({ orderBy: { order: 'asc' } });
+  return NextResponse.json(banners);
 }
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const banners = readData<Banner>('banners.json');
-  const maxId = banners.reduce((max, b) => Math.max(max, b.id), 0);
-  const newBanner: Banner = { ...body, id: maxId + 1 };
-  banners.push(newBanner);
-  writeData('banners.json', banners);
-  return NextResponse.json(newBanner, { status: 201 });
+  const count = await prisma.banner.count();
+  const banner = await prisma.banner.create({
+    data: {
+      title: body.title,
+      subtitle: body.subtitle ?? '',
+      buttonText: body.buttonText ?? '',
+      buttonLink: body.buttonLink ?? '',
+      image: body.image ?? '',
+      order: count,
+    },
+  });
+  return NextResponse.json(banner, { status: 201 });
 }

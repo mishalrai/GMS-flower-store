@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import {
@@ -11,7 +11,10 @@ import {
   Menu,
   X,
   ChevronDown,
+  LogOut,
+  User,
 } from "lucide-react";
+import { useSession, signOut } from "next-auth/react";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
 import CartSidebar from "./CartSidebar";
@@ -23,9 +26,13 @@ export default function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [shopDropdown, setShopDropdown] = useState(false);
+  const [userDropdown, setUserDropdown] = useState(false);
   const [categories, setCategories] = useState<{ id: number; name: string; slug: string }[]>([]);
   const [storeLogo, setStoreLogo] = useState("");
   const [storeName, setStoreName] = useState("GMS Flower Store");
+  const userDropdownRef = useRef<HTMLDivElement>(null);
+
+  const { data: session } = useSession();
 
   const router = useRouter();
   const toggleCart = useCartStore((state) => state.toggleCart);
@@ -37,6 +44,16 @@ export default function Header() {
     const handleScroll = () => setIsScrolled(window.scrollY > 50);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(e.target as Node)) {
+        setUserDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -174,12 +191,55 @@ export default function Header() {
 
           {/* Right Section */}
           <div className="flex items-center gap-2 md:gap-3">
-            <Link
-              href="/admin/login"
-              className="hidden md:block text-sm text-gray-600 hover:text-[#6FB644] transition-colors mr-1"
-            >
-              Login / Register
-            </Link>
+            {session ? (
+              /* Logged-in user avatar + dropdown */
+              <div className="relative hidden md:block" ref={userDropdownRef}>
+                <button
+                  onClick={() => setUserDropdown((v) => !v)}
+                  className="flex items-center gap-2 hover:bg-gray-100 rounded-lg px-2 py-1.5 transition-colors"
+                >
+                  {session.user?.image ? (
+                    <Image
+                      src={session.user.image}
+                      alt={session.user.name ?? "User"}
+                      width={28}
+                      height={28}
+                      className="w-7 h-7 rounded-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center">
+                      <User className="w-4 h-4 text-[#6FB644]" />
+                    </div>
+                  )}
+                  <span className="text-sm text-gray-700 max-w-[100px] truncate">
+                    {session.user?.name?.split(" ")[0]}
+                  </span>
+                  <ChevronDown className="w-3.5 h-3.5 text-gray-400" />
+                </button>
+
+                {userDropdown && (
+                  <div className="absolute right-0 top-full mt-1 w-44 bg-white shadow-lg rounded-lg border border-gray-100 py-1 z-50">
+                    <div className="px-4 py-2 border-b border-gray-100">
+                      <p className="text-xs text-gray-500 truncate">{session.user?.email}</p>
+                    </div>
+                    <button
+                      onClick={() => { setUserDropdown(false); signOut({ callbackUrl: "/" }); }}
+                      className="w-full flex items-center gap-2 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Sign out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/login"
+                className="hidden md:block text-sm text-gray-600 hover:text-[#6FB644] transition-colors mr-1"
+              >
+                Login / Register
+              </Link>
+            )}
 
             <button
               onClick={() => setIsSearchOpen(!isSearchOpen)}

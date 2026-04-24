@@ -1,57 +1,65 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readData, writeData } from '@/lib/db';
-
-interface Product {
-  id: number;
-  sku: string;
-  name: string;
-  slug: string;
-  category: string;
-  price: number;
-  salePrice?: number;
-  image: string;
-  description: string;
-  size: string;
-  badge: string | null;
-  rating: number;
-  inStock: boolean;
-}
+import prisma from '@/lib/db';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const category = searchParams.get('category');
   const search = searchParams.get('search');
 
-  let products = readData<Product>('products.json');
-
-  if (category && category !== 'all') {
-    products = products.filter(p => p.category === category);
-  }
-  if (search) {
-    const q = search.toLowerCase();
-    products = products.filter(p =>
-      p.name.toLowerCase().includes(q) ||
-      (p.sku && p.sku.toLowerCase().includes(q))
-    );
-  }
+  const products = await prisma.product.findMany({
+    where: {
+      ...(category && category !== 'all' ? { category } : {}),
+      ...(search
+        ? {
+            OR: [
+              { name: { contains: search, mode: 'insensitive' } },
+              { sku: { contains: search, mode: 'insensitive' } },
+            ],
+          }
+        : {}),
+    },
+    orderBy: { createdAt: 'desc' },
+  });
 
   return NextResponse.json(products);
 }
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const products = readData<Product>('products.json');
 
-  const maxId = products.reduce((max, p) => Math.max(max, p.id), 0);
-  const newId = maxId + 1;
-  const newProduct: Product = {
-    ...body,
-    id: newId,
-    sku: `GMS-${String(newId).padStart(4, '0')}`,
-    slug: body.slug || body.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-  };
+  const slug =
+    body.slug ||
+    body.name
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
 
-  products.push(newProduct);
-  writeData('products.json', products);
-  return NextResponse.json(newProduct, { status: 201 });
+  // Use max ID to avoid collisions with seeded data gaps
+  const maxId = await prisma.product.aggregate({ _max: { id: true } });
+  const nextNum = (maxId._max.id ?? 0) + 1;
+  const sku = body.sku || `GMS-${String(nextNum).padStart(4, '0')}`;
+
+  const product = await prisma.product.create({
+    data: {
+      sku,
+      name: body.name,
+      slug,
+      category: body.category,
+      price: body.price,
+      salePrice: body.salePrice ?? null,
+      costPrice: body.costPrice ?? null,
+      image: body.image ?? '',
+      images: body.images ?? [],
+      description: body.description ?? '',
+      size: body.size ?? 'small',
+      badge: body.badge ?? null,
+      rating: body.rating ?? 0,
+      inStock: body.inStock ?? true,
+      inventory: body.inventory ?? null,
+      richText: body.richText ?? null,
+      tags: body.tags ?? [],
+    },
+  });
+
+  return NextResponse.json(product, { status: 201 });
 }

@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readData, writeData } from '@/lib/db';
+import prisma from '@/lib/db';
 
-interface Product {
-  id: number;
-  [key: string]: unknown;
-}
-
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const products = readData<Product>('products.json');
-  const product = products.find(p => p.id === Number(id));
+  const product = await prisma.product.findUnique({ where: { id: Number(id) } });
   if (!product) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json(product);
 }
@@ -17,21 +11,42 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const body = await request.json();
-  const products = readData<Product>('products.json');
-  const index = products.findIndex(p => p.id === Number(id));
-  if (index === -1) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  products[index] = { ...products[index], ...body, id: Number(id) };
-  writeData('products.json', products);
-  return NextResponse.json(products[index]);
+  try {
+    const product = await prisma.product.update({
+      where: { id: Number(id) },
+      data: {
+        ...(body.name !== undefined && { name: body.name }),
+        ...(body.slug !== undefined && { slug: body.slug }),
+        ...(body.category !== undefined && { category: body.category }),
+        ...(body.price !== undefined && { price: body.price }),
+        ...(body.salePrice !== undefined && { salePrice: body.salePrice }),
+        ...(body.costPrice !== undefined && { costPrice: body.costPrice }),
+        ...(body.image !== undefined && { image: body.image }),
+        ...(body.images !== undefined && { images: body.images }),
+        ...(body.description !== undefined && { description: body.description }),
+        ...(body.size !== undefined && { size: body.size }),
+        ...(body.badge !== undefined && { badge: body.badge }),
+        ...(body.rating !== undefined && { rating: body.rating }),
+        ...(body.inStock !== undefined && { inStock: body.inStock }),
+        ...(body.inventory !== undefined && { inventory: body.inventory }),
+        ...(body.richText !== undefined && { richText: body.richText }),
+        ...(body.tags !== undefined && { tags: body.tags }),
+        ...(body.sku !== undefined && { sku: body.sku }),
+      },
+    });
+    return NextResponse.json(product);
+  } catch {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const products = readData<Product>('products.json');
-  const filtered = products.filter(p => p.id !== Number(id));
-  if (filtered.length === products.length) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-
-  writeData('products.json', filtered);
-  return NextResponse.json({ success: true });
+  try {
+    await prisma.product.delete({ where: { id: Number(id) } });
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 }

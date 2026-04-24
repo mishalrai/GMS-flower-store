@@ -1,40 +1,74 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readData, writeData } from '@/lib/db';
+import prisma from '@/lib/db';
 
-interface OrderItem { productId: number; name: string; quantity: number; price: number; reviewed: boolean; }
-interface Order {
-  id: string;
-  items: OrderItem[];
-  customer: { name: string; phone: string; address: string; note?: string };
-  status: string;
-  reviewEnabled: boolean;
-  total: number;
-  createdAt: string;
-  updatedAt: string;
+function formatOrder(order: Awaited<ReturnType<typeof prisma.order.findUnique>> & { items?: unknown[] }) {
+  if (!order) return null;
+  return {
+    id: order.id,
+    status: order.status,
+    reviewEnabled: order.reviewEnabled,
+    total: order.total,
+    customer: {
+      name: order.customerName,
+      phone: order.customerPhone,
+      address: order.customerAddress,
+      note: order.customerNote ?? undefined,
+      ...(order.locationLat != null && order.locationLng != null
+        ? { location: { lat: order.locationLat, lng: order.locationLng } }
+        : {}),
+    },
+    payment: {
+      method: order.paymentMethod,
+      ...(order.paymentQrLabel ? { qrLabel: order.paymentQrLabel } : {}),
+      ...(order.paymentScreenshot ? { screenshotUrl: order.paymentScreenshot } : {}),
+    },
+    items: (order.items as { id: number; productId: number; name: string; quantity: number; price: number; reviewed: boolean }[] | undefined)?.map((item) => ({
+      productId: item.productId,
+      name: item.name,
+      quantity: item.quantity,
+      price: item.price,
+      reviewed: item.reviewed,
+    })) ?? [],
+    createdAt: order.createdAt.toISOString(),
+    updatedAt: order.updatedAt.toISOString(),
+  };
 }
 
-export async function GET(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const orders = readData<Order>('orders.json');
-  const order = orders.find(o => o.id === id);
+  const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
   if (!order) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  return NextResponse.json(order);
+  return NextResponse.json(formatOrder(order));
 }
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const body = await request.json();
-  const orders = readData<Order>('orders.json');
-  const index = orders.findIndex(o => o.id === id);
-  if (index === -1) return NextResponse.json({ error: 'Not found' }, { status: 404 });
 
-  // Auto-enable reviews when status changes to delivered
-  const updatedOrder = { ...orders[index], ...body, updatedAt: new Date().toISOString() };
-  if (body.status === 'delivered') {
-    updatedOrder.reviewEnabled = true;
+  try {
+    const order = await prisma.order.update({
+      where: { id },
+      data: {
+        ...(body.status !== undefined && { status: body.status }),
+        // Auto-enable reviews when delivered
+        ...(body.status === 'delivered' && { reviewEnabled: true }),
+        ...(body.reviewEnabled !== undefined && body.status !== 'delivered' && { reviewEnabled: body.reviewEnabled }),
+        // Update individual item reviewed flags if provided
+        ...(body.items !== undefined && {
+          items: {
+            updateMany: body.items
+              .filter((item: { productId?: number; reviewed?: boolean }) => item.productId !== undefined)
+              .map((item: { productId: number; reviewed: boolean }) => ({
+                where: { productId: item.productId },
+                data: { reviewed: item.reviewed },
+              })),
+          },
+        }),
+      },
+      include: { items: true },
+    });
+    return NextResponse.json(formatOrder(order));
+  } catch {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
   }
-
-  orders[index] = updatedOrder;
-  writeData('orders.json', orders);
-  return NextResponse.json(orders[index]);
 }

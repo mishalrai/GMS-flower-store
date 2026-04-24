@@ -1,22 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readData, writeData } from '@/lib/db';
-
-interface Category { id: number; name: string; slug: string; image: string; description: string; }
+import prisma from '@/lib/db';
 
 export async function GET() {
-  return NextResponse.json(readData<Category>('categories.json'));
+  const categories = await prisma.category.findMany({ orderBy: { name: 'asc' } });
+  return NextResponse.json(categories);
 }
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const categories = readData<Category>('categories.json');
-  const maxId = categories.reduce((max, c) => Math.max(max, c.id), 0);
-  const newCategory: Category = {
-    ...body,
-    id: maxId + 1,
-    slug: body.slug || body.name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-  };
-  categories.push(newCategory);
-  writeData('categories.json', categories);
-  return NextResponse.json(newCategory, { status: 201 });
+
+  const slug =
+    body.slug ||
+    body.name
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9-]/g, '');
+
+  const category = await prisma.category.create({
+    data: {
+      name: body.name,
+      slug,
+      image: body.image ?? '',
+      description: body.description ?? '',
+    },
+  });
+
+  return NextResponse.json(category, { status: 201 });
 }

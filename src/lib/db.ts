@@ -1,5 +1,24 @@
+import { PrismaClient } from '@prisma/client';
 import { readFileSync, writeFileSync, existsSync } from 'fs';
 import { join } from 'path';
+
+// ─── Prisma Client (PostgreSQL) ───────────────────────────────────────────────
+
+const globalForPrisma = globalThis as unknown as {
+  prisma: PrismaClient | undefined;
+};
+
+export const prisma =
+  globalForPrisma.prisma ??
+  new PrismaClient({
+    log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
+  });
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
+
+export default prisma;
+
+// ─── JSON File Helpers (used only for analytics.json) ────────────────────────
 
 const DATA_DIR = join(process.cwd(), 'data');
 

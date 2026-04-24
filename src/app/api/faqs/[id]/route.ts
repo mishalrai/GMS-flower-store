@@ -1,30 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readData, writeData } from '@/lib/db';
-
-interface FAQ {
-  id: number;
-  question: string;
-  answer: string;
-  order: number;
-  active: boolean;
-}
+import prisma from '@/lib/db';
 
 export async function PUT(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   const body = await request.json();
-  const faqs = readData<FAQ>('faqs.json');
-  const index = faqs.findIndex(f => f.id === Number(id));
-  if (index === -1) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  faqs[index] = { ...faqs[index], ...body, id: Number(id) };
-  writeData('faqs.json', faqs);
-  return NextResponse.json(faqs[index]);
+  try {
+    const faq = await prisma.faq.update({
+      where: { id: Number(id) },
+      data: {
+        ...(body.question !== undefined && { question: body.question }),
+        ...(body.answer !== undefined && { answer: body.answer }),
+        ...(body.order !== undefined && { order: body.order }),
+        ...(body.active !== undefined && { active: body.active }),
+      },
+    });
+    return NextResponse.json(faq);
+  } catch {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 }
 
-export async function DELETE(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+export async function DELETE(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const faqs = readData<FAQ>('faqs.json');
-  const filtered = faqs.filter(f => f.id !== Number(id));
-  if (filtered.length === faqs.length) return NextResponse.json({ error: 'Not found' }, { status: 404 });
-  writeData('faqs.json', filtered);
-  return NextResponse.json({ success: true });
+  try {
+    await prisma.faq.delete({ where: { id: Number(id) } });
+    return NextResponse.json({ success: true });
+  } catch {
+    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  }
 }

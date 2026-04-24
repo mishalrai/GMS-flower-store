@@ -1,32 +1,21 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { readData, writeData } from '@/lib/db';
-
-interface FAQ {
-  id: number;
-  question: string;
-  answer: string;
-  order: number;
-  active: boolean;
-}
+import prisma from '@/lib/db';
 
 export async function GET() {
-  const faqs = readData<FAQ>('faqs.json');
-  return NextResponse.json(faqs.sort((a, b) => a.order - b.order));
+  const faqs = await prisma.faq.findMany({ orderBy: { order: 'asc' } });
+  return NextResponse.json(faqs);
 }
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
-  const faqs = readData<FAQ>('faqs.json');
-  const maxId = faqs.reduce((max, f) => Math.max(max, f.id), 0);
-  const maxOrder = faqs.reduce((max, f) => Math.max(max, f.order), 0);
-  const newFaq: FAQ = {
-    id: maxId + 1,
-    question: body.question,
-    answer: body.answer,
-    order: maxOrder + 1,
-    active: true,
-  };
-  faqs.push(newFaq);
-  writeData('faqs.json', faqs);
-  return NextResponse.json(newFaq, { status: 201 });
+  const maxOrder = await prisma.faq.aggregate({ _max: { order: true } });
+  const faq = await prisma.faq.create({
+    data: {
+      question: body.question,
+      answer: body.answer,
+      order: (maxOrder._max.order ?? 0) + 1,
+      active: true,
+    },
+  });
+  return NextResponse.json(faq, { status: 201 });
 }

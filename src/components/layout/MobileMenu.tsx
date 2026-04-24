@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { X, Home, ShoppingBag, Info, Phone, ChevronRight } from "lucide-react";
+import { X, Home, ShoppingBag, Info, Phone, ChevronRight, LogIn, LogOut, User } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useSession, signOut } from "next-auth/react";
 
 interface Category {
   id: number;
@@ -19,6 +20,7 @@ export default function MobileMenu({ onClose }: MobileMenuProps) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [storeLogo, setStoreLogo] = useState("");
   const [storeName, setStoreName] = useState("GMS Flower Store");
+  const { data: session } = useSession();
 
   useEffect(() => {
     fetch("/api/categories")
@@ -100,7 +102,46 @@ export default function MobileMenu({ onClose }: MobileMenuProps) {
         </nav>
 
         {/* Bottom */}
-        <div className="p-4 border-t bg-gray-50">
+        <div className="p-4 border-t bg-gray-50 space-y-2">
+          {session ? (
+            <div>
+              <div className="flex items-center gap-2 px-1 mb-2">
+                {session.user?.image ? (
+                  <Image
+                    src={session.user.image}
+                    alt={session.user.name ?? "User"}
+                    width={32}
+                    height={32}
+                    className="w-8 h-8 rounded-full object-cover"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+                    <User className="w-4 h-4 text-[#6FB644]" />
+                  </div>
+                )}
+                <div>
+                  <p className="text-sm font-medium text-gray-800">{session.user?.name}</p>
+                  <p className="text-xs text-gray-500 truncate max-w-[180px]">{session.user?.email}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => { onClose(); signOut({ callbackUrl: "/" }); }}
+                className="flex items-center justify-center gap-2 w-full border border-red-200 text-red-600 py-2.5 rounded-lg text-sm font-medium hover:bg-red-50 transition-colors"
+              >
+                <LogOut className="w-4 h-4" />
+                Sign Out
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              onClick={onClose}
+              className="flex items-center justify-center gap-2 w-full border border-[#6FB644] text-[#6FB644] py-2.5 rounded-lg text-sm font-semibold hover:bg-green-50 transition-colors"
+            >
+              <LogIn className="w-4 h-4" />
+              Login / Register
+            </Link>
+          )}
           <a
             href="https://wa.me/9779840036888"
             className="flex items-center justify-center gap-2 w-full bg-[#25D366] text-white py-3 rounded-lg font-semibold hover:bg-[#1da851] transition-colors"
