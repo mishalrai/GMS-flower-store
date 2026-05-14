@@ -6,22 +6,42 @@ export async function GET(request: NextRequest) {
   const category = searchParams.get('category');
   const search = searchParams.get('search');
 
-  const products = await prisma.product.findMany({
-    where: {
-      ...(category && category !== 'all' ? { category } : {}),
-      ...(search
-        ? {
-            OR: [
-              { name: { contains: search, mode: 'insensitive' } },
-              { sku: { contains: search, mode: 'insensitive' } },
-            ],
-          }
-        : {}),
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+  const [products, salesGroups] = await Promise.all([
+    prisma.product.findMany({
+      where: {
+        ...(category && category !== 'all' ? { category } : {}),
+        ...(search
+          ? {
+              OR: [
+                { name: { contains: search, mode: 'insensitive' } },
+                { sku: { contains: search, mode: 'insensitive' } },
+              ],
+            }
+          : {}),
+      },
+      orderBy: { createdAt: 'desc' },
+    }),
+    // Aggregate units sold from delivered/processing orders. Excludes
+    // cancelled and pending so "popular" reflects realised sales.
+    prisma.orderItem.groupBy({
+      by: ['productId'],
+      _sum: { quantity: true },
+      where: {
+        order: { status: { in: ['confirmed', 'processing', 'shipped', 'delivered'] } },
+      },
+    }),
+  ]);
 
-  return NextResponse.json(products);
+  const salesByProduct = new Map<number, number>(
+    salesGroups.map((g) => [g.productId, g._sum.quantity ?? 0]),
+  );
+
+  const withSales = products.map((p) => ({
+    ...p,
+    salesCount: salesByProduct.get(p.id) ?? 0,
+  }));
+
+  return NextResponse.json(withSales);
 }
 
 export async function POST(request: NextRequest) {

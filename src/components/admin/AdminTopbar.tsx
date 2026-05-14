@@ -1,11 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { LogOut, Menu } from "lucide-react";
+import { LogOut, Menu, PanelLeftOpen } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useSidebar } from "@/components/admin/SidebarContext";
 
 export default function AdminTopbar() {
   const router = useRouter();
+  const { collapsed, toggle } = useSidebar();
   const [loggingOut, setLoggingOut] = useState(false);
   const [storeName, setStoreName] = useState("GMS Flower Store");
 
@@ -26,9 +28,13 @@ export default function AdminTopbar() {
 
   return (
     <header className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
-      <div className="flex items-center gap-4">
-        <button title="Toggle menu" className="lg:hidden p-2 hover:bg-gray-100 rounded-lg">
-          <Menu className="w-5 h-5" />
+      <div className="flex items-center gap-3">
+        <button
+          onClick={toggle}
+          title={collapsed ? "Show menu" : "Hide menu"}
+          className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 transition-colors"
+        >
+          {collapsed ? <PanelLeftOpen className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
         </button>
         <h2 className="text-lg font-semibold text-gray-800">
           {storeName} — Admin

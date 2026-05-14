@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 600" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#86bf6c"/>
+      <stop offset="100%" stop-color="#3a6b25"/>
+    </linearGradient>
+    <pattern id="leaves" x="0" y="0" width="160" height="160" patternUnits="userSpaceOnUse">
+      <path d="M40 110 C 40 70, 80 40, 120 40 C 100 80, 80 100, 40 110 Z" fill="#ffffff" opacity="0.06"/>
+      <path d="M120 130 C 120 100, 140 70, 160 70 C 150 100, 140 120, 120 130 Z" fill="#ffffff" opacity="0.05"/>
+    </pattern>
+  </defs>
+  <rect width="1600" height="600" fill="url(#bg)"/>
+  <rect width="1600" height="600" fill="url(#leaves)"/>
+  <g font-family="system-ui, sans-serif" text-anchor="middle" fill="#ffffff" opacity="0.5">
+    <text x="800" y="290" font-size="42" font-weight="600">Banner image placeholder</text>
+    <text x="800" y="340" font-size="20">Replace with your own image from the side panel</text>
+  </g>
+</svg>

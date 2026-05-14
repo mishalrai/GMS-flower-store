@@ -375,6 +375,122 @@ async function main() {
   }
   console.log(`  ✓ ${media.length} media files done`);
 
+  // ── Pages (page builder defaults) ────────────────────────────────────────
+  console.log('📄 Seeding default pages...');
+  const homeBlocks = [
+    {
+      id: crypto.randomUUID(),
+      type: 'hero',
+      settings: {
+        height: 'md',
+        buttons: [{ text: 'Shop Now', link: '/shop' }],
+        overlayColor: '#000000',
+        overlayOpacity: 40,
+        textColor: '#ffffff',
+        manual: [
+          {
+            title: 'Make Your Home Beautiful with Plants',
+            subtitle: 'Fresh indoor & outdoor plants grown in our home garden',
+            image: '/uploads/1773556212672-cfl640.jpg',
+          },
+          {
+            title: 'Fresh From Our Garden to Your Home',
+            subtitle: 'Locally grown plants in Gauradaha, Jhapa, Nepal',
+            image: '/uploads/1773556212660-n4qo7a.jpg',
+          },
+          {
+            title: 'Gift a Plant, Gift Life',
+            subtitle: 'Perfect plants for every occasion — birthdays, festivals & more',
+            image: '/uploads/1773556212663-q5e325.jpg',
+          },
+        ],
+      },
+    },
+    { id: crypto.randomUUID(), type: 'category-grid', settings: { title: 'Shop by Category' } },
+    {
+      id: crypto.randomUUID(),
+      type: 'featured-products',
+      settings: {
+        title: 'Featured Products',
+        tabs: [
+          { label: 'New Arrivals', filter: { mode: 'newest' } },
+          { label: 'On Sale', filter: { mode: 'sale' } },
+          { label: 'Most Popular', filter: { mode: 'popular' } },
+        ],
+      },
+    },
+    { id: crypto.randomUUID(), type: 'trust-banner', settings: {} },
+    {
+      id: crypto.randomUUID(),
+      type: 'testimonials',
+      settings: { title: 'What Our Customers Say', source: 'reviews', limit: 6 },
+    },
+  ];
+  const aboutBlocks = [
+    {
+      id: crypto.randomUUID(),
+      type: 'cta',
+      settings: {
+        title: 'About GMS Flower Store',
+        subtitle: 'Growing happiness from our garden to your home in Gauradaha, Jhapa',
+        buttonText: '',
+        buttonLink: '',
+        bgColor: '#6FB644',
+        align: 'center',
+      },
+    },
+    {
+      id: crypto.randomUUID(),
+      type: 'rich-text',
+      settings: {
+        content:
+          '<h2>Our Story</h2><p>GMS Flower Store started as a small passion project in our home garden in Gauradaha, Jhapa, Nepal. What began with a few potted plants has grown into a thriving collection of indoor and outdoor plants that we lovingly nurture and share with our community.</p><p>Every plant in our store is grown with care in our own garden. We believe in sustainable gardening practices and take pride in offering healthy, vibrant plants that are perfectly adapted to the local climate of eastern Nepal.</p><p>Our mission is simple: to make every home and office greener, one plant at a time.</p>',
+        align: 'left',
+        maxWidth: 'md',
+      },
+    },
+    { id: crypto.randomUUID(), type: 'trust-banner', settings: {} },
+    {
+      id: crypto.randomUUID(),
+      type: 'cta',
+      settings: {
+        title: 'Visit Us',
+        subtitle: 'Gauradaha, Jhapa, Nepal · Open 7:00 AM - 6:00 PM (Sun-Fri)',
+        buttonText: 'Contact on WhatsApp',
+        buttonLink: 'https://wa.me/9779840036888',
+        bgColor: '#5a9636',
+        align: 'center',
+      },
+    },
+  ];
+  const contactBlocks = [
+    {
+      id: crypto.randomUUID(),
+      type: 'cta',
+      settings: {
+        title: 'Get in Touch',
+        subtitle: "Have a question about our plants or your order? We'd love to hear from you.",
+        buttonText: '',
+        buttonLink: '',
+        bgColor: '#6FB644',
+        align: 'center',
+      },
+    },
+  ];
+
+  for (const [slug, title, blocks] of [
+    ['home', 'Home', homeBlocks],
+    ['about', 'About', aboutBlocks],
+    ['contact', 'Contact', contactBlocks],
+  ] as const) {
+    await prisma.page.upsert({
+      where: { slug },
+      update: { title, blocks: blocks as object },
+      create: { slug, title, blocks: blocks as object, published: true },
+    });
+  }
+  console.log('  ✓ 3 default pages done');
+
   console.log('\n✅ Seeding complete!');
 }
 

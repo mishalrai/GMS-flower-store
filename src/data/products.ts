@@ -14,6 +14,9 @@ export interface Product {
   rating: number;
   inStock: boolean;
   richText?: string;
+  tags?: string[];
+  /** Total units sold across all delivered/processing orders. Populated by /api/products. */
+  salesCount?: number;
 }
 
 export interface Category {

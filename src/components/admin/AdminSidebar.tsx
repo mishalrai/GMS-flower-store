@@ -18,10 +18,13 @@ import {
   Leaf,
   HelpCircle,
   BarChart3,
+  LayoutTemplate,
 } from "lucide-react";
+import { useSidebar } from "@/components/admin/SidebarContext";
 
 const menuItems = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/pages", label: "Pages", icon: LayoutTemplate },
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/categories", label: "Categories", icon: FolderOpen },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
@@ -36,6 +39,7 @@ const menuItems = [
 
 export default function AdminSidebar() {
   const pathname = usePathname();
+  const { collapsed } = useSidebar();
   const [storeLogo, setStoreLogo] = useState("");
   const [storeName, setStoreName] = useState("GMS");
 
@@ -50,7 +54,12 @@ export default function AdminSidebar() {
   }, []);
 
   return (
-    <aside className="w-64 bg-gray-900 text-white min-h-screen flex flex-col fixed left-0 top-0 z-30">
+    <aside
+      className={`w-64 bg-gray-900 text-white min-h-screen flex flex-col fixed left-0 top-0 z-30 transition-transform duration-200 ${
+        collapsed ? "-translate-x-full" : "translate-x-0"
+      }`}
+      aria-hidden={collapsed}
+    >
       {/* Logo */}
       <div className="p-6 border-b border-gray-800">
         <div className="flex items-center gap-2">
