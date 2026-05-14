@@ -242,8 +242,8 @@ export default function MediaPickerModal({
   return (
     <>
       <div className="fixed inset-0 bg-black/30 z-50" onClick={onClose} />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-        <div className="bg-white rounded-xl shadow-xl w-full max-w-6xl max-h-[90vh] flex flex-col border border-gray-100">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-5">
+        <div className="bg-white rounded-xl shadow-xl w-full h-full flex flex-col border border-gray-100">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-100 flex-shrink-0">
             <h3 className="text-lg font-semibold">
@@ -366,7 +366,7 @@ export default function MediaPickerModal({
                   </p>
                 </div>
               ) : (
-                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
+                <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 xl:grid-cols-10 gap-3">
                   {visibleMedia.map((item) => {
                     const selected = isItemSelected(item);
                     const multiIndex = multiple ? selectedItems.findIndex((s) => s.id === item.id) : -1;
