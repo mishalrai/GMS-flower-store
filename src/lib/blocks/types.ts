@@ -57,6 +57,22 @@ export interface ManualTestimonial {
   image?: string;
 }
 
+export type TrustIconKey =
+  | "truck"
+  | "shield"
+  | "headphones"
+  | "refresh"
+  | "lock"
+  | "star"
+  | "heart"
+  | "award"
+  | "clock"
+  | "gift"
+  | "thumbs-up"
+  | "check-circle"
+  | "leaf"
+  | "package";
+
 export type ProductFilterMode =
   | "newest"
   | "popular"
@@ -132,9 +148,11 @@ export type BlockSettings = {
   };
   "category-grid": {
     title?: string;
+    /** Category slugs to show. When undefined or empty, all categories are shown in their default order. */
+    categorySlugs?: string[];
   };
   "trust-banner": {
-    items?: { title: string; subtitle: string }[];
+    items?: { icon?: TrustIconKey; title: string; subtitle: string }[];
   };
 };
 

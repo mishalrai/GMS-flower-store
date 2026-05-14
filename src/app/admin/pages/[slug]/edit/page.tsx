@@ -211,25 +211,59 @@ export default function PageEditor() {
     setReorderFrom(idx);
     setReorderOver(idx);
 
-    const onMove = (ev: PointerEvent) => {
-      if (!listRef.current) return;
+    let lastClientY = e.clientY;
+    let scrollRAF: number | null = null;
+
+    const computeOver = (clientY: number) => {
+      if (!listRef.current) return blocksRef.current.length;
       const items = listRef.current.querySelectorAll("[data-block-id]");
-      let target = items.length - 1;
       for (let i = 0; i < items.length; i++) {
         const rect = items[i].getBoundingClientRect();
-        if (ev.clientY < rect.top + rect.height / 2) {
-          target = i;
-          break;
+        if (clientY < rect.top + rect.height / 2) {
+          return i;
         }
       }
-      overRef.current = target;
-      setReorderOver(target);
+      // Past every block's midpoint → drop at the end
+      return items.length;
+    };
+
+    // Auto-scroll the window when cursor enters the edge zone so the user
+    // can drag past tall blocks (e.g. Featured Products with many rows).
+    const AUTO_SCROLL_ZONE = 100; // px from viewport edge
+    const MAX_SPEED = 22; // px per frame
+    const tick = () => {
+      const vh = window.innerHeight;
+      let dy = 0;
+      if (lastClientY < AUTO_SCROLL_ZONE) {
+        dy = -(((AUTO_SCROLL_ZONE - lastClientY) / AUTO_SCROLL_ZONE) * MAX_SPEED);
+      } else if (lastClientY > vh - AUTO_SCROLL_ZONE) {
+        dy =
+          ((lastClientY - (vh - AUTO_SCROLL_ZONE)) / AUTO_SCROLL_ZONE) * MAX_SPEED;
+      }
+      if (dy !== 0) {
+        window.scrollBy(0, dy);
+        // After scroll, recompute drop index because DOM rects changed.
+        const next = computeOver(lastClientY);
+        overRef.current = next;
+        setReorderOver(next);
+      }
+      scrollRAF = window.requestAnimationFrame(tick);
+    };
+    scrollRAF = window.requestAnimationFrame(tick);
+
+    const onMove = (ev: PointerEvent) => {
+      lastClientY = ev.clientY;
+      const next = computeOver(ev.clientY);
+      overRef.current = next;
+      setReorderOver(next);
     };
 
     const onUp = () => {
       document.removeEventListener("pointermove", onMove);
       document.removeEventListener("pointerup", onUp);
       document.body.style.userSelect = "";
+      document.body.style.cursor = "";
+      if (scrollRAF !== null) window.cancelAnimationFrame(scrollRAF);
 
       const from = dragRef.current;
       const to = overRef.current;
@@ -238,15 +272,21 @@ export default function PageEditor() {
       setReorderFrom(null);
       setReorderOver(null);
 
-      if (from === null || to === null || from === to) return;
+      if (from === null || to === null) return;
+      // After removing the dragged item, indices for any block originally
+      // *after* the drag source shift left by 1. Adjust so dropping above
+      // block N (visual intent) lands the dragged block at that visual slot.
+      const adjustedTo = to > from ? to - 1 : to;
+      if (adjustedTo === from) return; // dropped on its own slot — no-op
 
       const updated = [...blocksRef.current];
       const [dragged] = updated.splice(from, 1);
-      updated.splice(to, 0, dragged);
+      updated.splice(adjustedTo, 0, dragged);
       setBlocks(updated);
     };
 
     document.body.style.userSelect = "none";
+    document.body.style.cursor = "grabbing";
     document.addEventListener("pointermove", onMove);
     document.addEventListener("pointerup", onUp);
   };
@@ -336,13 +376,18 @@ export default function PageEditor() {
 
                   return (
                     <div key={block.id} data-block-id={block.id}>
-                      {showLibDropLine && (
-                        <div className="h-1 bg-[#6FB644] rounded-full mb-2 animate-pulse" />
+                      {(showLibDropLine || isReorderOver) && (
+                        <div className="relative h-2 mb-2 flex items-center pointer-events-none">
+                          <div className="absolute inset-x-0 h-1 bg-[#6FB644] rounded-full animate-pulse shadow-[0_0_8px_rgba(111,182,68,0.6)]" />
+                          <div className="absolute left-1/2 -translate-x-1/2 -top-1.5 px-2 py-0.5 bg-[#6FB644] text-white text-[10px] font-semibold rounded shadow-md whitespace-nowrap">
+                            Drop here
+                          </div>
+                        </div>
                       )}
                       <div
                         className={`group/block relative bg-white rounded-xl border border-gray-200 overflow-hidden transition-all ${
-                          isReorderDragging ? "opacity-40" : ""
-                        } ${isReorderOver ? "border-t-2 border-t-[#6FB644]" : ""} ${
+                          isReorderDragging ? "opacity-30 scale-[0.99]" : ""
+                        } ${
                           expanded ? "ring-2 ring-[#6FB644]/40" : ""
                         }`}
                       >
@@ -497,9 +542,17 @@ export default function PageEditor() {
                     </div>
                   );
                 })}
-                {/* Drop indicator at the end */}
-                {draggingLibType !== null && dropIdx === blocks.length && (
-                  <div className="h-1 bg-[#6FB644] rounded-full animate-pulse" />
+                {/* Drop indicator at the end of the list (library drag OR internal reorder) */}
+                {((draggingLibType !== null && dropIdx === blocks.length) ||
+                  (reorderFrom !== null &&
+                    reorderOver === blocks.length &&
+                    reorderFrom !== blocks.length - 1)) && (
+                  <div className="relative h-2 mt-2 flex items-center pointer-events-none">
+                    <div className="absolute inset-x-0 h-1 bg-[#6FB644] rounded-full animate-pulse shadow-[0_0_8px_rgba(111,182,68,0.6)]" />
+                    <div className="absolute left-1/2 -translate-x-1/2 -top-1.5 px-2 py-0.5 bg-[#6FB644] text-white text-[10px] font-semibold rounded shadow-md whitespace-nowrap">
+                      Drop here
+                    </div>
+                  </div>
                 )}
               </div>
             )}

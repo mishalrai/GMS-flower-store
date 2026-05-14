@@ -4,7 +4,8 @@ import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, Save, X, Plus, Star as StarIcon } from "lucide-react";
+import { ArrowLeft, Save, X, Plus, Star as StarIcon, ExternalLink, Youtube } from "lucide-react";
+import { isYouTubeUrl, parseVideoSource, isVideoFileUrl } from "@/lib/video";
 import { useToast } from "@/components/admin/Toast";
 import CustomSelect from "@/components/ui/CustomSelect";
 import MediaPickerModal from "@/components/admin/MediaPickerModal";
@@ -26,10 +27,14 @@ export default function EditProductPage() {
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<Category[]>([]);
   const [images, setImages] = useState<string[]>([]);
+  const [videos, setVideos] = useState<string[]>([]);
+  const [showYoutubeInput, setShowYoutubeInput] = useState(false);
+  const [youtubeUrl, setYoutubeUrl] = useState("");
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [mediaPickerOpen, setMediaPickerOpen] = useState(false);
   const [rteMediaPickerOpen, setRteMediaPickerOpen] = useState(false);
   const [rteImageUrl, setRteImageUrl] = useState<string | null>(null);
+  const [slug, setSlug] = useState<string>("");
   const [form, setForm] = useState({
     name: "",
     sku: "",
@@ -52,6 +57,7 @@ export default function EditProductPage() {
       fetch(`/api/products/${id}`).then((r) => r.json()),
       fetch("/api/categories").then((r) => r.json()),
     ]).then(([data, cats]: [Record<string, unknown>, Category[]]) => {
+      setSlug((data.slug as string) || "");
       setForm({
         name: data.name as string,
         sku: (data.sku as string) || "",
@@ -83,22 +89,37 @@ export default function EditProductPage() {
         setImages([singleImage]);
       }
 
+      // Load videos
+      const productVideos = data.videos as string[] | undefined;
+      if (productVideos && productVideos.length > 0) setVideos(productVideos);
+
       setCategories(cats);
       setLoading(false);
     });
   }, [id]);
 
+  // Route a picked URL to the right list based on whether it's a video file or image.
   const handleMediaSelect = (url: string) => {
-    if (!images.includes(url)) {
-      setImages((prev) => [...prev, url]);
+    if (isVideoFileUrl(url)) {
+      if (!videos.includes(url)) setVideos((prev) => [...prev, url]);
+    } else {
+      if (!images.includes(url)) setImages((prev) => [...prev, url]);
     }
   };
 
   const handleMediaSelectMultiple = (urls: string[]) => {
-    setImages((prev) => {
-      const newUrls = urls.filter((u) => !prev.includes(u));
-      return [...prev, ...newUrls];
-    });
+    const newImages: string[] = [];
+    const newVideos: string[] = [];
+    for (const u of urls) {
+      if (isVideoFileUrl(u)) newVideos.push(u);
+      else newImages.push(u);
+    }
+    if (newImages.length) {
+      setImages((prev) => [...prev, ...newImages.filter((u) => !prev.includes(u))]);
+    }
+    if (newVideos.length) {
+      setVideos((prev) => [...prev, ...newVideos.filter((u) => !prev.includes(u))]);
+    }
   };
 
   const removeImage = (index: number) => {
@@ -108,6 +129,25 @@ export default function EditProductPage() {
     } else if (featuredIndex > index) {
       setFeaturedIndex(featuredIndex - 1);
     }
+  };
+
+  const removeVideo = (index: number) =>
+    setVideos((prev) => prev.filter((_, i) => i !== index));
+
+  const addYoutubeLink = () => {
+    const url = youtubeUrl.trim();
+    if (!url) return;
+    if (!isYouTubeUrl(url)) {
+      toast("That doesn't look like a YouTube link", "error");
+      return;
+    }
+    if (videos.includes(url)) {
+      toast("This video is already added", "error");
+      return;
+    }
+    setVideos((prev) => [...prev, url]);
+    setYoutubeUrl("");
+    setShowYoutubeInput(false);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -125,6 +165,7 @@ export default function EditProductPage() {
       richText: form.richText || undefined,
       image: images[featuredIndex] || "",
       images,
+      videos,
       slug: form.name
         .toLowerCase()
         .replace(/\s+/g, "-")
@@ -165,6 +206,18 @@ export default function EditProductPage() {
           <ArrowLeft className="w-5 h-5" />
         </Link>
         <h1 className="text-2xl font-bold text-gray-800">Edit Product</h1>
+        {slug && (
+          <Link
+            href={`/products/${slug}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Open the customer-facing product page in a new tab"
+            className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          >
+            <ExternalLink className="w-4 h-4" />
+            View on site
+          </Link>
+        )}
       </div>
 
       <form
@@ -172,15 +225,15 @@ export default function EditProductPage() {
         onSubmit={handleSubmit}
         className="bg-white rounded-xl p-6"
       >
-        {/* Images */}
+        {/* Product Media (images + videos) */}
         <div className="mb-6">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            Product Images
+            Product Media
           </label>
           <div className="flex flex-wrap gap-3">
             {images.map((url, index) => (
               <div
-                key={url}
+                key={`img-${url}`}
                 className={`relative w-28 h-28 rounded-lg overflow-hidden border-2 group cursor-pointer ${
                   index === featuredIndex
                     ? "border-[#6FB644]"
@@ -204,20 +257,115 @@ export default function EditProductPage() {
                 </button>
               </div>
             ))}
+            {videos.map((url, i) => {
+              const v = parseVideoSource(url);
+              return (
+                <div
+                  key={`vid-${url}-${i}`}
+                  className="relative w-28 h-28 rounded-lg border-2 border-gray-200 overflow-hidden bg-black group"
+                >
+                  {v.kind === "youtube" ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={v.thumbnail}
+                      alt="YouTube video"
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <video
+                      src={url}
+                      className="w-full h-full object-cover"
+                      muted
+                      playsInline
+                      preload="metadata"
+                    />
+                  )}
+                  {/* Play overlay */}
+                  <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                    <div className="w-7 h-7 rounded-full bg-black/55 flex items-center justify-center">
+                      <span className="block w-0 h-0 ml-0.5 border-y-[5px] border-y-transparent border-l-[8px] border-l-white" />
+                    </div>
+                  </div>
+                  {v.kind === "youtube" && (
+                    <span className="absolute top-1 left-1 px-1.5 py-0.5 bg-red-600 text-white text-[9px] font-bold rounded flex items-center gap-1">
+                      <Youtube className="w-3 h-3" />
+                      YT
+                    </span>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => removeVideo(i)}
+                    title="Remove video"
+                    className="absolute top-1 right-1 bg-white rounded-full p-0.5 shadow-md hover:bg-gray-100 opacity-0 group-hover:opacity-100 transition-opacity"
+                  >
+                    <X className="w-3.5 h-3.5 text-gray-600" />
+                  </button>
+                </div>
+              );
+            })}
             <button
               type="button"
               onClick={() => setMediaPickerOpen(true)}
               className="w-28 h-28 border-2 border-dashed border-gray-300 rounded-lg flex flex-col items-center justify-center gap-1 hover:border-[#6FB644] hover:bg-green-50 transition-colors"
             >
               <Plus className="w-5 h-5 text-gray-400" />
-              <span className="text-[10px] text-gray-500">Add Image</span>
+              <span className="text-[10px] text-gray-500">Add Media</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowYoutubeInput(true)}
+              className="w-28 h-28 rounded-lg border-2 border-dashed border-gray-300 hover:border-red-500 hover:text-red-500 text-gray-400 flex flex-col items-center justify-center transition-colors"
+            >
+              <Youtube className="w-5 h-5" />
+              <span className="text-[10px] text-gray-500 mt-1">YouTube link</span>
             </button>
           </div>
-          {images.length > 1 && (
-            <p className="text-xs text-gray-400 mt-2">
-              Click an image to set it as the featured image (shown with star).
-            </p>
+
+          {/* Inline YouTube link input */}
+          {showYoutubeInput && (
+            <div className="mt-3 flex items-center gap-2 p-3 border border-gray-200 rounded-lg bg-gray-50">
+              <Youtube className="w-5 h-5 text-red-500 flex-shrink-0" />
+              <input
+                type="text"
+                autoFocus
+                value={youtubeUrl}
+                onChange={(e) => setYoutubeUrl(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    addYoutubeLink();
+                  }
+                  if (e.key === "Escape") {
+                    setShowYoutubeInput(false);
+                    setYoutubeUrl("");
+                  }
+                }}
+                placeholder="https://www.youtube.com/watch?v=…"
+                className="flex-1 px-3 py-2 border border-gray-300 rounded text-sm outline-none focus:border-[#6FB644]"
+              />
+              <button
+                type="button"
+                onClick={addYoutubeLink}
+                className="px-3 py-2 bg-[#6FB644] hover:bg-[#5a9636] text-white text-sm font-semibold rounded"
+              >
+                Add
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowYoutubeInput(false);
+                  setYoutubeUrl("");
+                }}
+                className="p-2 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
           )}
+
+          <p className="text-xs text-gray-400 mt-2">
+            Click an image to set it as the featured image (shown with star). Videos: max 50 MB · MP4 / WebM, or paste a YouTube link.
+          </p>
         </div>
 
         <div className="grid md:grid-cols-2 gap-6">

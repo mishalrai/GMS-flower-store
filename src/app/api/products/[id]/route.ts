@@ -24,6 +24,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
         ...(body.costPrice !== undefined && { costPrice: body.costPrice }),
         ...(body.image !== undefined && { image: body.image }),
         ...(body.images !== undefined && { images: body.images }),
+        ...(body.videos !== undefined && { videos: body.videos }),
         ...(body.description !== undefined && { description: body.description }),
         ...(body.size !== undefined && { size: body.size }),
         ...(body.badge !== undefined && { badge: body.badge }),
@@ -36,8 +37,14 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
       },
     });
     return NextResponse.json(product);
-  } catch {
-    return NextResponse.json({ error: 'Not found' }, { status: 404 });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Update failed';
+    // Prisma "Record to update not found" → 404, anything else → 500 with detail
+    if (msg.includes('not found') || msg.includes('No record')) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+    console.error('PUT /api/products/[id] failed:', err);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
 

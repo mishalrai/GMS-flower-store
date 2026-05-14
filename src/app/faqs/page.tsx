@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import PageBanner from "@/components/layout/PageBanner";
 import WhatsAppButton from "@/components/home/WhatsAppButton";
 
 interface FAQ {
@@ -32,15 +33,15 @@ export default function FAQsPage() {
     <>
       <Header />
       <main className="min-h-screen">
-        <section className="py-16 px-4">
+        <PageBanner
+          title="FAQs"
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "FAQs" },
+          ]}
+        />
+        <section className="py-12 px-4">
           <div className="max-w-3xl mx-auto">
-            <h1 className="text-3xl font-bold text-gray-800 mb-2 text-center">
-              Frequently Asked Questions
-            </h1>
-            <p className="text-gray-500 text-center mb-10">
-              Find answers to common questions about our plants and services.
-            </p>
-
             {loading ? (
               <div className="flex justify-center py-12">
                 <div className="animate-spin w-8 h-8 border-4 border-[#6FB644] border-t-transparent rounded-full" />

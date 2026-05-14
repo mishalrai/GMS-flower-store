@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Plus, Trash2, Image as ImageIcon, AlignLeft, AlignCenter, AlignRight, Bookmark, BookmarkCheck, Star } from "lucide-react";
 import MediaPickerModal from "@/components/admin/MediaPickerModal";
@@ -12,8 +12,10 @@ import {
   ManualTestimonial,
   ProductFilter,
   ProductFilterMode,
+  TrustIconKey,
 } from "@/lib/blocks/types";
 import { FILTER_MODE_OPTIONS, readTabFilter } from "@/lib/blocks/filters";
+import { TRUST_ICONS, TRUST_ICON_KEYS, iconForItem } from "@/lib/blocks/trustIcons";
 import ProductPicker from "./ProductPicker";
 import MultiProductPicker from "./MultiProductPicker";
 
@@ -924,24 +926,172 @@ export function CategoryGridForm({
   settings: BlockSettings["category-grid"];
   onChange: (s: BlockSettings["category-grid"]) => void;
 }) {
+  const [categories, setCategories] = useState<{ slug: string; name: string }[]>([]);
+
+  useEffect(() => {
+    fetch("/api/categories")
+      .then((r) => r.json())
+      .then((data: { slug: string; name: string }[]) => setCategories(data))
+      .catch(() => {});
+  }, []);
+
+  const selected = settings.categorySlugs ?? [];
+  const showAll = selected.length === 0;
+
+  const toggleSlug = (slug: string) => {
+    const next = selected.includes(slug)
+      ? selected.filter((s) => s !== slug)
+      : [...selected, slug];
+    onChange({ ...settings, categorySlugs: next.length > 0 ? next : undefined });
+  };
+
   return (
     <div className="space-y-4">
       <div>
-        <Label>Title</Label>
-        <input
-          type="text"
-          value={settings.title ?? ""}
-          onChange={(e) => onChange({ ...settings, title: e.target.value })}
-          placeholder="Shop by Category"
-          className={fieldClass}
-        />
-        <p className="text-xs text-gray-400 mt-1">Categories are managed in the Categories admin.</p>
+        <Label>Categories to show</Label>
+        <div className="flex items-center gap-3 mb-2">
+          <button
+            type="button"
+            onClick={() => onChange({ ...settings, categorySlugs: undefined })}
+            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+              showAll
+                ? "bg-[#6FB644] text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            All categories
+          </button>
+          <button
+            type="button"
+            onClick={() =>
+              onChange({
+                ...settings,
+                categorySlugs: selected.length > 0 ? selected : [categories[0]?.slug].filter(Boolean) as string[],
+              })
+            }
+            className={`flex-1 px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+              !showAll
+                ? "bg-[#6FB644] text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            Pick specific
+          </button>
+        </div>
+
+        {!showAll && (
+          <div className="space-y-1 max-h-56 overflow-y-auto border border-gray-200 rounded-lg p-2">
+            {categories.length === 0 ? (
+              <p className="text-xs text-gray-400 text-center py-3">Loading…</p>
+            ) : (
+              categories.map((c) => {
+                const checked = selected.includes(c.slug);
+                return (
+                  <label
+                    key={c.slug}
+                    className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-gray-50 cursor-pointer text-sm"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => toggleSlug(c.slug)}
+                      className="accent-[#6FB644]"
+                    />
+                    <span className="text-gray-700">{c.name}</span>
+                  </label>
+                );
+              })
+            )}
+          </div>
+        )}
+
+        <p className="text-xs text-gray-400 mt-2">
+          {showAll
+            ? "Showing all categories in their default order."
+            : `${selected.length} selected · shown in the order you pick.`}
+        </p>
       </div>
     </div>
   );
 }
 
 // ─── Trust Banner ─────────────────────────────────────────────────────────
+
+function TrustIconPicker({
+  value,
+  onChange,
+  fallbackIndex,
+}: {
+  value: TrustIconKey | undefined;
+  onChange: (key: TrustIconKey) => void;
+  fallbackIndex: number;
+}) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [open]);
+
+  const Active = iconForItem(value, fallbackIndex);
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        title="Pick an icon"
+        className="w-10 h-10 rounded-lg bg-green-100 hover:bg-green-200 flex items-center justify-center transition-colors border border-transparent hover:border-[#6FB644]"
+      >
+        <Active className="w-5 h-5 text-[#6FB644]" />
+      </button>
+      {open && (
+        <div className="absolute top-full left-0 mt-1 z-30 bg-white border border-gray-200 rounded-lg shadow-xl p-2 grid grid-cols-4 gap-1 w-44">
+          {TRUST_ICON_KEYS.map((k) => {
+            const { Icon, label } = TRUST_ICONS[k];
+            const active = (value ?? null) === k;
+            return (
+              <button
+                key={k}
+                type="button"
+                title={label}
+                onClick={() => {
+                  onChange(k);
+                  setOpen(false);
+                }}
+                className={`w-9 h-9 rounded flex items-center justify-center transition-colors ${
+                  active
+                    ? "bg-[#6FB644] text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
+              >
+                <Icon className="w-4 h-4" />
+              </button>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// Same fallback that TrustBannerBlock renders when settings.items is empty,
+// so the form can show them as starter items on first open.
+const TRUST_BANNER_DEFAULTS: {
+  icon: TrustIconKey;
+  title: string;
+  subtitle: string;
+}[] = [
+  { icon: "truck", title: "Free Delivery", subtitle: "On orders over Rs 2,000" },
+  { icon: "shield", title: "Safe Payment", subtitle: "100% secure payment" },
+  { icon: "headphones", title: "24/7 Support", subtitle: "Dedicated support" },
+  { icon: "refresh", title: "Easy Returns", subtitle: "7-day return policy" },
+];
 
 export function TrustBannerForm({
   settings,
@@ -950,14 +1100,33 @@ export function TrustBannerForm({
   settings: BlockSettings["trust-banner"];
   onChange: (s: BlockSettings["trust-banner"]) => void;
 }) {
+  // When the block has never been edited (`items` is undefined), seed the
+  // form with the same defaults the public block uses so they're editable.
+  // Empty array (`items: []`) is left alone — user intentionally cleared.
+  useEffect(() => {
+    if (settings.items === undefined) {
+      onChange({ ...settings, items: TRUST_BANNER_DEFAULTS });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const items = settings.items ?? [];
-  const update = (i: number, patch: Partial<{ title: string; subtitle: string }>) => {
+  const update = (
+    i: number,
+    patch: Partial<{ icon?: TrustIconKey; title: string; subtitle: string }>,
+  ) => {
     const next = [...items];
     next[i] = { ...next[i], ...patch };
     onChange({ ...settings, items: next });
   };
   const add = () =>
-    onChange({ ...settings, items: [...items, { title: "Feature", subtitle: "Description" }] });
+    onChange({
+      ...settings,
+      items: [
+        ...items,
+        { icon: "truck", title: "Feature", subtitle: "Description" },
+      ],
+    });
   const remove = (i: number) =>
     onChange({ ...settings, items: items.filter((_, idx) => idx !== i) });
 
@@ -966,24 +1135,35 @@ export function TrustBannerForm({
       <Label>Items (max 4 displayed)</Label>
       <div className="space-y-2">
         {items.map((item, i) => (
-          <div key={i} className="flex items-center gap-2 p-2 border border-gray-200 rounded">
-            <input
-              type="text"
-              placeholder="Title"
-              value={item.title}
-              onChange={(e) => update(i, { title: e.target.value })}
-              className="flex-1 px-2 py-1.5 border border-gray-200 rounded text-sm outline-none focus:border-[#6FB644]"
+          <div
+            key={i}
+            className="flex items-start gap-2 p-2 border border-gray-200 rounded bg-white"
+          >
+            <TrustIconPicker
+              value={item.icon}
+              onChange={(icon) => update(i, { icon })}
+              fallbackIndex={i}
             />
-            <input
-              type="text"
-              placeholder="Subtitle"
-              value={item.subtitle}
-              onChange={(e) => update(i, { subtitle: e.target.value })}
-              className="flex-1 px-2 py-1.5 border border-gray-200 rounded text-sm outline-none focus:border-[#6FB644]"
-            />
+            <div className="flex-1 space-y-1 min-w-0">
+              <input
+                type="text"
+                placeholder="Title"
+                value={item.title}
+                onChange={(e) => update(i, { title: e.target.value })}
+                className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm outline-none focus:border-[#6FB644]"
+              />
+              <input
+                type="text"
+                placeholder="Subtitle"
+                value={item.subtitle}
+                onChange={(e) => update(i, { subtitle: e.target.value })}
+                className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm outline-none focus:border-[#6FB644]"
+              />
+            </div>
             <button
               onClick={() => remove(i)}
-              className="text-red-500 hover:bg-red-50 p-1 rounded"
+              title="Remove item"
+              className="text-red-500 hover:bg-red-50 p-1 rounded flex-shrink-0"
             >
               <Trash2 className="w-4 h-4" />
             </button>

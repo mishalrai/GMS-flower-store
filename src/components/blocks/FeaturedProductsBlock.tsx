@@ -46,8 +46,12 @@ export default function FeaturedProductsBlock({ settings }: { settings: BlockSet
             {settings.tabs.map((t, i) => (
               <button
                 key={i}
-                onClick={() => setActiveTab(i)}
-                className={`px-5 py-2 text-sm font-medium transition-all ${
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setActiveTab(i);
+                }}
+                onPointerDown={(e) => e.stopPropagation()}
+                className={`pointer-events-auto cursor-pointer px-5 py-2 text-sm font-medium transition-all ${
                   i === activeTab
                     ? "bg-[#6FB644] text-white shadow-sm"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"

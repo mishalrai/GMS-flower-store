@@ -16,6 +16,7 @@ import {
   Eye,
   Pencil,
   Crop,
+  Play,
 } from "lucide-react";
 import Modal from "@/components/admin/Modal";
 import ImageCropModal from "@/components/admin/ImageCropModal";
@@ -191,6 +192,7 @@ export default function MediaPage() {
   };
 
   const isImage = (type: string) => type.startsWith("image/");
+  const isVideo = (type: string) => type.startsWith("video/");
 
   if (loading) {
     return (
@@ -230,7 +232,7 @@ export default function MediaPage() {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/*,video/*"
             multiple
             onChange={handleFileInput}
             className="hidden"
@@ -260,7 +262,7 @@ export default function MediaPage() {
             </button>
           </p>
           <p className="text-xs text-gray-400 mt-1">
-            Supports JPG, PNG, GIF, SVG, WebP
+            Images: JPG, PNG, GIF, SVG, WebP · Videos: MP4, WebM, MOV (max 50 MB)
           </p>
           {uploading && (
             <div className="mt-3 flex items-center justify-center gap-2">
@@ -282,15 +284,28 @@ export default function MediaPage() {
               className="w-full pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
             />
           </div>
-          <CustomSelect
-            value={typeFilter}
-            onChange={(val) => setTypeFilter(val)}
-            className="min-w-[150px]"
-            options={[
-              { value: "all", label: "All Types" },
-              { value: "image", label: "Images" },
-            ]}
-          />
+          {/* Type filter tabs */}
+          <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+            {(
+              [
+                { value: "all", label: "All" },
+                { value: "image", label: "Images" },
+                { value: "video", label: "Videos" },
+              ] as const
+            ).map((t, i) => (
+              <button
+                key={t.value}
+                onClick={() => setTypeFilter(t.value)}
+                className={`px-3 py-2 text-sm font-medium transition-colors ${
+                  typeFilter === t.value
+                    ? "bg-[#6FB644] text-white"
+                    : "text-gray-600 hover:bg-gray-100"
+                } ${i > 0 ? "border-l border-gray-300" : ""}`}
+              >
+                {t.label}
+              </button>
+            ))}
+          </div>
           <div className="flex border border-gray-300 rounded-lg overflow-hidden">
             <button
               onClick={() => setViewMode("grid")}
@@ -400,6 +415,21 @@ export default function MediaPage() {
                       fill
                       className="object-cover"
                     />
+                  ) : isVideo(item.type) ? (
+                    <>
+                      <video
+                        src={item.url}
+                        muted
+                        playsInline
+                        preload="metadata"
+                        className="absolute inset-0 w-full h-full object-cover bg-black"
+                      />
+                      <span className="absolute inset-0 flex items-center justify-center bg-black/25 pointer-events-none">
+                        <span className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow">
+                          <Play className="w-4 h-4 text-gray-800 fill-gray-800 ml-0.5" />
+                        </span>
+                      </span>
+                    </>
                   ) : (
                     <div className="w-full h-full flex items-center justify-center">
                       <File className="w-10 h-10 text-gray-300" />
@@ -491,6 +521,19 @@ export default function MediaPage() {
                               fill
                               className="object-cover"
                             />
+                          ) : isVideo(item.type) ? (
+                            <>
+                              <video
+                                src={item.url}
+                                muted
+                                playsInline
+                                preload="metadata"
+                                className="absolute inset-0 w-full h-full object-cover bg-black"
+                              />
+                              <span className="absolute inset-0 flex items-center justify-center bg-black/25 pointer-events-none">
+                                <Play className="w-3 h-3 text-white fill-white" />
+                              </span>
+                            </>
                           ) : (
                             <div className="w-full h-full flex items-center justify-center">
                               <File className="w-5 h-5 text-gray-400" />
@@ -577,6 +620,14 @@ export default function MediaPage() {
                   alt={selected.alt}
                   fill
                   className="object-contain"
+                />
+              ) : isVideo(selected.type) ? (
+                <video
+                  src={selected.url}
+                  controls
+                  playsInline
+                  preload="metadata"
+                  className="w-full h-full object-contain bg-black"
                 />
               ) : (
                 <div className="w-full h-full flex items-center justify-center">

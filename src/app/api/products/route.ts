@@ -70,6 +70,7 @@ export async function POST(request: NextRequest) {
       costPrice: body.costPrice ?? null,
       image: body.image ?? '',
       images: body.images ?? [],
+      videos: body.videos ?? [],
       description: body.description ?? '',
       size: body.size ?? 'small',
       badge: body.badge ?? null,

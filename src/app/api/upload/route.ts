@@ -13,11 +13,23 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'No file provided' }, { status: 400 });
   }
 
+  const isVideo = file.type.startsWith('video/');
   const bytes = await file.arrayBuffer();
   const rawBuffer = Buffer.from(bytes);
-  const { buffer, optimizedSize } = await optimizeImage(rawBuffer, file.type);
 
-  const ext = path.extname(file.name) || '.jpg';
+  // Images go through the optimizer; videos are saved as-is.
+  let buffer: Buffer;
+  let finalSize: number;
+  if (isVideo) {
+    buffer = rawBuffer;
+    finalSize = rawBuffer.length;
+  } else {
+    const opt = await optimizeImage(rawBuffer, file.type);
+    buffer = opt.buffer;
+    finalSize = opt.optimizedSize;
+  }
+
+  const ext = path.extname(file.name) || (isVideo ? '.mp4' : '.jpg');
   const filename = `${Date.now()}-${randomBytes(4).toString('hex')}${ext}`;
   const filepath = path.join(process.cwd(), 'public', 'uploads', filename);
 
@@ -30,7 +42,7 @@ export async function POST(request: NextRequest) {
       filename,
       originalName: file.name,
       url,
-      size: optimizedSize,
+      size: finalSize,
       type: file.type,
       alt: file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' '),
     },

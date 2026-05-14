@@ -429,18 +429,6 @@ async function main() {
   const aboutBlocks = [
     {
       id: crypto.randomUUID(),
-      type: 'cta',
-      settings: {
-        title: 'About GMS Flower Store',
-        subtitle: 'Growing happiness from our garden to your home in Gauradaha, Jhapa',
-        buttonText: '',
-        buttonLink: '',
-        bgColor: '#6FB644',
-        align: 'center',
-      },
-    },
-    {
-      id: crypto.randomUUID(),
       type: 'rich-text',
       settings: {
         content:
@@ -463,20 +451,7 @@ async function main() {
       },
     },
   ];
-  const contactBlocks = [
-    {
-      id: crypto.randomUUID(),
-      type: 'cta',
-      settings: {
-        title: 'Get in Touch',
-        subtitle: "Have a question about our plants or your order? We'd love to hear from you.",
-        buttonText: '',
-        buttonLink: '',
-        bgColor: '#6FB644',
-        align: 'center',
-      },
-    },
-  ];
+  const contactBlocks: never[] = [];
 
   for (const [slug, title, blocks] of [
     ['home', 'Home', homeBlocks],

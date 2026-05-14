@@ -2,6 +2,7 @@
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import PageBanner from "@/components/layout/PageBanner";
 import WhatsAppButton from "@/components/home/WhatsAppButton";
 import ProductCard from "@/components/home/ProductCard";
 import { products as staticProducts, Product } from "@/data/products";
@@ -20,14 +21,17 @@ import {
   ChevronRight,
   ChevronLeft,
   Pencil,
+  Play,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
+import { parseVideoSource } from "@/lib/video";
 
 interface ApiProduct extends Product {
   sku?: string;
   images?: string[];
+  videos?: string[];
   richText?: string;
 }
 
@@ -107,10 +111,15 @@ export default function ProductPage() {
     );
   }
 
-  // Build images array from both images and legacy image field
-  const allImages = product.images && product.images.length > 0
-    ? product.images
-    : [product.image];
+  // Build a unified media list: images first (legacy `image` as fallback),
+  // followed by videos. Thumbnails and main viewer iterate the same array.
+  const imageUrls =
+    product.images && product.images.length > 0 ? product.images : [product.image];
+  const media: { type: "image" | "video"; url: string }[] = [
+    ...imageUrls.map((url) => ({ type: "image" as const, url })),
+    ...(product.videos ?? []).map((url) => ({ type: "video" as const, url })),
+  ];
+  const activeMedia = media[activeImageIndex] ?? media[0];
 
   const relatedProducts = staticProducts
     .filter((p) => p.category === product.category && p.id !== product.id)
@@ -135,36 +144,57 @@ export default function ProductPage() {
     <>
       <Header />
       <main className="min-h-screen">
-        {/* Breadcrumb */}
-        <div className="bg-gray-50 py-3 px-4">
-          <div className="max-w-7xl mx-auto flex items-center gap-2 text-sm text-gray-600">
-            <Link href="/" className="hover:text-[#6FB644]">
-              Home
-            </Link>
-            <ChevronRight className="w-4 h-4" />
-            <Link href="/shop" className="hover:text-[#6FB644]">
-              Shop
-            </Link>
-            <ChevronRight className="w-4 h-4" />
-            <span className="text-gray-800 font-medium">{product.name}</span>
-          </div>
-        </div>
+        <PageBanner
+          title="Product Details"
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Shop", href: "/shop" },
+            { label: "Product Details" },
+          ]}
+        />
 
         {/* Product Detail */}
         <section className="py-12 px-4">
           <div className="max-w-7xl mx-auto grid md:grid-cols-2 gap-12">
             {/* Image */}
             <div className="relative">
-              {/* Main Image */}
+              {/* Main viewer (image, uploaded video, or YouTube iframe) */}
               <div className="relative rounded-2xl aspect-square overflow-hidden bg-gray-100">
-                <Image
-                  src={allImages[activeImageIndex]}
-                  alt={product.name}
-                  fill
-                  className="object-cover"
-                  priority
-                />
-
+                {activeMedia?.type === "video"
+                  ? (() => {
+                      const v = parseVideoSource(activeMedia.url);
+                      if (v.kind === "youtube") {
+                        return (
+                          <iframe
+                            key={v.id}
+                            src={v.embed}
+                            title="YouTube video"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                            className="w-full h-full bg-black"
+                          />
+                        );
+                      }
+                      return (
+                        <video
+                          key={activeMedia.url}
+                          src={activeMedia.url}
+                          controls
+                          playsInline
+                          preload="metadata"
+                          className="w-full h-full object-cover bg-black"
+                        />
+                      );
+                    })()
+                  : activeMedia && (
+                      <Image
+                        src={activeMedia.url}
+                        alt={product.name}
+                        fill
+                        className="object-cover"
+                        priority
+                      />
+                    )}
               </div>
 
               {product.badge && (
@@ -181,10 +211,10 @@ export default function ProductPage() {
                 </span>
               )}
 
-              {/* Thumbnail Slider */}
-              {allImages.length > 1 && (
+              {/* Thumbnail Slider (images + videos) */}
+              {media.length > 1 && (
                 <ThumbnailSlider
-                  images={allImages}
+                  media={media}
                   activeIndex={activeImageIndex}
                   onSelect={setActiveImageIndex}
                   productName={product.name}
@@ -369,12 +399,12 @@ export default function ProductPage() {
 }
 
 function ThumbnailSlider({
-  images,
+  media,
   activeIndex,
   onSelect,
   productName,
 }: {
-  images: string[];
+  media: { type: "image" | "video"; url: string }[];
   activeIndex: number;
   onSelect: (index: number) => void;
   productName: string;
@@ -389,7 +419,7 @@ function ThumbnailSlider({
     check();
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
-  }, [images]);
+  }, [media]);
 
   const scroll = (direction: "left" | "right") => {
     if (!scrollRef.current) return;
@@ -417,7 +447,7 @@ function ThumbnailSlider({
         ref={scrollRef}
         className="flex gap-2 overflow-x-auto scrollbar-hide px-1"
       >
-        {images.map((img, index) => (
+        {media.map((m, index) => (
           <button
             key={index}
             onClick={() => onSelect(index)}
@@ -427,12 +457,44 @@ function ThumbnailSlider({
                 : "border-gray-200 hover:border-gray-300"
             }`}
           >
-            <Image
-              src={img}
-              alt={`${productName} ${index + 1}`}
-              fill
-              className="object-cover"
-            />
+            {m.type === "image" ? (
+              <Image
+                src={m.url}
+                alt={`${productName} ${index + 1}`}
+                fill
+                className="object-cover"
+              />
+            ) : (
+              (() => {
+                const v = parseVideoSource(m.url);
+                return (
+                  <>
+                    {v.kind === "youtube" ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={v.thumbnail}
+                        alt={`${productName} video ${index + 1}`}
+                        className="absolute inset-0 w-full h-full object-cover bg-black"
+                      />
+                    ) : (
+                      <video
+                        src={m.url}
+                        muted
+                        playsInline
+                        preload="metadata"
+                        className="absolute inset-0 w-full h-full object-cover bg-black"
+                      />
+                    )}
+                    {/* Video indicator overlay (same look for files + YouTube) */}
+                    <span className="absolute inset-0 flex items-center justify-center bg-black/30">
+                      <span className="w-6 h-6 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
+                        <Play className="w-3.5 h-3.5 text-gray-800 fill-gray-800 ml-0.5" />
+                      </span>
+                    </span>
+                  </>
+                );
+              })()
+            )}
           </button>
         ))}
       </div>

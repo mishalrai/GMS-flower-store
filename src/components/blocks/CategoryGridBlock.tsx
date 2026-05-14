@@ -3,7 +3,12 @@
 import CategoryGrid from "@/components/home/CategoryGrid";
 import { BlockSettings } from "@/lib/blocks/types";
 
-export default function CategoryGridBlock({}: { settings: BlockSettings["category-grid"] }) {
-  // Title is rendered inside CategoryGrid; setting reserved for future use.
-  return <CategoryGrid />;
+export default function CategoryGridBlock({
+  settings,
+  editable,
+}: {
+  settings: BlockSettings["category-grid"];
+  editable?: boolean;
+}) {
+  return <CategoryGrid editable={editable} categorySlugs={settings.categorySlugs} />;
 }

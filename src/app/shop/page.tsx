@@ -2,6 +2,7 @@
 
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
+import PageBanner from "@/components/layout/PageBanner";
 import WhatsAppButton from "@/components/home/WhatsAppButton";
 import ProductCard from "@/components/home/ProductCard";
 import { products } from "@/data/products";
@@ -121,17 +122,23 @@ function ShopContent() {
     <>
       <Header />
       <main className="min-h-screen">
-        {/* Hero */}
-        <section className="bg-gradient-to-r from-green-700 to-green-500 text-white py-16 px-4">
-          <div className="max-w-6xl mx-auto text-center">
-            <h1 className="text-4xl md:text-5xl font-bold mb-4">
-              {searchQuery ? `Search: "${searchQuery}"` : filterParam === "new-arrivals" ? "New Arrivals" : filterParam === "flash-sale" ? "Flash Sale" : filterParam === "most-popular" ? "Most Popular" : "Our Plants"}
-            </h1>
-            <p className="text-lg opacity-90">
-              {searchQuery ? `Showing results for "${searchQuery}"` : filterParam === "new-arrivals" ? "Check out our latest additions" : filterParam === "flash-sale" ? "Grab these deals before they're gone" : filterParam === "most-popular" ? "Our customers' top-rated favorites" : "Browse our collection of fresh, home-grown plants"}
-            </p>
-          </div>
-        </section>
+        <PageBanner
+          title={
+            searchQuery
+              ? `Search: "${searchQuery}"`
+              : filterParam === "new-arrivals"
+              ? "New Arrivals"
+              : filterParam === "flash-sale"
+              ? "Flash Sale"
+              : filterParam === "most-popular"
+              ? "Most Popular"
+              : "Shop"
+          }
+          breadcrumbs={[
+            { label: "Home", href: "/" },
+            { label: "Shop" },
+          ]}
+        />
 
         <section className="py-12 px-4">
           <div className="max-w-7xl mx-auto">
@@ -154,19 +161,23 @@ function ShopContent() {
               >
                 All
               </button>
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => !isDragging && setSelectedCategory(cat.slug)}
-                  className={`px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors flex-shrink-0 ${
-                    selectedCategory === cat.slug
-                      ? "bg-[#6FB644] text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              ))}
+              {categories
+                .filter((cat) =>
+                  baseProducts.some((p) => p.category === cat.slug)
+                )
+                .map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => !isDragging && setSelectedCategory(cat.slug)}
+                    className={`px-4 py-1.5 text-xs font-medium whitespace-nowrap transition-colors flex-shrink-0 ${
+                      selectedCategory === cat.slug
+                        ? "bg-[#6FB644] text-white"
+                        : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    }`}
+                  >
+                    {cat.name}
+                  </button>
+                ))}
             </div>
 
             {/* Filters Bar */}

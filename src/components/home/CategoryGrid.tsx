@@ -13,7 +13,13 @@ interface Category {
   description: string;
 }
 
-export default function CategoryGrid() {
+export default function CategoryGrid({
+  editable = false,
+  categorySlugs,
+}: {
+  editable?: boolean;
+  categorySlugs?: string[];
+} = {}) {
   const [categories, setCategories] = useState<Category[]>([]);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
@@ -24,9 +30,20 @@ export default function CategoryGrid() {
   useEffect(() => {
     fetch("/api/categories")
       .then((r) => r.json())
-      .then((data) => setCategories(data))
+      .then((data: Category[]) => {
+        if (categorySlugs && categorySlugs.length > 0) {
+          // Filter to the picked slugs AND preserve the admin's chosen order
+          const bySlug = new Map(data.map((c) => [c.slug, c]));
+          const filtered = categorySlugs
+            .map((s) => bySlug.get(s))
+            .filter((c): c is Category => !!c);
+          setCategories(filtered);
+        } else {
+          setCategories(data);
+        }
+      })
       .catch(() => {});
-  }, []);
+  }, [categorySlugs]);
 
   const updateScrollState = useCallback(() => {
     const el = scrollRef.current;
@@ -99,8 +116,12 @@ export default function CategoryGrid() {
         {/* Left Arrow */}
         {canScrollLeft && (
           <button
-            onClick={() => scrollBy("left")}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-20 w-9 h-9 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              scrollBy("left");
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 z-20 w-9 h-9 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors pointer-events-auto"
           >
             <ChevronLeft className="w-5 h-5 text-gray-700" />
           </button>
@@ -109,8 +130,12 @@ export default function CategoryGrid() {
         {/* Right Arrow */}
         {canScrollRight && (
           <button
-            onClick={() => scrollBy("right")}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-20 w-9 h-9 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              scrollBy("right");
+            }}
+            onPointerDown={(e) => e.stopPropagation()}
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 z-20 w-9 h-9 bg-white rounded-full shadow-md flex items-center justify-center hover:bg-gray-50 transition-colors pointer-events-auto"
           >
             <ChevronRight className="w-5 h-5 text-gray-700" />
           </button>
@@ -119,7 +144,8 @@ export default function CategoryGrid() {
         <div
           ref={scrollRef}
           onScroll={updateScrollState}
-          className={`flex gap-4 overflow-x-auto scrollbar-hide ${isOverflowing ? "cursor-grab active:cursor-grabbing" : ""}`}
+          className={`flex gap-4 overflow-x-auto scrollbar-hide pointer-events-auto ${isOverflowing ? "cursor-grab active:cursor-grabbing" : ""}`}
+          onPointerDown={(e) => e.stopPropagation()}
           onMouseDown={handleMouseDown}
           onMouseMove={handleMouseMove}
           onMouseUp={handleMouseUp}
@@ -129,7 +155,15 @@ export default function CategoryGrid() {
             <Link
               key={category.id}
               href={`/shop?category=${category.slug}`}
-              onClick={scrollToCenter}
+              onClick={(e) => {
+                // In page-builder preview: don't navigate away
+                if (editable) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  return;
+                }
+                scrollToCenter(e);
+              }}
               className="group relative overflow-hidden rounded-xl aspect-[2/1] flex items-center justify-center flex-shrink-0 w-[calc(50%-8px)] md:w-[calc(16.666%-14px)]"
             >
               <Image

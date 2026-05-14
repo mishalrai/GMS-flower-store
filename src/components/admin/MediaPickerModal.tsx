@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
-import { X, Upload, Search, Check, ImageIcon, Copy, Pencil, Crop, Eye, Trash2 } from "lucide-react";
+import { X, Upload, Search, Check, ImageIcon, Copy, Pencil, Crop, Eye, Trash2, Play, Video } from "lucide-react";
 import ImageCropModal from "@/components/admin/ImageCropModal";
+import Modal from "@/components/admin/Modal";
 
 interface MediaItem {
   id: number;
@@ -23,7 +24,11 @@ interface MediaPickerModalProps {
   onSelectMultiple?: (urls: string[]) => void;
   multiple?: boolean;
   currentImage?: string;
+  /** Restrict the picker to one media kind. Defaults to "image". */
+  mediaType?: "image" | "video";
 }
+
+const isVideoItem = (item: { type: string }) => item.type.startsWith("video/");
 
 function formatFileSize(bytes: number): string {
   if (bytes < 1024) return bytes + " B";
@@ -46,7 +51,17 @@ export default function MediaPickerModal({
   onSelectMultiple,
   multiple = false,
   currentImage,
+  mediaType = "image",
 }: MediaPickerModalProps) {
+  // Internal tab — initialised from the caller's preferred mediaType but
+  // the user can switch within the modal.
+  const [activeTab, setActiveTab] = useState<"image" | "video">(mediaType);
+  const isVideoMode = activeTab === "video";
+
+  // Reset tab to caller's preference when the modal re-opens
+  useEffect(() => {
+    if (isOpen) setActiveTab(mediaType);
+  }, [isOpen, mediaType]);
   const [media, setMedia] = useState<MediaItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
@@ -59,6 +74,7 @@ export default function MediaPickerModal({
   const [altText, setAltText] = useState("");
   const [previewItem, setPreviewItem] = useState<MediaItem | null>(null);
   const [cropItem, setCropItem] = useState<MediaItem | null>(null);
+  const [deleteItem, setDeleteItem] = useState<MediaItem | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const fetchMedia = useCallback(async () => {
@@ -66,7 +82,7 @@ export default function MediaPickerModal({
     try {
       const params = new URLSearchParams();
       if (search) params.set("search", search);
-      params.set("type", "image");
+      params.set("type", activeTab);
       const res = await fetch(`/api/media?${params}`);
       const data = await res.json();
       setMedia(data);
@@ -75,7 +91,7 @@ export default function MediaPickerModal({
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  }, [search, activeTab]);
 
   useEffect(() => {
     if (isOpen) {
@@ -188,12 +204,13 @@ export default function MediaPickerModal({
     }
   };
 
-  const handleDelete = async () => {
-    if (!selectedItem) return;
-    await fetch(`/api/media/${selectedItem.id}`, { method: "DELETE" });
-    setMedia(media.filter((m) => m.id !== selectedItem.id));
-    setSelectedItems((prev) => prev.filter((s) => s.id !== selectedItem.id));
-    setSelectedItem(null);
+  const confirmDelete = async () => {
+    if (!deleteItem) return;
+    await fetch(`/api/media/${deleteItem.id}`, { method: "DELETE" });
+    setMedia((prev) => prev.filter((m) => m.id !== deleteItem.id));
+    setSelectedItems((prev) => prev.filter((s) => s.id !== deleteItem.id));
+    if (selectedItem?.id === deleteItem.id) setSelectedItem(null);
+    setDeleteItem(null);
   };
 
   const handleCropComplete = async (blob: Blob) => {
@@ -215,6 +232,11 @@ export default function MediaPickerModal({
 
   const selectionCount = multiple ? selectedItems.length : (selectedItem ? 1 : 0);
 
+  // Filter media by the picker's target type — only the matching items show.
+  const visibleMedia = media.filter((m) =>
+    isVideoMode ? isVideoItem(m) : !isVideoItem(m),
+  );
+
   if (!isOpen) return null;
 
   return (
@@ -225,7 +247,7 @@ export default function MediaPickerModal({
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-100 flex-shrink-0">
             <h3 className="text-lg font-semibold">
-              {multiple ? "Select Images" : "Select Image"}
+              {multiple ? "Select Media" : "Select from Media"}
             </h3>
             <button
               onClick={onClose}
@@ -239,11 +261,44 @@ export default function MediaPickerModal({
           <input
             ref={fileRef}
             type="file"
-            accept="image/*"
+            accept={isVideoMode ? "video/*" : "image/*"}
             multiple
             onChange={(e) => handleUpload(e.target.files)}
             className="hidden"
           />
+
+          {/* Tabs to switch between images and videos inside the picker */}
+          <div className="flex border-b border-gray-100 px-4 flex-shrink-0">
+            {(
+              [
+                { value: "image" as const, label: "Images", Icon: ImageIcon },
+                { value: "video" as const, label: "Videos", Icon: Video },
+              ]
+            ).map(({ value, label, Icon }) => {
+              const active = activeTab === value;
+              return (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => {
+                    setActiveTab(value);
+                    // Clear the selection when switching tabs so the wrong-type item
+                    // doesn't stay highlighted.
+                    setSelectedItem(null);
+                    setSelectedItems([]);
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+                    active
+                      ? "border-[#6FB644] text-[#6FB644]"
+                      : "border-transparent text-gray-500 hover:text-gray-800"
+                  }`}
+                >
+                  <Icon className="w-4 h-4" />
+                  {label}
+                </button>
+              );
+            })}
+          </div>
 
           {/* Body: Grid + Sidebar */}
           <div className="flex-1 flex overflow-hidden min-h-0">
@@ -273,7 +328,9 @@ export default function MediaPickerModal({
                   </button>
                 </p>
                 <p className="text-xs text-gray-400 mt-1">
-                  Supports JPG, PNG, GIF, SVG, WebP
+                  {isVideoMode
+                    ? "Supports MP4, WebM, MOV (max 50 MB)"
+                    : "Supports JPG, PNG, GIF, SVG, WebP"}
                 </p>
                 {uploading && (
                   <div className="mt-3 flex items-center justify-center gap-2">
@@ -299,16 +356,21 @@ export default function MediaPickerModal({
                 <div className="flex items-center justify-center h-48">
                   <div className="animate-spin w-8 h-8 border-4 border-[#6FB644] border-t-transparent rounded-full" />
                 </div>
-              ) : media.length === 0 ? (
+              ) : visibleMedia.length === 0 ? (
                 <div className="flex flex-col items-center justify-center h-48 text-gray-400">
-                  <ImageIcon className="w-12 h-12 mb-2" />
-                  <p className="text-sm">No images found. Upload one to get started.</p>
+                  {isVideoMode ? <Video className="w-12 h-12 mb-2" /> : <ImageIcon className="w-12 h-12 mb-2" />}
+                  <p className="text-sm">
+                    {isVideoMode
+                      ? "No videos yet. Upload one to get started."
+                      : "No images found. Upload one to get started."}
+                  </p>
                 </div>
               ) : (
                 <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
-                  {media.map((item) => {
+                  {visibleMedia.map((item) => {
                     const selected = isItemSelected(item);
                     const multiIndex = multiple ? selectedItems.findIndex((s) => s.id === item.id) : -1;
+                    const isVid = isVideoItem(item);
                     return (
                       <button
                         key={item.id}
@@ -320,12 +382,29 @@ export default function MediaPickerModal({
                             : "hover:ring-1 hover:ring-gray-300"
                         }`}
                       >
-                        <Image
-                          src={item.url}
-                          alt={item.alt}
-                          fill
-                          className="object-cover"
-                        />
+                        {isVid ? (
+                          <>
+                            <video
+                              src={item.url}
+                              muted
+                              playsInline
+                              preload="metadata"
+                              className="absolute inset-0 w-full h-full object-cover bg-black"
+                            />
+                            <span className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
+                              <span className="w-8 h-8 rounded-full bg-white/90 flex items-center justify-center shadow">
+                                <Play className="w-4 h-4 text-gray-800 fill-gray-800 ml-0.5" />
+                              </span>
+                            </span>
+                          </>
+                        ) : (
+                          <Image
+                            src={item.url}
+                            alt={item.alt}
+                            fill
+                            className="object-cover"
+                          />
+                        )}
                         {selected && (
                           <div className="absolute inset-0 bg-[#6FB644]/20 flex items-center justify-center">
                             <div className="w-7 h-7 bg-[#6FB644] rounded-full flex items-center justify-center">
@@ -352,14 +431,24 @@ export default function MediaPickerModal({
             {/* Right: Detail Sidebar */}
             {selectedItem && (
               <div className="w-72 flex-shrink-0 border-l border-gray-100 overflow-y-auto bg-gray-50/50">
-                {/* Image Preview */}
+                {/* Preview (image or video) */}
                 <div className="aspect-square relative bg-gray-50 overflow-hidden">
-                  <Image
-                    src={selectedItem.url}
-                    alt={selectedItem.alt}
-                    fill
-                    className="object-contain"
-                  />
+                  {isVideoItem(selectedItem) ? (
+                    <video
+                      src={selectedItem.url}
+                      controls
+                      playsInline
+                      preload="metadata"
+                      className="w-full h-full object-contain bg-black"
+                    />
+                  ) : (
+                    <Image
+                      src={selectedItem.url}
+                      alt={selectedItem.alt}
+                      fill
+                      className="object-contain"
+                    />
+                  )}
                   <button
                     onClick={() => setSelectedItem(null)}
                     title="Close details"
@@ -455,13 +544,15 @@ export default function MediaPickerModal({
 
                   {/* Actions */}
                   <div className="flex gap-2 pt-3 border-t border-gray-200">
-                    <button
-                      onClick={() => setCropItem(selectedItem)}
-                      className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200"
-                    >
-                      <Crop className="w-3.5 h-3.5" />
-                      Crop
-                    </button>
+                    {!isVideoItem(selectedItem) && (
+                      <button
+                        onClick={() => setCropItem(selectedItem)}
+                        className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200"
+                      >
+                        <Crop className="w-3.5 h-3.5" />
+                        Crop
+                      </button>
+                    )}
                     <button
                       onClick={() => setPreviewItem(selectedItem)}
                       className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg border border-gray-200"
@@ -470,7 +561,7 @@ export default function MediaPickerModal({
                       Preview
                     </button>
                     <button
-                      onClick={handleDelete}
+                      onClick={() => setDeleteItem(selectedItem)}
                       className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-medium text-red-500 hover:bg-red-50 rounded-lg border border-red-200"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
@@ -485,11 +576,12 @@ export default function MediaPickerModal({
           {/* Footer */}
           <div className="flex items-center justify-between p-4 border-t border-gray-100 flex-shrink-0">
             <p className="text-sm text-gray-500">
-              {selectionCount === 0
-                ? "No image selected"
-                : selectionCount === 1
-                  ? "1 image selected"
-                  : `${selectionCount} images selected`}
+              {(() => {
+                const noun = isVideoMode ? "video" : "image";
+                if (selectionCount === 0) return `No ${noun} selected`;
+                if (selectionCount === 1) return `1 ${noun} selected`;
+                return `${selectionCount} ${noun}s selected`;
+              })()}
             </p>
             <div className="flex gap-3">
               <button
@@ -503,9 +595,11 @@ export default function MediaPickerModal({
                 disabled={selectionCount === 0}
                 className="px-4 py-2 text-sm text-white bg-[#6FB644] rounded-lg hover:bg-[#5a9636] disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {multiple
-                  ? `Select ${selectionCount > 0 ? selectionCount + " " : ""}Image${selectionCount !== 1 ? "s" : ""}`
-                  : "Select Image"}
+                {(() => {
+                  const noun = isVideoMode ? "Video" : "Image";
+                  if (!multiple) return `Select ${noun}`;
+                  return `Select ${selectionCount > 0 ? selectionCount + " " : ""}${noun}${selectionCount !== 1 ? "s" : ""}`;
+                })()}
               </button>
             </div>
           </div>
@@ -520,6 +614,24 @@ export default function MediaPickerModal({
           onClose={() => setCropItem(null)}
         />
       )}
+
+      {/* Delete confirmation */}
+      <Modal
+        isOpen={deleteItem !== null}
+        onClose={() => setDeleteItem(null)}
+        title={deleteItem && isVideoItem(deleteItem) ? "Delete video" : "Delete image"}
+        onConfirm={confirmDelete}
+        confirmText="Delete"
+        confirmColor="bg-red-500 hover:bg-red-600"
+      >
+        <p className="text-gray-600">
+          Are you sure you want to delete{" "}
+          <span className="font-medium text-gray-800">
+            {deleteItem?.originalName}
+          </span>
+          ? This action cannot be undone.
+        </p>
+      </Modal>
 
       {/* Full Preview Modal */}
       {previewItem && (
@@ -537,12 +649,22 @@ export default function MediaPickerModal({
               <X className="w-6 h-6 text-white" />
             </button>
             <div className="relative max-w-4xl max-h-[80vh] w-full h-full">
-              <Image
-                src={previewItem.url}
-                alt={previewItem.alt}
-                fill
-                className="object-contain"
-              />
+              {isVideoItem(previewItem) ? (
+                <video
+                  src={previewItem.url}
+                  controls
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <Image
+                  src={previewItem.url}
+                  alt={previewItem.alt}
+                  fill
+                  className="object-contain"
+                />
+              )}
             </div>
             <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-white/10 backdrop-blur-sm rounded-lg px-4 py-2">
               <p className="text-white text-sm">{previewItem.originalName}</p>

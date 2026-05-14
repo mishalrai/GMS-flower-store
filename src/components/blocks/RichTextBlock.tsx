@@ -5,7 +5,7 @@ const widthClass = {
   sm: "max-w-2xl",
   md: "max-w-4xl",
   lg: "max-w-6xl",
-  full: "max-w-none",
+  full: "max-w-7xl",
 };
 
 const sanitizeOpts: sanitizeHtml.IOptions = {
@@ -33,9 +33,9 @@ export default function RichTextBlock({ settings }: { settings: BlockSettings["r
   const max = widthClass[settings.maxWidth ?? "md"];
 
   return (
-    <section className="py-12 px-4">
+    <section className="py-12 px-4 overflow-hidden">
       <div
-        className={`${max} mx-auto prose prose-gray text-${align}`}
+        className={`${max} mx-auto prose prose-gray text-${align} break-words [&_*]:max-w-full [&_img]:h-auto [&_pre]:overflow-x-auto`}
         dangerouslySetInnerHTML={{ __html: safe }}
       />
     </section>

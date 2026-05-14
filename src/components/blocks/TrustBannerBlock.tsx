@@ -1,16 +1,14 @@
-import { Truck, Shield, Headphones, RefreshCw, LucideIcon } from "lucide-react";
 import { BlockSettings } from "@/lib/blocks/types";
-
-const fallbackIcons: LucideIcon[] = [Truck, Shield, Headphones, RefreshCw];
+import { iconForItem } from "@/lib/blocks/trustIcons";
 
 export default function TrustBannerBlock({ settings }: { settings: BlockSettings["trust-banner"] }) {
   const items = settings.items?.length
     ? settings.items
     : [
-        { title: "Free Delivery", subtitle: "On orders over Rs 2,000" },
-        { title: "Safe Payment", subtitle: "100% secure payment" },
-        { title: "24/7 Support", subtitle: "Dedicated support" },
-        { title: "Easy Returns", subtitle: "7-day return policy" },
+        { icon: "truck" as const, title: "Free Delivery", subtitle: "On orders over Rs 2,000" },
+        { icon: "shield" as const, title: "Safe Payment", subtitle: "100% secure payment" },
+        { icon: "headphones" as const, title: "24/7 Support", subtitle: "Dedicated support" },
+        { icon: "refresh" as const, title: "Easy Returns", subtitle: "7-day return policy" },
       ];
 
   return (
@@ -18,7 +16,7 @@ export default function TrustBannerBlock({ settings }: { settings: BlockSettings
       <div className="max-w-7xl mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
           {items.map((feature, i) => {
-            const Icon = fallbackIcons[i % fallbackIcons.length];
+            const Icon = iconForItem(feature.icon, i);
             return (
               <div
                 key={i}
