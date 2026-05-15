@@ -2,9 +2,40 @@
 
 import dynamic from "next/dynamic";
 import { useRef, useMemo, useEffect, useState } from "react";
+import { isYouTubeUrl, isVideoFileUrl, youtubeId } from "@/lib/video";
 import "react-quill-new/dist/quill.snow.css";
 
-const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false }) as any;
+// Dynamic loader: registers a custom `videoFile` blot (renders <video controls>)
+// so picked uploaded videos survive Quill's parsing. YouTube links use Quill's
+// built-in `video` format (iframe).
+const ReactQuill = dynamic(
+  async () => {
+    const mod = await import("react-quill-new");
+    const Quill = (mod as { Quill?: any }).Quill;
+    if (Quill && !Quill.imports["formats/videoFile"]) {
+      const BlockEmbed = Quill.import("blots/block/embed");
+      class VideoFileBlot extends BlockEmbed {
+        static blotName = "videoFile";
+        static tagName = "video";
+        static create(url: string) {
+          const node = super.create() as HTMLVideoElement;
+          node.setAttribute("src", url);
+          node.setAttribute("controls", "");
+          node.setAttribute("playsinline", "");
+          node.setAttribute("preload", "metadata");
+          node.setAttribute("style", "max-width:100%;");
+          return node;
+        }
+        static value(node: HTMLElement) {
+          return node.getAttribute("src");
+        }
+      }
+      Quill.register("formats/videoFile", VideoFileBlot);
+    }
+    return mod.default;
+  },
+  { ssr: false },
+) as any;
 
 const toolbarOptions = [
   [{ header: [1, 2, 3, false] }],
@@ -13,7 +44,7 @@ const toolbarOptions = [
   [{ list: "ordered" }, { list: "bullet" }],
   [{ align: [] }],
   ["blockquote", "code-block"],
-  ["link", "image"],
+  ["link", "image", "video"],
   ["clean"],
 ];
 
@@ -31,6 +62,8 @@ const formats = [
   "code-block",
   "link",
   "image",
+  "video",
+  "videoFile",
 ];
 
 export default function RichTextEditor({
@@ -61,6 +94,7 @@ export default function RichTextEditor({
         container: toolbarOptions,
         handlers: {
           image: () => imageClickRef.current?.(),
+          video: () => imageClickRef.current?.(),
         },
       },
     }),
@@ -207,9 +241,11 @@ export default function RichTextEditor({
     return () => clearTimeout(timeout);
   }, [sourceMode]);
 
-  // Insert image when pendingImageUrl changes
+  // Insert picked media. The same picker covers images, uploaded video files,
+  // and YouTube links — route by URL shape into the right Quill embed.
   useEffect(() => {
     if (!pendingImageUrl) return;
+    const url = pendingImageUrl;
     try {
       const quill = quillRef.current;
       const editor = quill?.getEditor?.() ?? quill?.editor;
@@ -217,11 +253,22 @@ export default function RichTextEditor({
         const range = editor.getSelection() || {
           index: editor.getLength() - 1,
         };
-        editor.insertEmbed(range.index, "image", pendingImageUrl);
+        if (isYouTubeUrl(url)) {
+          const id = youtubeId(url);
+          const embedSrc = id ? `https://www.youtube.com/embed/${id}` : url;
+          editor.insertEmbed(range.index, "video", embedSrc);
+        } else if (isVideoFileUrl(url)) {
+          editor.insertEmbed(range.index, "videoFile", url);
+        } else {
+          editor.insertEmbed(range.index, "image", url);
+        }
         editor.setSelection(range.index + 1);
       }
     } catch {
-      onChange(value + `<p><img src="${pendingImageUrl}"></p>`);
+      const tag = isVideoFileUrl(url)
+        ? `<p><video src="${url}" controls style="max-width:100%"></video></p>`
+        : `<p><img src="${url}"></p>`;
+      onChange(value + tag);
     }
     onImageInserted?.();
   }, [pendingImageUrl]);

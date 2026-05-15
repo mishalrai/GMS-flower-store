@@ -17,14 +17,26 @@ const sanitizeOpts: sanitizeHtml.IOptions = {
     "s",
     "del",
     "ins",
+    "video",
+    "source",
+    "iframe",
   ]),
   allowedAttributes: {
     ...sanitizeHtml.defaults.allowedAttributes,
     "*": ["style", "class"],
     a: ["href", "name", "target", "rel"],
     img: ["src", "alt", "title", "width", "height"],
+    video: ["src", "controls", "playsinline", "preload", "poster", "width", "height", "muted", "loop"],
+    source: ["src", "type"],
+    iframe: ["src", "width", "height", "frameborder", "allow", "allowfullscreen"],
   },
   allowedSchemes: ["http", "https", "mailto", "tel"],
+  allowedIframeHostnames: [
+    "www.youtube.com",
+    "youtube.com",
+    "youtube-nocookie.com",
+    "player.vimeo.com",
+  ],
 };
 
 export default function RichTextBlock({ settings }: { settings: BlockSettings["rich-text"] }) {
