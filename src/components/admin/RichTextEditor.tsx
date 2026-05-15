@@ -44,7 +44,7 @@ const toolbarOptions = [
   [{ list: "ordered" }, { list: "bullet" }],
   [{ align: [] }],
   ["blockquote", "code-block"],
-  ["link", "image", "video"],
+  ["link", "image"],
   ["clean"],
 ];
 
