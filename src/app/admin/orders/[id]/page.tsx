@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowLeft, MessageCircle, CheckCircle, XCircle, QrCode, Banknote, MapPin, Navigation } from "lucide-react";
+import { ArrowLeft, MessageCircle, CheckCircle, XCircle, QrCode, Banknote, MapPin, Navigation, ExternalLink, Package } from "lucide-react";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { useToast } from "@/components/admin/Toast";
 
@@ -14,6 +14,8 @@ interface OrderItem {
   quantity: number;
   price: number;
   reviewed: boolean;
+  image: string | null;
+  slug: string | null;
 }
 
 interface Payment {
@@ -140,30 +142,56 @@ export default function OrderDetailPage() {
                 {order.items.map((item, i) => (
                   <div
                     key={i}
-                    className="flex items-center justify-between py-3"
+                    className="flex items-center gap-4 py-3"
                   >
-                    <div>
-                      <p className="font-medium text-sm">{item.name}</p>
-                      <p className="text-xs text-gray-500">
-                        Qty: {item.quantity} × Rs{" "}
+                    <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0">
+                      {item.image ? (
+                        <Image
+                          src={item.image}
+                          alt={item.name}
+                          fill
+                          className="object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center text-gray-400">
+                          <Package className="w-6 h-6" />
+                        </div>
+                      )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      {item.slug ? (
+                        <Link
+                          href={`/products/${item.slug}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 font-medium text-sm text-gray-800 hover:text-[#6FB644] hover:underline"
+                        >
+                          {item.name}
+                          <ExternalLink className="w-3 h-3" />
+                        </Link>
+                      ) : (
+                        <p className="font-medium text-sm">{item.name}</p>
+                      )}
+                      <p className="text-xs text-gray-500 mt-0.5">
+                        SKU ID: {item.productId} · Qty {item.quantity} × Rs{" "}
                         {item.price.toLocaleString()}
                       </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-medium text-sm">
-                        Rs {(item.quantity * item.price).toLocaleString()}
-                      </p>
-                      <div className="flex items-center gap-1 mt-1">
+                      <div className="mt-1">
                         {item.reviewed ? (
-                          <span className="flex items-center gap-1 text-xs text-green-600">
+                          <span className="inline-flex items-center gap-1 text-xs text-green-600">
                             <CheckCircle className="w-3 h-3" /> Reviewed
                           </span>
                         ) : (
-                          <span className="flex items-center gap-1 text-xs text-gray-400">
+                          <span className="inline-flex items-center gap-1 text-xs text-gray-400">
                             <XCircle className="w-3 h-3" /> Not reviewed
                           </span>
                         )}
                       </div>
+                    </div>
+                    <div className="text-right flex-shrink-0">
+                      <p className="font-semibold text-sm">
+                        Rs {(item.quantity * item.price).toLocaleString()}
+                      </p>
                     </div>
                   </div>
                 ))}

@@ -22,12 +22,14 @@ function formatOrder(order: Awaited<ReturnType<typeof prisma.order.findUnique>> 
       ...(order.paymentQrLabel ? { qrLabel: order.paymentQrLabel } : {}),
       ...(order.paymentScreenshot ? { screenshotUrl: order.paymentScreenshot } : {}),
     },
-    items: (order.items as { id: number; productId: number; name: string; quantity: number; price: number; reviewed: boolean }[] | undefined)?.map((item) => ({
+    items: (order.items as { id: number; productId: number; name: string; quantity: number; price: number; reviewed: boolean; product?: { image: string; slug: string } | null }[] | undefined)?.map((item) => ({
       productId: item.productId,
       name: item.name,
       quantity: item.quantity,
       price: item.price,
       reviewed: item.reviewed,
+      image: item.product?.image ?? null,
+      slug: item.product?.slug ?? null,
     })) ?? [],
     createdAt: order.createdAt.toISOString(),
     updatedAt: order.updatedAt.toISOString(),
@@ -36,7 +38,10 @@ function formatOrder(order: Awaited<ReturnType<typeof prisma.order.findUnique>> 
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const order = await prisma.order.findUnique({ where: { id }, include: { items: true } });
+  const order = await prisma.order.findUnique({
+    where: { id },
+    include: { items: { include: { product: { select: { image: true, slug: true } } } } },
+  });
   if (!order) return NextResponse.json({ error: 'Not found' }, { status: 404 });
   return NextResponse.json(formatOrder(order));
 }
@@ -65,7 +70,7 @@ export async function PUT(request: NextRequest, { params }: { params: Promise<{ 
           },
         }),
       },
-      include: { items: true },
+      include: { items: { include: { product: { select: { image: true, slug: true } } } } },
     });
     return NextResponse.json(formatOrder(order));
   } catch {

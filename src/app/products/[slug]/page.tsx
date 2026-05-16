@@ -14,9 +14,6 @@ import {
   ShoppingCart,
   Minus,
   Plus,
-  Truck,
-  Shield,
-  RefreshCw,
   MessageCircle,
   ChevronRight,
   ChevronLeft,
@@ -345,21 +342,6 @@ export default function ProductPage() {
                 </a>
               </div>
 
-              {/* Trust */}
-              <div className="grid grid-cols-3 gap-4 border-t pt-6">
-                {[
-                  { icon: Truck, text: "Free Delivery\nOver Rs 2,000" },
-                  { icon: Shield, text: "Healthy Plant\nGuarantee" },
-                  { icon: RefreshCw, text: "7-Day\nReturn Policy" },
-                ].map((item, i) => (
-                  <div key={i} className="flex items-center gap-2 text-center">
-                    <item.icon className="w-5 h-5 text-[#6FB644] flex-shrink-0" />
-                    <span className="text-xs text-gray-600 whitespace-pre-line">
-                      {item.text}
-                    </span>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
         </section>

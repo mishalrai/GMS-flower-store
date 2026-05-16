@@ -8,6 +8,7 @@ import TestimonialsBlock from "@/components/blocks/TestimonialsBlock";
 import RichTextBlock from "@/components/blocks/RichTextBlock";
 import CategoryGridBlock from "@/components/blocks/CategoryGridBlock";
 import TrustBannerBlock from "@/components/blocks/TrustBannerBlock";
+import FAQBlock from "@/components/blocks/FAQBlock";
 
 // Renderers accept optional editable + onSettingsChange to support inline
 // editing in the admin preview. Public PageRenderer just passes `settings`.
@@ -36,4 +37,5 @@ export const blockRegistry: { [T in BlockType]: BlockRenderer<T> } = {
   "rich-text": RichTextBlock,
   "category-grid": CategoryGridBlock,
   "trust-banner": TrustBannerBlock,
+  faq: FAQBlock,
 };

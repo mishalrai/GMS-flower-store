@@ -17,6 +17,7 @@ import {
 import { useSession, signOut } from "next-auth/react";
 import { useCartStore } from "@/store/cartStore";
 import { useWishlistStore } from "@/store/wishlistStore";
+import { useStoreSettings } from "@/components/providers/SettingsProvider";
 import CartSidebar from "./CartSidebar";
 import MobileMenu from "./MobileMenu";
 
@@ -28,9 +29,13 @@ export default function Header() {
   const [shopDropdown, setShopDropdown] = useState(false);
   const [userDropdown, setUserDropdown] = useState(false);
   const [categories, setCategories] = useState<{ id: number; name: string; slug: string }[]>([]);
-  const [storeLogo, setStoreLogo] = useState("");
-  const [storeName, setStoreName] = useState("GMS Flower Store");
   const userDropdownRef = useRef<HTMLDivElement>(null);
+  const {
+    logo: storeLogo,
+    logoWidth,
+    logoHeight,
+    storeName,
+  } = useStoreSettings();
 
   const { data: session } = useSession();
 
@@ -61,13 +66,6 @@ export default function Header() {
       .then((r) => r.json())
       .then((data) => setCategories(data))
       .catch(() => {});
-    fetch("/api/settings")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.logo) setStoreLogo(data.logo);
-        if (data.storeName) setStoreName(data.storeName);
-      })
-      .catch(() => {});
   }, []);
 
   return (
@@ -92,9 +90,11 @@ export default function Header() {
               <Image
                 src={storeLogo}
                 alt={storeName}
-                width={36}
-                height={36}
-                className="w-9 h-9 object-contain"
+                width={logoWidth}
+                height={logoHeight}
+                style={{ width: logoWidth, height: logoHeight }}
+                className="object-contain"
+                unoptimized={storeLogo.toLowerCase().endsWith(".svg")}
               />
             ) : (
               <span className="text-xl">🌱</span>

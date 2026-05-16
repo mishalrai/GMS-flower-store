@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
-import { Save, Upload, Trash2, Plus, QrCode, LayoutGrid, ImageIcon } from "lucide-react";
+import { Save, Upload, Trash2, Plus, QrCode, LayoutGrid, ImageIcon, Link2, Link2Off } from "lucide-react";
 import { useToast } from "@/components/admin/Toast";
 import MediaPickerModal from "@/components/admin/MediaPickerModal";
 
@@ -28,6 +28,8 @@ interface StoreSettings {
   freeDeliveryThreshold: number;
   currency: string;
   logo: string;
+  logoWidth: number;
+  logoHeight: number;
   favicon: string;
   socialLinks: { facebook: string; instagram: string; youtube: string; tiktok: string };
   homepageTabs: HomepageTabs;
@@ -40,10 +42,31 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
   const [logoPickerOpen, setLogoPickerOpen] = useState(false);
+  const [lockLogoRatio, setLockLogoRatio] = useState(true);
+  const logoNaturalRatio = useRef<number | null>(null);
   const [faviconPickerOpen, setFaviconPickerOpen] = useState(false);
   const [qrPickerOpen, setQrPickerOpen] = useState(false);
   const [generatingFavicon, setGeneratingFavicon] = useState(false);
   const [newQRLabel, setNewQRLabel] = useState("");
+
+  // Capture the logo's natural aspect ratio whenever its URL changes so the
+  // ratio-lock toggle has something to work with.
+  useEffect(() => {
+    if (!settings?.logo) {
+      logoNaturalRatio.current = null;
+      return;
+    }
+    const img = new window.Image();
+    img.onload = () => {
+      if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+        logoNaturalRatio.current = img.naturalWidth / img.naturalHeight;
+      }
+    };
+    img.onerror = () => {
+      logoNaturalRatio.current = null;
+    };
+    img.src = settings.logo;
+  }, [settings?.logo]);
 
   useEffect(() => {
     fetch("/api/settings")
@@ -52,6 +75,8 @@ export default function SettingsPage() {
         setSettings({
           ...data,
           logo: data.logo || "",
+          logoWidth: data.logoWidth ?? 36,
+          logoHeight: data.logoHeight ?? 36,
           favicon: data.favicon || "",
           homepageTabs: data.homepageTabs || { "new-arrivals": true, "flash-sale": true, "most-popular": true },
           paymentQRCodes: data.paymentQRCodes || [],
@@ -136,7 +161,7 @@ export default function SettingsPage() {
           <ImageIcon className="w-5 h-5 text-[#6FB644]" />
           Store Logo
         </h3>
-        <div className="flex items-center gap-6 mb-8 pb-8 border-b border-gray-200">
+        <div className="flex items-start gap-6 mb-8 pb-8 border-b border-gray-200">
           <div className="relative w-24 h-24 border border-gray-200 rounded-lg overflow-hidden bg-gray-50 flex items-center justify-center flex-shrink-0">
             {settings.logo ? (
               <>
@@ -145,6 +170,7 @@ export default function SettingsPage() {
                   alt="Store logo"
                   fill
                   className="object-contain p-2"
+                  unoptimized={settings.logo.toLowerCase().endsWith(".svg")}
                 />
                 <button
                   type="button"
@@ -159,17 +185,122 @@ export default function SettingsPage() {
               <ImageIcon className="w-8 h-8 text-gray-300" />
             )}
           </div>
-          <div>
-            <button
-              type="button"
-              onClick={() => setLogoPickerOpen(true)}
-              className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
-            >
-              <Upload className="w-4 h-4" />
-              {settings.logo ? "Change Logo" : "Upload Logo"}
-            </button>
-            <p className="text-xs text-gray-400 mt-2">
-              Supports SVG, PNG, JPG, WebP
+          <div className="flex-1 space-y-3">
+            <div>
+              <button
+                type="button"
+                onClick={() => setLogoPickerOpen(true)}
+                className="flex items-center gap-2 bg-gray-100 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-200 transition-colors"
+              >
+                <Upload className="w-4 h-4" />
+                {settings.logo ? "Change Logo" : "Upload Logo"}
+              </button>
+              <p className="text-xs text-gray-400 mt-2">
+                Supports SVG, PNG, JPG, WebP
+              </p>
+            </div>
+            <div className="flex items-stretch gap-2 max-w-md">
+              <div className="grid grid-cols-2 gap-3 flex-1">
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Width (px)
+                  </label>
+                  <input
+                    type="number"
+                    min={8}
+                    max={400}
+                    value={settings.logoWidth}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      const w = raw === "" ? 0 : Number(raw);
+                      const ratio = logoNaturalRatio.current;
+                      setSettings({
+                        ...settings,
+                        logoWidth: w,
+                        logoHeight:
+                          lockLogoRatio && ratio && w > 0
+                            ? Math.round(w / ratio)
+                            : settings.logoHeight,
+                      });
+                    }}
+                    onBlur={(e) => {
+                      const w = Math.max(8, Number(e.target.value) || 8);
+                      const ratio = logoNaturalRatio.current;
+                      setSettings({
+                        ...settings,
+                        logoWidth: w,
+                        logoHeight:
+                          lockLogoRatio && ratio
+                            ? Math.max(8, Math.round(w / ratio))
+                            : settings.logoHeight,
+                      });
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-gray-600 mb-1">
+                    Height (px)
+                  </label>
+                  <input
+                    type="number"
+                    min={8}
+                    max={400}
+                    value={settings.logoHeight}
+                    onChange={(e) => {
+                      const raw = e.target.value;
+                      const h = raw === "" ? 0 : Number(raw);
+                      const ratio = logoNaturalRatio.current;
+                      setSettings({
+                        ...settings,
+                        logoHeight: h,
+                        logoWidth:
+                          lockLogoRatio && ratio && h > 0
+                            ? Math.round(h * ratio)
+                            : settings.logoWidth,
+                      });
+                    }}
+                    onBlur={(e) => {
+                      const h = Math.max(8, Number(e.target.value) || 8);
+                      const ratio = logoNaturalRatio.current;
+                      setSettings({
+                        ...settings,
+                        logoHeight: h,
+                        logoWidth:
+                          lockLogoRatio && ratio
+                            ? Math.max(8, Math.round(h * ratio))
+                            : settings.logoWidth,
+                      });
+                    }}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
+                  />
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLockLogoRatio((v) => !v)}
+                title={
+                  lockLogoRatio
+                    ? "Aspect ratio locked — click to unlock"
+                    : "Aspect ratio unlocked — click to lock"
+                }
+                className={`self-end flex items-center justify-center px-3 rounded-lg border transition-colors h-[38px] ${
+                  lockLogoRatio
+                    ? "bg-[#6FB644]/10 border-[#6FB644] text-[#6FB644]"
+                    : "bg-white border-gray-300 text-gray-400 hover:text-gray-600"
+                }`}
+              >
+                {lockLogoRatio ? (
+                  <Link2 className="w-4 h-4" />
+                ) : (
+                  <Link2Off className="w-4 h-4" />
+                )}
+              </button>
+            </div>
+            <p className="text-xs text-gray-400">
+              {lockLogoRatio
+                ? "Auto-ratio is on — editing one dimension updates the other to match the logo's natural proportions."
+                : "Auto-ratio is off — width and height adjust independently."}
             </p>
           </div>
         </div>

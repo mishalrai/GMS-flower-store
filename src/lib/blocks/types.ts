@@ -6,7 +6,8 @@ export type BlockType =
   | "testimonials"
   | "rich-text"
   | "category-grid"
-  | "trust-banner";
+  | "trust-banner"
+  | "faq";
 
 export type ButtonVariant = "primary" | "secondary" | "outline" | "dark" | "white";
 export type ButtonSize = "sm" | "md" | "lg";
@@ -153,6 +154,12 @@ export type BlockSettings = {
   };
   "trust-banner": {
     items?: { icon?: TrustIconKey; title: string; subtitle: string }[];
+  };
+  faq: {
+    title?: string;
+    subtitle?: string;
+    /** Specific FAQ IDs to show in display order. When undefined or empty, all active FAQs are shown. */
+    faqIds?: number[];
   };
 };
 

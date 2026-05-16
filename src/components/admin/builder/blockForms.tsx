@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Plus, Trash2, Image as ImageIcon, AlignLeft, AlignCenter, AlignRight, Bookmark, BookmarkCheck, Star } from "lucide-react";
 import MediaPickerModal from "@/components/admin/MediaPickerModal";
+import Modal from "@/components/admin/Modal";
 import RichTextEditor from "@/components/admin/RichTextEditor";
 import {
   BlockSettings,
@@ -671,199 +672,254 @@ export function TestimonialsForm({
       (s) => s.name === item.name && s.text === item.text,
     );
 
+  // ─── Block-level presets (entire testimonials block config) ──────────────
+  type Preset = {
+    id: number;
+    name: string;
+    title: string | null;
+    source: "reviews" | "manual";
+    limit: number | null;
+    manual: ManualTestimonial[];
+  };
+  const [presets, setPresets] = useState<Preset[]>([]);
+  const [presetName, setPresetName] = useState("");
+  const [savingPreset, setSavingPreset] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<Preset | null>(null);
+
+  useEffect(() => {
+    fetch("/api/testimonial-presets")
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setPresets)
+      .catch(() => {});
+  }, []);
+
+  const savePreset = async () => {
+    if (!presetName.trim()) return;
+    setSavingPreset(true);
+    try {
+      const res = await fetch("/api/testimonial-presets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: presetName.trim(),
+          title: settings.title ?? null,
+          source: settings.source,
+          limit: settings.limit ?? null,
+          manual: settings.manual ?? [],
+        }),
+      });
+      if (res.ok) {
+        const created: Preset = await res.json();
+        setPresets((prev) => [created, ...prev]);
+        setPresetName("");
+      }
+    } finally {
+      setSavingPreset(false);
+    }
+  };
+
+  const importPreset = (preset: Preset) => {
+    onChange({
+      ...settings,
+      title: preset.title ?? "",
+      source: preset.source,
+      limit: preset.limit ?? undefined,
+      manual: preset.manual ?? [],
+    });
+  };
+
+  const deletePreset = async (id: number) => {
+    const res = await fetch(`/api/testimonial-presets/${id}`, {
+      method: "DELETE",
+    });
+    if (res.ok) setPresets((prev) => prev.filter((p) => p.id !== id));
+    setConfirmDelete(null);
+  };
+
   return (
     <div className="space-y-4">
-      <div>
-        <Label>Title</Label>
-        <input
-          type="text"
-          value={settings.title ?? ""}
-          onChange={(e) => onChange({ ...settings, title: e.target.value })}
-          className={fieldClass}
-        />
-      </div>
-      <div>
-        <Label>Source</Label>
-        <select
-          value={settings.source}
-          onChange={(e) => onChange({ ...settings, source: e.target.value as "reviews" | "manual" })}
-          className={fieldClass}
-        >
-          <option value="reviews">Real customer reviews (latest)</option>
-          <option value="manual">Custom quotes (configure here)</option>
-        </select>
-      </div>
-      {settings.source === "reviews" && (
+      <p className="text-xs text-gray-500">
+        Edit the title and quotes directly in the block preview.
+      </p>
+
+      {saved.length > 0 && (
         <div>
-          <Label>Limit</Label>
-          <input
-            type="number"
-            min={1}
-            max={20}
-            value={settings.limit ?? 6}
-            onChange={(e) => onChange({ ...settings, limit: Number(e.target.value) })}
-            className={fieldClass}
-          />
-        </div>
-      )}
-      {settings.source === "manual" && (
-        <div>
-          <Label>Quotes</Label>
-          <div className="space-y-3">
-            {items.map((item, i) => (
-              <div key={i} className="border border-gray-200 rounded-lg p-3 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="text-xs text-gray-500">Quote {i + 1}</span>
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() => saveTestimonial(item, i)}
-                      disabled={savingIdx === i || isAlreadySaved(item)}
-                      title={
-                        isAlreadySaved(item)
-                          ? "Already saved"
-                          : "Save this quote for reuse"
-                      }
-                      className={`p-1 rounded transition-colors ${
-                        isAlreadySaved(item)
-                          ? "text-[#6FB644] cursor-default"
-                          : "text-gray-400 hover:text-[#6FB644] hover:bg-green-50"
-                      } disabled:opacity-60`}
-                    >
-                      {isAlreadySaved(item) ? (
-                        <BookmarkCheck className="w-4 h-4" />
-                      ) : (
-                        <Bookmark className="w-4 h-4" />
-                      )}
-                    </button>
-                    <button
-                      onClick={() => removeItem(i)}
-                      title="Remove quote"
-                      className="text-red-500 hover:bg-red-50 p-1 rounded"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+          <Label>Add from saved quotes</Label>
+          <div className="space-y-1.5">
+            {saved.map((s) => (
+              <div
+                key={s.id}
+                className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg bg-white hover:border-[#6FB644] transition-colors group"
+              >
+                <button
+                  type="button"
+                  onClick={() =>
+                    addItem({
+                      name: s.name,
+                      location: s.location ?? undefined,
+                      text: s.text,
+                      rating: s.rating,
+                      image: s.image ?? undefined,
+                    })
+                  }
+                  className="flex-1 flex items-center gap-2 min-w-0 text-left"
+                  title="Add as new quote"
+                >
+                  {s.image ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={s.image}
+                      alt={s.name}
+                      className="w-7 h-7 rounded-full object-cover flex-shrink-0"
+                    />
+                  ) : (
+                    <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
+                      <BookmarkCheck className="w-3.5 h-3.5 text-[#6FB644]" />
+                    </div>
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-gray-800 truncate">
+                      {s.name}
+                    </p>
+                    <p className="text-[11px] text-gray-500 truncate">{s.text}</p>
                   </div>
-                </div>
-                <div>
-                  <Label>Customer photo (optional)</Label>
-                  <ImageField
-                    value={item.image}
-                    onChange={(url) => updateItem(i, { image: url || undefined })}
-                  />
-                </div>
-                <input
-                  type="text"
-                  placeholder="Customer name"
-                  value={item.name}
-                  onChange={(e) => updateItem(i, { name: e.target.value })}
-                  className={fieldClass}
-                />
-                <input
-                  type="text"
-                  placeholder="Location (optional)"
-                  value={item.location ?? ""}
-                  onChange={(e) => updateItem(i, { location: e.target.value })}
-                  className={fieldClass}
-                />
-                <textarea
-                  placeholder="Quote text"
-                  value={item.text}
-                  onChange={(e) => updateItem(i, { text: e.target.value })}
-                  rows={3}
-                  className={fieldClass + " resize-none"}
-                />
-                <div>
-                  <Label>Rating</Label>
-                  <div className="flex items-center gap-1">
-                    {[1, 2, 3, 4, 5].map((n) => (
-                      <button
-                        key={n}
-                        type="button"
-                        onClick={() => updateItem(i, { rating: n })}
-                        title={`${n} star${n > 1 ? "s" : ""}`}
-                        className="p-0.5 hover:scale-110 transition-transform"
-                      >
-                        <Star
-                          className={`w-5 h-5 ${
-                            n <= item.rating
-                              ? "text-yellow-400 fill-yellow-400"
-                              : "text-gray-300"
-                          }`}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                  <Plus className="w-4 h-4 text-gray-300 group-hover:text-[#6FB644] flex-shrink-0" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => deleteSaved(s.id)}
+                  title="Remove from saved"
+                  className="text-gray-300 hover:text-red-500 p-1 rounded flex-shrink-0"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                </button>
               </div>
             ))}
-            <button
-              onClick={() => addItem()}
-              className="w-full py-2 border-2 border-dashed border-gray-300 rounded text-sm text-gray-500 hover:border-[#6FB644] hover:text-[#6FB644]"
-            >
-              <Plus className="w-4 h-4 inline mr-1" /> Add blank quote
-            </button>
-
-            {saved.length > 0 && (
-              <div className="pt-2">
-                <p className="text-[11px] font-semibold text-gray-500 uppercase tracking-wide mb-2">
-                  Add from saved
-                </p>
-                <div className="space-y-1.5">
-                  {saved.map((s) => (
-                    <div
-                      key={s.id}
-                      className="flex items-center gap-2 p-2 border border-gray-200 rounded-lg bg-white hover:border-[#6FB644] transition-colors group"
-                    >
-                      <button
-                        type="button"
-                        onClick={() =>
-                          addItem({
-                            name: s.name,
-                            location: s.location ?? undefined,
-                            text: s.text,
-                            rating: s.rating,
-                            image: s.image ?? undefined,
-                          })
-                        }
-                        className="flex-1 flex items-center gap-2 min-w-0 text-left"
-                        title="Add as new quote"
-                      >
-                        {s.image ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={s.image}
-                            alt={s.name}
-                            className="w-7 h-7 rounded-full object-cover flex-shrink-0"
-                          />
-                        ) : (
-                          <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-                            <BookmarkCheck className="w-3.5 h-3.5 text-[#6FB644]" />
-                          </div>
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-medium text-gray-800 truncate">
-                            {s.name}
-                          </p>
-                          <p className="text-[11px] text-gray-500 truncate">{s.text}</p>
-                        </div>
-                        <Plus className="w-4 h-4 text-gray-300 group-hover:text-[#6FB644] flex-shrink-0" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => deleteSaved(s.id)}
-                        title="Remove from saved"
-                        className="text-gray-300 hover:text-red-500 p-1 rounded flex-shrink-0"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </div>
       )}
+
+      {items.length > 0 && (
+        <div>
+          <Label>Save quotes for reuse</Label>
+          <div className="space-y-1">
+            {items.map((item, i) => {
+              const already = isAlreadySaved(item);
+              return (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => saveTestimonial(item, i)}
+                  disabled={savingIdx === i || already || !item.name?.trim() || !item.text?.trim()}
+                  className={`w-full flex items-center gap-2 p-2 border border-gray-200 rounded text-left text-xs disabled:opacity-60 ${
+                    already ? "bg-green-50/50" : "hover:border-[#6FB644]"
+                  }`}
+                  title={
+                    already
+                      ? "Already saved"
+                      : !item.name?.trim() || !item.text?.trim()
+                        ? "Add a customer name and quote text first"
+                        : "Save this quote for reuse"
+                  }
+                >
+                  {already ? (
+                    <BookmarkCheck className="w-4 h-4 text-[#6FB644] flex-shrink-0" />
+                  ) : (
+                    <Bookmark className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                  )}
+                  <span className="flex-1 truncate text-gray-700">
+                    {item.name || `Quote ${i + 1}`}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="pt-3 border-t border-gray-100">
+        <Label>Save as preset</Label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={presetName}
+            onChange={(e) => setPresetName(e.target.value)}
+            placeholder="e.g. Happy customers"
+            className={fieldClass}
+          />
+          <button
+            type="button"
+            onClick={savePreset}
+            disabled={savingPreset || !presetName.trim()}
+            className="px-3 py-2 bg-[#6FB644] text-white text-sm font-medium rounded-lg hover:bg-[#5a9636] disabled:opacity-50 whitespace-nowrap"
+          >
+            {savingPreset ? "Saving…" : "Save"}
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mt-1.5">
+          Stores the current title, source, and quotes — reusable on any
+          Testimonials block.
+        </p>
+      </div>
+
+      <div>
+        <Label>Saved presets</Label>
+        {presets.length === 0 ? (
+          <p className="text-xs text-gray-400 italic">No presets yet.</p>
+        ) : (
+          <div className="space-y-1.5">
+            {presets.map((preset) => (
+              <div
+                key={preset.id}
+                className="flex items-center gap-2 p-2 border border-gray-200 rounded bg-gray-50"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-800 truncate">
+                    {preset.name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {preset.source === "reviews"
+                      ? `Reviews · top ${preset.limit ?? 6}`
+                      : `${preset.manual?.length ?? 0} quote${(preset.manual?.length ?? 0) === 1 ? "" : "s"}`}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => importPreset(preset)}
+                  className="px-2.5 py-1 text-xs font-medium text-[#6FB644] hover:bg-green-100 rounded"
+                >
+                  Import
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(preset)}
+                  title="Delete preset"
+                  className="p-1 text-gray-400 hover:text-red-500"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Modal
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        title="Delete preset?"
+        onConfirm={() => confirmDelete && deletePreset(confirmDelete.id)}
+        confirmText="Delete"
+        confirmColor="bg-red-500 hover:bg-red-600"
+      >
+        <p className="text-sm text-gray-600">
+          Delete the preset{" "}
+          <span className="font-medium text-gray-800">
+            “{confirmDelete?.name}”
+          </span>
+          ? This won't change any blocks that already imported it.
+        </p>
+      </Modal>
     </div>
   );
 }
@@ -1176,6 +1232,173 @@ export function TrustBannerForm({
           <Plus className="w-4 h-4 inline mr-1" /> Add item
         </button>
       </div>
+    </div>
+  );
+}
+
+// ─── FAQ ──────────────────────────────────────────────────────────────────
+
+interface FaqPreset {
+  id: number;
+  name: string;
+  title: string | null;
+  subtitle: string | null;
+  faqIds: number[];
+}
+
+export function FAQForm({
+  settings,
+  onChange,
+}: {
+  settings: BlockSettings["faq"];
+  onChange: (s: BlockSettings["faq"]) => void;
+}) {
+  const [presets, setPresets] = useState<FaqPreset[]>([]);
+  const [name, setName] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState<FaqPreset | null>(null);
+
+  useEffect(() => {
+    fetch("/api/faq-presets")
+      .then((r) => (r.ok ? r.json() : []))
+      .then(setPresets)
+      .catch(() => {});
+  }, []);
+
+  const savePreset = async () => {
+    if (!name.trim()) return;
+    setSaving(true);
+    try {
+      const res = await fetch("/api/faq-presets", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: name.trim(),
+          title: settings.title ?? null,
+          subtitle: settings.subtitle ?? null,
+          faqIds: settings.faqIds ?? [],
+        }),
+      });
+      if (res.ok) {
+        const created: FaqPreset = await res.json();
+        setPresets((prev) => [created, ...prev]);
+        setName("");
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const importPreset = (preset: FaqPreset) => {
+    onChange({
+      ...settings,
+      title: preset.title ?? "",
+      subtitle: preset.subtitle ?? "",
+      faqIds: preset.faqIds.length > 0 ? preset.faqIds : undefined,
+    });
+  };
+
+  const deletePreset = async (id: number) => {
+    const res = await fetch(`/api/faq-presets/${id}`, { method: "DELETE" });
+    if (res.ok) setPresets((prev) => prev.filter((p) => p.id !== id));
+    setConfirmDelete(null);
+  };
+
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-gray-500">
+        Edit the title, subtitle, and questions directly in the block preview.
+        Manage the global FAQ list at{" "}
+        <a href="/admin/faqs" className="text-[#6FB644] hover:underline">
+          /admin/faqs
+        </a>
+        .
+      </p>
+
+      <div className="pt-3 border-t border-gray-100">
+        <Label>Save as preset</Label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="e.g. Plant care FAQs"
+            className={fieldClass}
+          />
+          <button
+            type="button"
+            onClick={savePreset}
+            disabled={saving || !name.trim()}
+            className="px-3 py-2 bg-[#6FB644] text-white text-sm font-medium rounded-lg hover:bg-[#5a9636] disabled:opacity-50 whitespace-nowrap"
+          >
+            {saving ? "Saving…" : "Save"}
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mt-1.5">
+          Stores the current title, subtitle, and question list — reusable on
+          any FAQ block.
+        </p>
+      </div>
+
+      <div>
+        <Label>Saved presets</Label>
+        {presets.length === 0 ? (
+          <p className="text-xs text-gray-400 italic">No presets yet.</p>
+        ) : (
+          <div className="space-y-1.5">
+            {presets.map((preset) => (
+              <div
+                key={preset.id}
+                className="flex items-center gap-2 p-2 border border-gray-200 rounded bg-gray-50"
+              >
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-800 truncate">
+                    {preset.name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {preset.faqIds.length === 0
+                      ? "All active FAQs"
+                      : `${preset.faqIds.length} question${preset.faqIds.length === 1 ? "" : "s"}`}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => importPreset(preset)}
+                  className="px-2.5 py-1 text-xs font-medium text-[#6FB644] hover:bg-green-100 rounded"
+                >
+                  Import
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setConfirmDelete(preset)}
+                  title="Delete preset"
+                  className="p-1 text-gray-400 hover:text-red-500"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <Modal
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        title="Delete preset?"
+        onConfirm={() => confirmDelete && deletePreset(confirmDelete.id)}
+        confirmText="Delete"
+        confirmColor="bg-red-500 hover:bg-red-600"
+      >
+        <p className="text-sm text-gray-600">
+          Delete the preset{" "}
+          <span className="font-medium text-gray-800">
+            “{confirmDelete?.name}”
+          </span>
+          ? This won't remove any FAQs from the global list or from blocks that
+          already imported it.
+        </p>
+      </Modal>
     </div>
   );
 }

@@ -6,6 +6,8 @@ import { join } from "path";
 import { readSingle } from "@/lib/db";
 import Analytics from "@/components/Analytics";
 import AuthProvider from "@/components/providers/AuthProvider";
+import { SettingsProvider } from "@/components/providers/SettingsProvider";
+import { getStoreSettings } from "@/lib/settings";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -33,6 +35,10 @@ function getIconsMetadata() {
   return undefined;
 }
 
+// Re-fetch store settings on every request so admin changes (logo, name,
+// dimensions, etc.) reflect immediately without rebuild.
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "GMS Flower Store - Fresh Plants from Our Garden | Gauradaha, Jhapa",
   description:
@@ -43,17 +49,21 @@ export const metadata: Metadata = {
   manifest: "/api/manifest",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const storeSettings = await getStoreSettings();
+
   return (
     <html lang="en">
       <body className={`${inter.variable} antialiased font-sans`}>
         <AuthProvider>
-          <Analytics />
-          {children}
+          <SettingsProvider value={storeSettings}>
+            <Analytics />
+            {children}
+          </SettingsProvider>
         </AuthProvider>
       </body>
     </html>

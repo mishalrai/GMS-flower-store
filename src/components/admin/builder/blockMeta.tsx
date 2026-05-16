@@ -9,6 +9,7 @@ import {
   Type,
   LayoutGrid,
   ShieldCheck,
+  HelpCircle,
   LucideIcon,
 } from "lucide-react";
 import { ComponentType } from "react";
@@ -22,6 +23,7 @@ import {
   RichTextForm,
   CategoryGridForm,
   TrustBannerForm,
+  FAQForm,
 } from "./blockForms";
 
 type Form<T extends BlockType> = ComponentType<{
@@ -93,6 +95,13 @@ export const blockMeta: { [T in BlockType]: BlockMeta<T> } = {
     description: "Row of icon-text trust signals",
     icon: ShieldCheck,
     form: TrustBannerForm,
+  },
+  faq: {
+    type: "faq",
+    label: "FAQ",
+    description: "Accordion of frequently asked questions",
+    icon: HelpCircle,
+    form: FAQForm,
   },
 };
 

@@ -255,7 +255,9 @@ export default function RichTextEditor({
         };
         if (isYouTubeUrl(url)) {
           const id = youtubeId(url);
-          const embedSrc = id ? `https://www.youtube.com/embed/${id}` : url;
+          const embedSrc = id
+            ? `https://www.youtube-nocookie.com/embed/${id}`
+            : url;
           editor.insertEmbed(range.index, "video", embedSrc);
         } else if (isVideoFileUrl(url)) {
           editor.insertEmbed(range.index, "videoFile", url);

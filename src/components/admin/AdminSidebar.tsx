@@ -7,6 +7,7 @@ import { useState, useEffect } from "react";
 import {
   LayoutDashboard,
   Package,
+  PackageSearch,
   FolderOpen,
   ShoppingCart,
   Star,
@@ -28,6 +29,7 @@ const menuItems = [
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/categories", label: "Categories", icon: FolderOpen },
   { href: "/admin/orders", label: "Orders", icon: ShoppingCart },
+  { href: "/admin/product-requests", label: "Product Requests", icon: PackageSearch },
   { href: "/admin/messages", label: "Messages", icon: MessageSquare },
   { href: "/admin/media", label: "Media", icon: Images },
   { href: "/admin/reviews", label: "Reviews", icon: Star },

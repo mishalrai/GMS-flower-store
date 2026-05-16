@@ -4,21 +4,15 @@ import Link from "next/link";
 import Image from "next/image";
 import { MapPin, Phone, Mail, Clock } from "lucide-react";
 import SocialLinks from "./SocialLinks";
-import { useState, useEffect } from "react";
+import { useStoreSettings } from "@/components/providers/SettingsProvider";
 
 export default function Footer() {
-  const [storeLogo, setStoreLogo] = useState("");
-  const [storeName, setStoreName] = useState("GMS Flower Store");
-
-  useEffect(() => {
-    fetch("/api/settings")
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.logo) setStoreLogo(data.logo);
-        if (data.storeName) setStoreName(data.storeName);
-      })
-      .catch(() => {});
-  }, []);
+  const {
+    logo: storeLogo,
+    logoWidth,
+    logoHeight,
+    storeName,
+  } = useStoreSettings();
 
   return (
     <footer className="bg-gray-900 text-gray-300">
@@ -32,9 +26,11 @@ export default function Footer() {
                 <Image
                   src={storeLogo}
                   alt={storeName}
-                  width={32}
-                  height={32}
-                  className="w-8 h-8 object-contain"
+                  width={logoWidth}
+                  height={logoHeight}
+                  style={{ width: logoWidth, height: logoHeight }}
+                  className="object-contain"
+                  unoptimized={storeLogo.toLowerCase().endsWith(".svg")}
                 />
               ) : (
                 <span className="text-2xl">🌱</span>
@@ -56,6 +52,7 @@ export default function Footer() {
               {[
                 { href: "/", label: "Home" },
                 { href: "/shop", label: "Shop" },
+                { href: "/request-product", label: "Request a Product" },
                 { href: "/about", label: "About Us" },
                 { href: "/contact", label: "Contact" },
               ].map((link) => (

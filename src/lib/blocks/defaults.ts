@@ -40,8 +40,8 @@ export function defaultSettings<T extends BlockType>(type: T): BlockSettings[T] 
     case "testimonials":
       return {
         title: "What Our Customers Say",
-        source: "reviews",
-        limit: 6,
+        source: "manual" as const,
+        manual: [] as BlockSettings["testimonials"]["manual"],
       } as BlockSettings[T];
     case "rich-text":
       return {
@@ -59,6 +59,12 @@ export function defaultSettings<T extends BlockType>(type: T): BlockSettings[T] 
           { title: "24/7 Support", subtitle: "Dedicated support" },
           { title: "Easy Returns", subtitle: "7-day return policy" },
         ],
+      } as BlockSettings[T];
+    case "faq":
+      return {
+        title: "Frequently Asked Questions",
+        subtitle: "Find answers to common questions about our plants and services.",
+        faqIds: [] as number[],
       } as BlockSettings[T];
     default:
       throw new Error(`Unknown block type: ${type}`);

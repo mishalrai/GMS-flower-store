@@ -31,8 +31,10 @@ export function isAnyVideoUrl(url: string): boolean {
 }
 
 export function youtubeEmbed(id: string): string {
+  // Use youtube-nocookie.com to avoid the "Sign in to confirm you're not a bot"
+  // guard that YouTube triggers on regular youtube.com/embed URLs from dev origins.
   // playsinline=1 keeps it inline on iOS; rel=0 avoids unrelated suggestions.
-  return `https://www.youtube.com/embed/${id}?playsinline=1&rel=0`;
+  return `https://www.youtube-nocookie.com/embed/${id}?playsinline=1&rel=0`;
 }
 
 export type VideoSource =

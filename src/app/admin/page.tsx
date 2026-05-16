@@ -6,6 +6,7 @@ import StatCard from "@/components/admin/StatCard";
 import StatusBadge from "@/components/admin/StatusBadge";
 import {
   Package,
+  PackageSearch,
   ShoppingCart,
   DollarSign,
   Clock,
@@ -38,18 +39,26 @@ interface Product {
   price: number;
 }
 
+interface ProductRequestRow {
+  id: number;
+  status: "pending" | "reviewing" | "available" | "rejected";
+}
+
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
+  const [productRequests, setProductRequests] = useState<ProductRequestRow[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       fetch("/api/orders").then((r) => r.json()),
       fetch("/api/products").then((r) => r.json()),
-    ]).then(([ordersData, productsData]) => {
+      fetch("/api/product-requests").then((r) => r.json()),
+    ]).then(([ordersData, productsData, requestsData]) => {
       setOrders(ordersData);
       setProducts(productsData);
+      setProductRequests(requestsData);
       setLoading(false);
     });
   }, []);
@@ -67,6 +76,9 @@ export default function AdminDashboard() {
     .reduce((sum, o) => sum + o.total, 0);
   const pendingOrders = orders.filter((o) => o.status === "pending").length;
   const outOfStock = products.filter((p) => !p.inStock);
+  const openRequests = productRequests.filter(
+    (r) => r.status === "pending" || r.status === "reviewing",
+  ).length;
 
   return (
     <div>
@@ -91,7 +103,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Stat Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
         <StatCard
           title="Total Products"
           value={products.length}
@@ -119,6 +131,13 @@ export default function AdminDashboard() {
           icon={Clock}
           color={pendingOrders > 0 ? "#F59E0B" : "#10B981"}
           href="/admin/orders"
+        />
+        <StatCard
+          title="Product Requests"
+          value={openRequests}
+          icon={PackageSearch}
+          color={openRequests > 0 ? "#8B5CF6" : "#10B981"}
+          href="/admin/product-requests"
         />
       </div>
 

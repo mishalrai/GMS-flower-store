@@ -8,7 +8,8 @@ import ProductCard from "@/components/home/ProductCard";
 import { products } from "@/data/products";
 import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { SlidersHorizontal, ChevronDown, Check } from "lucide-react";
+import Link from "next/link";
+import { SlidersHorizontal, ChevronDown, Check, PackageSearch } from "lucide-react";
 
 export default function ShopPage() {
   return (
@@ -256,6 +257,28 @@ function ShopContent() {
                 </button>
               </div>
             )}
+
+            {/* Can't find what you want? */}
+            <div className="mt-12 border border-dashed border-gray-200 rounded-2xl p-6 md:p-8 flex flex-col md:flex-row items-center gap-5 md:gap-8 bg-gray-50/50">
+              <div className="w-14 h-14 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
+                <PackageSearch className="w-6 h-6 text-[#6FB644]" />
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="font-semibold text-gray-800 mb-1">
+                  Can&apos;t find what you&apos;re looking for?
+                </h3>
+                <p className="text-sm text-gray-600">
+                  Tell us about the plant or product you&apos;d like us to stock —
+                  we&apos;ll do our best to source it.
+                </p>
+              </div>
+              <Link
+                href="/request-product"
+                className="inline-flex items-center gap-2 bg-[#6FB644] text-white px-5 py-2.5 rounded-lg font-medium hover:bg-[#5a9636] transition-colors flex-shrink-0"
+              >
+                Request a Product
+              </Link>
+            </div>
           </div>
         </section>
       </main>

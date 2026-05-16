@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Eye, Plus } from "lucide-react";
+import { Eye, Plus, Search } from "lucide-react";
 import StatusBadge from "@/components/admin/StatusBadge";
 import { useToast } from "@/components/admin/Toast";
 
@@ -22,6 +22,7 @@ const tabLabels: Record<string, string> = { "out-for-delivery": "Out for Deliver
 export default function OrdersPage() {
   const [orders, setOrders] = useState<Order[]>([]);
   const [activeTab, setActiveTab] = useState("all");
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
   const [showNewOrder, setShowNewOrder] = useState(false);
   const { toast } = useToast();
@@ -69,10 +70,16 @@ export default function OrdersPage() {
     }
   };
 
-  const filtered =
-    activeTab === "all"
-      ? orders
-      : orders.filter((o) => o.status === activeTab);
+  const q = search.trim().toLowerCase();
+  const filtered = orders.filter((o) => {
+    if (activeTab !== "all" && o.status !== activeTab) return false;
+    if (!q) return true;
+    return (
+      o.id.toLowerCase().includes(q) ||
+      o.customer.name.toLowerCase().includes(q) ||
+      o.customer.phone.toLowerCase().includes(q)
+    );
+  });
 
   if (loading) {
     return (
@@ -158,6 +165,18 @@ export default function OrdersPage() {
           </div>
         </form>
       )}
+
+      {/* Search */}
+      <div className="relative mb-4">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="Search by order ID, customer name, or phone"
+          className="w-full pl-10 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-[#6FB644] outline-none"
+        />
+      </div>
 
       {/* Status Tabs */}
       <div className="flex gap-2 mb-6 overflow-x-auto">

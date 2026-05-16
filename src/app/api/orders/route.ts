@@ -23,12 +23,14 @@ function formatOrder(order: Awaited<ReturnType<typeof prisma.order.findFirst>> &
       ...(order.paymentQrLabel ? { qrLabel: order.paymentQrLabel } : {}),
       ...(order.paymentScreenshot ? { screenshotUrl: order.paymentScreenshot } : {}),
     },
-    items: (order.items as { id: number; productId: number; name: string; quantity: number; price: number; reviewed: boolean }[] | undefined)?.map((item) => ({
+    items: (order.items as { id: number; productId: number; name: string; quantity: number; price: number; reviewed: boolean; product?: { image: string; slug: string } | null }[] | undefined)?.map((item) => ({
       productId: item.productId,
       name: item.name,
       quantity: item.quantity,
       price: item.price,
       reviewed: item.reviewed,
+      image: item.product?.image ?? null,
+      slug: item.product?.slug ?? null,
     })) ?? [],
     createdAt: order.createdAt.toISOString(),
     updatedAt: order.updatedAt.toISOString(),
@@ -45,7 +47,7 @@ export async function GET(request: NextRequest) {
       ...(status && status !== 'all' ? { status: status as never } : {}),
       ...(phone ? { customerPhone: phone } : {}),
     },
-    include: { items: true },
+    include: { items: { include: { product: { select: { image: true, slug: true } } } } },
     orderBy: { createdAt: 'desc' },
   });
 

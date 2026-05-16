@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE "Settings" ADD COLUMN     "logoHeight" INTEGER NOT NULL DEFAULT 36,
+ADD COLUMN     "logoWidth" INTEGER NOT NULL DEFAULT 36;

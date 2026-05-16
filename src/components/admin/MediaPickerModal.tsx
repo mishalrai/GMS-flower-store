@@ -241,8 +241,8 @@ export default function MediaPickerModal({
 
   return (
     <>
-      <div className="fixed inset-0 bg-black/30 z-50" onClick={onClose} />
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-5">
+      <div className="fixed inset-0 bg-black/30 z-50 pointer-events-auto" onClick={onClose} />
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-5 pointer-events-auto">
         <div className="bg-white rounded-xl shadow-xl w-full h-full flex flex-col border border-gray-100">
           {/* Header */}
           <div className="flex items-center justify-between p-4 border-b border-gray-100 flex-shrink-0">

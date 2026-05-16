@@ -26,6 +26,8 @@ function formatSettings(s: Awaited<ReturnType<typeof prisma.settings.findUnique>
     },
     paymentQRCodes: s.paymentQRCodes,
     logo: s.logo,
+    logoWidth: s.logoWidth,
+    logoHeight: s.logoHeight,
     favicon: s.favicon,
   };
 }
@@ -63,6 +65,8 @@ export async function PUT(request: NextRequest) {
       ...(body.homepageTabs?.['most-popular'] !== undefined && { homepageTabMostPopular: body.homepageTabs['most-popular'] }),
       ...(body.paymentQRCodes !== undefined && { paymentQRCodes: body.paymentQRCodes }),
       ...(body.logo !== undefined && { logo: body.logo }),
+      ...(body.logoWidth !== undefined && { logoWidth: Number(body.logoWidth) }),
+      ...(body.logoHeight !== undefined && { logoHeight: Number(body.logoHeight) }),
       ...(body.favicon !== undefined && { favicon: body.favicon }),
     },
     create: { id: 1 },
